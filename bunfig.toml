@@ -1,0 +1,11 @@
+[test]
+root = "tests"
+coverage = false
+
+[install]
+exact = false
+lockfile = true
+
+[serve]
+port = 4173
+hostname = "127.0.0.1"

@@ -16,21 +16,48 @@ A phone-first shared pantry for two people. The main job is checking what is lef
 - Local demo data is durable within this browser and clearly labeled. Export downloads JSON.
 - Firebase project `pantry-organizer-fec7c` is configured on Spark with Email/Password Auth, a production-mode Firestore database in nam5, and published two-member household rules. Two Auth users and the `households/our-pantry` membership record are configured. Local development reads the ignored `config.js`; production hosting builds it from public `PANTRY_FIREBASE_*` environment values. See [SETUP.md](SETUP.md) for deployment setup.
 
+## Modern Stack & Tooling
+
+- **TypeScript**: TypeScript 7 (`typescript@7.0.2`) with strict typing, `tsconfig.json`, and typed domain schemas/models.
+- **UI**: Modern React (`react@19.3.0`, `react-dom@19.3.0`) with accessible components, keyboard navigation, and native dialog modals.
+- **Effect**: Powered by `effect@3.22.2`:
+  - Runtime validation and schema decoding via `Schema` (`PantryRecordSchema`, `ProductSchema`, `BatchSchema`, etc.).
+  - Functional error handling with `Data.TaggedError` (`DomainValidationError`, `StorageError`, etc.).
+  - Option and functional pipelines with `Option` and `pipe`.
+  - Transactional mutation pipelines and service tags (`Context.GenericTag`).
+- **Linting & Formatting**: Powered by **oxlint** (high-speed linting with React and JSX a11y rules) and **oxfmt** (formatting).
+- **Runtime & Bundler**: Powered by Bun (`v1.4.2`):
+  - Native zero-copy HTTP server (`Bun.serve`) in `server.mjs` with Node fallback.
+  - Project configuration via `bunfig.toml`.
+  - Native TypeScript test suite in `tests/domain.bun.test.ts` via `bun:test`.
+  - Fast native browser bundling via `bun build`.
+
 ## Run
 
-Node 22+ is sufficient; the local app has no install/build dependencies.
+You can run with Bun or Node:
 
 ```sh
-npm start
+# Start development server
+bun start
+# or: npm start
 ```
 
-Open http://localhost:4173. Choose **Try sample pantry** or **Add food**. The server binds only to this computer. To run checks:
+Open http://localhost:4173. Choose **Try sample pantry** or **Add food**. The server binds only to this computer.
+
+To run checks and tests:
 
 ```sh
-npm test
-npm run check
-# UI assertions require playwright-core and installed Microsoft Edge:
-node tests/ui.mjs
+# Typecheck & syntax checks
+bun run check
+# or: npm run check
+
+# Domain unit tests
+bun test
+# or: npm test
+
+# End-to-end UI assertions (requires installed Microsoft Edge or Chromium):
+bun run test:ui
+# or: node tests/ui.mjs
 ```
 
 ## Shared data and access
