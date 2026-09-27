@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
+    "dev": "bun server.mjs",
+    "preview": "bun server.mjs",
     "bundle": "bun build.mjs --bundle-only",
     "build": "bun build.mjs",
     "test": "node --test tests/domain.test.mjs && bun test tests/domain.test.mjs",

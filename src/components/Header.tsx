@@ -7,6 +7,7 @@ interface HeaderProps {
   onToggleProfile: () => void;
   onCloseProfile: () => void;
   onExport: () => void;
+  onImport?: (file: File) => void;
   onConnect: () => void;
 }
 
@@ -17,10 +18,22 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleProfile,
   onCloseProfile,
   onExport,
+  onImport,
   onConnect
 }) => {
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImport) {
+      onImport(file);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     if (profileOpen) {
@@ -86,6 +99,29 @@ export const Header: React.FC<HeaderProps> = ({
             <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 19h14" />
           </svg>
         </button>
+        {onImport && (
+          <>
+            <button
+              className="icon-button"
+              type="button"
+              data-action="import"
+              aria-label="Import pantry backup"
+              title="Import pantry backup"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 21v-12m0 0 5 5m-5-5-5 5M5 5h14" />
+              </svg>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+          </>
+        )}
         <div className="profile-wrap">
           <button
             ref={profileButtonRef}

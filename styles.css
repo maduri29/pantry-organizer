@@ -724,3 +724,38 @@ label {
     gap: 4px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  header,
+  .hero,
+  .nav,
+  .toolbar,
+  .stats,
+  .card-foot,
+  button,
+  dialog,
+  #toast {
+    display: none !important;
+  }
+  body,
+  main {
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+  .shopping-row {
+    border-bottom: 1px solid #ccc !important;
+    page-break-inside: avoid;
+  }
+}

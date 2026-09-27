@@ -231,6 +231,27 @@ export const App: React.FC = () => {
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }, [data]);
 
+  const handleImport = useCallback(
+    async (file: File) => {
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const exit = Effect.runSyncExit(D.validateState(json));
+        if (exit._tag === 'Failure') {
+          showToast('Invalid backup file. Format not recognized.');
+          return;
+        }
+        const validated = exit.value;
+        await mutate((s) => {
+          Object.assign(s, validated);
+        }, 'Pantry restored from backup');
+      } catch (err: any) {
+        showToast(err.message || 'Could not import file.');
+      }
+    },
+    [mutate, showToast]
+  );
+
   const handleConnect = useCallback(async () => {
     setProfileOpen(false);
     if (online) {
@@ -402,6 +423,7 @@ export const App: React.FC = () => {
         onToggleProfile={() => setProfileOpen((prev) => !prev)}
         onCloseProfile={() => setProfileOpen(false)}
         onExport={handleExport}
+        onImport={handleImport}
         onConnect={handleConnect}
       />
 
