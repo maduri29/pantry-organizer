@@ -1,8 +1,9 @@
-import { Data, Effect, Option, pipe } from 'effect';
+import { Data, Effect, Option, pipe, Schema } from 'effect';
 import {
   units,
   locations,
   categories,
+  PantryStateSchema,
   type Unit,
   type Location,
   type Product,
@@ -370,3 +371,11 @@ export function demo(): PantryState {
   }
   return s;
 }
+
+export const validateState = (data: unknown): Effect.Effect<PantryState, DomainValidationError> => {
+  const decoded = Schema.decodeUnknownEither(PantryStateSchema)(data);
+  if (decoded._tag === 'Left') {
+    return Effect.fail(new DomainValidationError({ message: 'Invalid pantry data format.' }));
+  }
+  return Effect.succeed(decoded.right as PantryState);
+};

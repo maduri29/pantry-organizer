@@ -10721,6 +10721,7 @@ var getSync = (ast, isDecoding, options) => {
   const parser = getEither(ast, isDecoding, options);
   return (input, overrideOptions) => getOrThrowWith(parser(input, overrideOptions), parseError);
 };
+var decodeUnknownEither = (schema, options) => getEither(schema.ast, true, options);
 var validateSync = (schema, options) => getSync(typeAST(schema.ast), true, options);
 var decodeMemoMap = /* @__PURE__ */ globalValue(/* @__PURE__ */ Symbol.for("effect/ParseResult/decodeMemoMap"), () => new WeakMap);
 var encodeMemoMap = /* @__PURE__ */ globalValue(/* @__PURE__ */ Symbol.for("effect/ParseResult/encodeMemoMap"), () => new WeakMap);
@@ -11698,6 +11699,10 @@ var toASTAnnotations = (annotations) => {
   return out;
 };
 var mergeSchemaAnnotations = (ast, annotations2) => annotations(ast, toASTAnnotations(annotations2));
+var decodeUnknownEither2 = (schema, options) => {
+  const decodeUnknownEither2 = decodeUnknownEither(schema, options);
+  return (u, overrideOptions) => mapLeft(decodeUnknownEither2(u, overrideOptions), parseError);
+};
 var isSchema = (u) => hasProperty(u, TypeId11) && isObject(u[TypeId11]);
 function getDefaultLiteralAST(literals) {
   return isMembers(literals) ? Union.make(mapMembers(literals, (literal) => new Literal(literal))) : new Literal(literals[0]);
@@ -12424,6 +12429,13 @@ function demo() {
   }
   return s;
 }
+var validateState = (data) => {
+  const decoded = decodeUnknownEither2(PantryStateSchema)(data);
+  if (decoded._tag === "Left") {
+    return fail3(new DomainValidationError({ message: "Invalid pantry data format." }));
+  }
+  return succeed3(decoded.right);
+};
 export {
   DomainConflictError,
   DomainNotFoundError,
@@ -12448,5 +12460,6 @@ export {
   suggest,
   today,
   total,
-  units
+  units,
+  validateState
 };

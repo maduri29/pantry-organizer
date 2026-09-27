@@ -62,6 +62,30 @@ export const App: React.FC = () => {
     modalRef.current = modal;
   }, [modal]);
 
+  useEffect(() => {
+    const handleGlobalShortcuts = (e: KeyboardEvent) => {
+      if (e.key === '/' && !modalRef.current) {
+        const target = e.target as HTMLElement | null;
+        const tagName = target?.tagName?.toLowerCase();
+        if (
+          tagName !== 'input' &&
+          tagName !== 'textarea' &&
+          tagName !== 'select' &&
+          !target?.isContentEditable
+        ) {
+          const searchInput = document.getElementById('search') as HTMLInputElement | null;
+          if (searchInput && document.activeElement !== searchInput) {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalShortcuts);
+    return () => window.removeEventListener('keydown', handleGlobalShortcuts);
+  }, []);
+
   const pendingRemoteRef = useRef<PantryRecord | null>(null);
 
   const showToast = useCallback((msg: string) => {

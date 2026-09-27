@@ -7,8 +7,19 @@ const types = {
   '.html': 'text/html',
   '.js': 'text/javascript',
   '.css': 'text/css',
-  '.json': 'application/json'
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.webmanifest': 'application/manifest+json'
 };
+const allowedStatic = new Set([
+  '/',
+  '/index.html',
+  '/styles.css',
+  '/config.js',
+  '/favicon.svg',
+  '/manifest.webmanifest',
+  '/sw.js'
+]);
 const port = Number(process.env.PORT) || 4173;
 
 if (typeof Bun !== 'undefined') {
@@ -28,11 +39,7 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (
-        !['/index.html', '/styles.css', '/config.js'].includes(url.pathname) &&
-        url.pathname !== '/' &&
-        !allowedSource
-      ) {
+      if (!allowedStatic.has(url.pathname) && !allowedSource) {
         return new Response('Not found', { status: 404 });
       }
       const file = Bun.file(path);
@@ -69,11 +76,7 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (
-        !['/index.html', '/styles.css', '/config.js'].includes(url.pathname) &&
-        url.pathname !== '/' &&
-        !allowedSource
-      ) {
+      if (!allowedStatic.has(url.pathname) && !allowedSource) {
         res.writeHead(404).end();
         return;
       }

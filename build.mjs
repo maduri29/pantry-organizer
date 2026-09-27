@@ -51,7 +51,7 @@ if (process.argv.includes('--bundle-only')) {
 
 // 2. Prepare static hosting in public/
 await mkdir('public', { recursive: true });
-for (const name of ['index.html', 'styles.css']) {
+for (const name of ['index.html', 'styles.css', 'favicon.svg', 'manifest.webmanifest', 'sw.js']) {
   await copyFile(name, `public/${name}`);
 }
 await cp('src', 'public/src', { recursive: true });

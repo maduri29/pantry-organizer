@@ -281,6 +281,7 @@ select {
   gap: 17px;
 }
 .card {
+  contain: content;
   border: 1px solid #e0e5d9;
   background: #fff;
   border-radius: 18px;

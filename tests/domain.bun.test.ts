@@ -56,4 +56,14 @@ describe('Bun + Effect Domain Suite', () => {
     const saved = await repo.save(initial.state, 0);
     expect(saved.revision).toBe(1);
   });
+
+  test('validateState succeeds on valid pantry state and fails on corrupted data', () => {
+    const s = D.empty();
+    D.add(s, food());
+    const validResult = Effect.runSyncExit(D.validateState(s));
+    expect(validResult._tag).toBe('Success');
+
+    const invalidResult = Effect.runSyncExit(D.validateState({ products: 'not-an-array' }));
+    expect(invalidResult._tag).toBe('Failure');
+  });
 });

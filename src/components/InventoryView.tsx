@@ -165,6 +165,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           placeholder="Search your pantry…"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') e.currentTarget.blur();
+          }}
         />
         <select
           id="location"

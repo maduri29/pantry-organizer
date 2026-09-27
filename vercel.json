@@ -4,11 +4,20 @@
   "framework": null,
   "headers": [
     {
-      "source": "/(styles\\.css|src/.*\\.js)",
+      "source": "/(styles\\.css|src/.*\\.js|favicon\\.svg)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/(sw\\.js|manifest\\.webmanifest)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     },

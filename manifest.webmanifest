@@ -1,0 +1,18 @@
+{
+  "name": "Pantry — a little less waste",
+  "short_name": "Pantry",
+  "description": "A calm, resilient pantry organizer to reduce food waste, track batches, and manage shared groceries.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f7f0",
+  "theme_color": "#204b39",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
