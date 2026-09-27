@@ -14,7 +14,7 @@ A phone-first shared pantry for two people. The main job is checking what is lef
 - **Restock several** lets you select purchased foods, adjust every level/amount and location, then confirm them together. Unselected foods are untouched. Rough levels require an explicit choice.
 - Foods can be removed from the pantry after a confirmation step. Removing one also clears its batches, activity history, and linked shopping entries while preserving other foods.
 - Local demo data is durable within this browser and clearly labeled. Export downloads JSON.
-- Firebase project `pantry-organizer-fec7c` is configured on Spark with Email/Password Auth, a production-mode Firestore database in nam5, and published two-member household rules. Two Auth users and the `households/our-pantry` membership record are configured. The local ignored `config.js` points to this project. See [SETUP.md](SETUP.md) for verification and the remaining cross-device check.
+- Firebase project `pantry-organizer-fec7c` is configured on Spark with Email/Password Auth, a production-mode Firestore database in nam5, and published two-member household rules. Two Auth users and the `households/our-pantry` membership record are configured. Local development reads the ignored `config.js`; production hosting builds it from public `PANTRY_FIREBASE_*` environment values. See [SETUP.md](SETUP.md) for deployment setup.
 
 ## Run
 

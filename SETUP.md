@@ -19,3 +19,9 @@ Two Email/Password Auth users exist. The `households/our-pantry` document has th
 True cross-device sync has not been tested. Keep the project on Spark. No hosting deployment or billing upgrade has been made. Git commit/push status is recorded in the implementation checkpoint.
 
 Local demo data stays separate from the cloud pantry and is never uploaded automatically. Never put a service-account key or user password in the app or repository.
+
+## Vercel production hosting
+
+Vercel builds the static app with `npm run build` and serves `public/`. Configure these production environment values on the Vercel project: `PANTRY_FIREBASE_API_KEY`, `PANTRY_FIREBASE_AUTH_DOMAIN`, `PANTRY_FIREBASE_PROJECT_ID`, `PANTRY_FIREBASE_APP_ID`, and optionally `PANTRY_HOUSEHOLD_ID` (defaults to `our-pantry`). These Firebase web settings are public client configuration, not admin credentials. The build emits `public/config.js`; the ignored local `config.js` is never required or uploaded by the production build.
+
+After production deployment, add its assigned Vercel hostname to Firebase Authentication's authorized domains before testing sign-in from another browser. Firestore rules and project billing do not need to change.
