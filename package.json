@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "bundle": "bun build src/main.tsx --outfile=src/app.js --target=browser --external '*/firebase.js' && bun build src/domain.ts --outfile=src/domain.js --target=node && bun build src/storage.ts --outfile=src/storage.js --target=node",
-    "build": "bun run bundle && node build.mjs",
+    "bundle": "bun build.mjs --bundle-only",
+    "build": "bun build.mjs",
     "test": "node --test tests/domain.test.mjs && bun test tests/domain.test.mjs",
     "test:ui": "node tests/ui.mjs",
     "typecheck": "tsc --noEmit",

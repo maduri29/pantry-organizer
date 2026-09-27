@@ -17,9 +17,11 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
   onAddSuggestion
 }) => {
   const items = useMemo(() => s.shopping.filter((i) => i.status === 'open'), [s.shopping]);
+  const productMap = useMemo(() => new Map(s.products.map((p) => [p.id, p])), [s.products]);
+  const openItemProductIds = useMemo(() => new Set(items.map((i) => i.productId)), [items]);
   const suggestions = useMemo(() => {
-    return s.products.filter((p) => D.isLow(s, p) && !items.some((i) => i.productId === p.id));
-  }, [s, items]);
+    return s.products.filter((p) => !openItemProductIds.has(p.id) && D.isLow(s, p));
+  }, [s, openItemProductIds]);
 
   return (
     <>
@@ -29,7 +31,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
 
       {items.length > 0 ? (
         items.map((i) => {
-          const p = s.products.find((prod) => prod.id === i.productId);
+          const p = productMap.get(i.productId);
           if (!p) return null;
           return (
             <div key={i.id} className="shopping-row">

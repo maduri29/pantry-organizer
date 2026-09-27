@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { Movement, PantryState } from '../types.ts';
 import { fmt } from './InventoryView.tsx';
@@ -15,7 +15,8 @@ const actionLabels: Record<string, string> = {
 };
 
 export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
-  const movements = s.movements.slice().reverse().slice(0, 100);
+  const productMap = useMemo(() => new Map(s.products.map((p) => [p.id, p])), [s.products]);
+  const movements = useMemo(() => s.movements.slice().reverse().slice(0, 100), [s.movements]);
 
   return (
     <>
@@ -35,7 +36,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
           </thead>
           <tbody>
             {movements.map((m: Movement) => {
-              const p = s.products.find((prod) => prod.id === m.productId);
+              const p = productMap.get(m.productId);
               const amountStr =
                 p?.unit === 'level'
                   ? m.type === 'correct'

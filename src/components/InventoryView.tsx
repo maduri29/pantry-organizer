@@ -65,23 +65,69 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     return [...new Set([...D.categories, ...s.products.map((p) => p.category)])].sort();
   }, [s.products]);
 
+  const { productBatches, productTotals, productIsLow, minExpiryDays, openShoppingIds } =
+    useMemo(() => {
+      const pBatches = new Map<string, Batch[]>();
+      const pTotals = new Map<string, number>();
+      const pIsLow = new Map<string, boolean>();
+      const pExpiry = new Map<string, number>();
+
+      for (const b of s.batches) {
+        if (b.quantity > 0) {
+          const list = pBatches.get(b.productId);
+          if (list) list.push(b);
+          else pBatches.set(b.productId, [b]);
+        }
+      }
+
+      for (const [pId, batches] of pBatches.entries()) {
+        batches.sort((a, b) => (a.expiry || '9999').localeCompare(b.expiry || '9999'));
+        let minExp = Infinity;
+        for (const b of batches) {
+          const exp = D.expiryDays(b.expiry);
+          if (exp < minExp) minExp = exp;
+        }
+        pExpiry.set(pId, minExp);
+      }
+
+      for (const p of s.products) {
+        const tot = D.total(s, p);
+        pTotals.set(p.id, tot);
+        pIsLow.set(p.id, D.isLow(s, p));
+      }
+
+      const openShop = new Set<string>();
+      for (const item of s.shopping) {
+        if (item.status === 'open') {
+          openShop.add(item.productId);
+        }
+      }
+
+      return {
+        productBatches: pBatches,
+        productTotals: pTotals,
+        productIsLow: pIsLow,
+        minExpiryDays: pExpiry,
+        openShoppingIds: openShop
+      };
+    }, [s]);
+
   const items = useMemo(() => {
+    const term = search.toLowerCase();
     return s.products
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(search.toLowerCase()) &&
-          (category === 'all' || p.category === category) &&
-          (location === 'all' ||
-            s.batches.some(
-              (b) => b.productId === p.id && b.location === location && b.quantity > 0
-            )) &&
-          (filter === 'all' ||
-            (filter === 'low' && D.isLow(s, p)) ||
-            (filter === 'soon' &&
-              s.batches.some(
-                (b) => b.productId === p.id && b.quantity > 0 && D.expiryDays(b.expiry) <= 3
-              )))
-      )
+      .filter((p) => {
+        if (term && !p.name.toLowerCase().includes(term)) return false;
+        if (category !== 'all' && p.category !== category) return false;
+        if (
+          location !== 'all' &&
+          !(productBatches.get(p.id)?.some((b) => b.location === location) ?? false)
+        ) {
+          return false;
+        }
+        if (filter === 'low') return productIsLow.get(p.id) ?? false;
+        if (filter === 'soon') return (minExpiryDays.get(p.id) ?? Infinity) <= 3;
+        return true;
+      })
       .sort((a, b) => {
         if (sort === 'category') {
           return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
@@ -90,21 +136,25 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           return a.name.localeCompare(b.name);
         }
         if (sort === 'low') {
-          return Number(D.isLow(s, b)) - Number(D.isLow(s, a)) || a.name.localeCompare(b.name);
+          const lowDiff =
+            Number(productIsLow.get(b.id) ?? false) - Number(productIsLow.get(a.id) ?? false);
+          return lowDiff || a.name.localeCompare(b.name);
         }
-        const aExpiry = Math.min(
-          ...s.batches
-            .filter((x) => x.productId === a.id && x.quantity > 0)
-            .map((x) => D.expiryDays(x.expiry))
-        );
-        const bExpiry = Math.min(
-          ...s.batches
-            .filter((x) => x.productId === b.id && x.quantity > 0)
-            .map((x) => D.expiryDays(x.expiry))
-        );
-        return aExpiry - bExpiry;
+        const aExp = minExpiryDays.get(a.id) ?? Infinity;
+        const bExp = minExpiryDays.get(b.id) ?? Infinity;
+        return aExp - bExp;
       });
-  }, [s, search, category, location, filter, sort]);
+  }, [
+    s.products,
+    search,
+    category,
+    location,
+    filter,
+    sort,
+    productBatches,
+    productIsLow,
+    minExpiryDays
+  ]);
 
   return (
     <>
@@ -170,14 +220,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 </h2>
               ) : null;
 
-            const batches = s.batches
-              .filter((b) => b.productId === p.id && b.quantity > 0)
-              .sort((a, b) => (a.expiry || '9999').localeCompare(b.expiry || '9999'));
-
-            const isOnShopping = s.shopping.some(
-              (i) => i.productId === p.id && i.status === 'open'
-            );
-            const totalQty = D.total(s, p);
+            const batches = productBatches.get(p.id) || [];
+            const isOnShopping = openShoppingIds.has(p.id);
+            const totalQty = productTotals.get(p.id) ?? 0;
+            const itemIsLow = productIsLow.get(p.id) ?? false;
 
             return (
               <React.Fragment key={p.id}>
@@ -203,8 +249,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     )}
                   </div>
 
-                  <span className={`badge ${D.isLow(s, p) ? 'warn' : ''}`}>
-                    {totalQty === 0 ? 'Out of stock' : D.isLow(s, p) ? 'Running low' : 'Stocked up'}
+                  <span className={`badge ${itemIsLow ? 'warn' : ''}`}>
+                    {totalQty === 0 ? 'Out of stock' : itemIsLow ? 'Running low' : 'Stocked up'}
                     {p.unit === 'level' ? '' : ` · min ${fmt(p.minimum)} ${p.unit}`}
                   </span>
 
