@@ -1,0 +1,35 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.tgrep": true,
+    "**/public/src": true
+  },
+  "files.watcherExclude": {
+    "**/.tgrep/**": true,
+    "**/public/**": true,
+    "**/node_modules/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/public": true,
+    "**/.tgrep": true
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.chat.localeOverride": "en"
+}
