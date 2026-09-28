@@ -30,11 +30,12 @@ describe('Bun + Effect Domain Suite', () => {
 
   test('PantryRecordSchema decodes and validates PantryRecord', () => {
     const s = D.empty();
-    D.add(s, food());
+    D.add(s, food({ name: 'Bread flour', unit: 'lb', quantity: 1, minimum: 0 }));
     const record = { state: s, revision: 1 };
     const decoded = Schema.decodeUnknownSync(PantryRecordSchema)(record);
     expect(decoded.revision).toBe(1);
     expect(decoded.state.products.length).toBe(1);
+    expect(decoded.state.products[0].unit).toBe('lb');
   });
 
   test('Effect Option computes expiry days correctly', () => {

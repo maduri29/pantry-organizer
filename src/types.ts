@@ -1,6 +1,6 @@
 import { Context, Schema } from 'effect';
 
-export const units = ['level', 'items', 'g', 'kg', 'ml', 'L', 'packs'] as const;
+export const units = ['level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs'] as const;
 export const locations = ['Pantry', 'Fridge', 'Freezer'] as const;
 export const categories = [
   'Vegetables',
@@ -15,7 +15,7 @@ export const categories = [
   'Other'
 ] as const;
 
-export const UnitSchema = Schema.Literal('level', 'items', 'g', 'kg', 'ml', 'L', 'packs');
+export const UnitSchema = Schema.Literal('level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs');
 export type Unit = (typeof units)[number];
 
 export const LocationSchema = Schema.Literal('Pantry', 'Fridge', 'Freezer');

@@ -339,6 +339,20 @@ try {
   );
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   pass('desktop toolbar preserves flex layout with no horizontal overflow');
+  await page.getByRole('button', { name: 'Add food', exact: false }).click();
+  await page.locator('[name="name"]').fill('Bread flour');
+  await page.getByLabel('Tracking').selectOption('lb');
+  await page.locator('[name="quantity"]').fill('1');
+  await page.locator('[name="category"]').fill('Grains & pulses');
+  await page.getByRole('button', { name: 'Add food', exact: true }).click();
+  await page.locator('dialog').waitFor({ state: 'hidden' });
+  const flour = page
+    .locator('.card')
+    .filter({ has: page.getByRole('heading', { name: 'Bread flour', exact: true }) });
+  assert.equal(await flour.locator('.amount').innerText(), '1 lb');
+  assert.match(await flour.innerText(), /Grains & pulses/);
+  assert.match(await flour.innerText(), /Pantry/);
+  pass('pound tracking saves and displays one lb with category and location');
   await profileButton.click();
   await page.getByRole('menuitem', { name: 'Connect', exact: true }).click();
   await page.getByRole('heading', { name: 'Connect your shared pantry' }).waitFor();

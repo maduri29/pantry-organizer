@@ -12112,7 +12112,7 @@ function getDisableValidationMakeOption(options) {
   return isBoolean(options) ? options : options?.disableValidation ?? false;
 }
 // src/types.ts
-var units = ["level", "items", "g", "kg", "ml", "L", "packs"];
+var units = ["level", "items", "g", "kg", "lb", "ml", "L", "packs"];
 var locations = ["Pantry", "Fridge", "Freezer"];
 var categories = [
   "Vegetables",
@@ -12126,7 +12126,7 @@ var categories = [
   "Drinks",
   "Other"
 ];
-var UnitSchema = Literal2("level", "items", "g", "kg", "ml", "L", "packs");
+var UnitSchema = Literal2("level", "items", "g", "kg", "lb", "ml", "L", "packs");
 var LocationSchema = Literal2("Pantry", "Fridge", "Freezer");
 var CategorySchema = Literal2("Vegetables", "Fruit", "Grains & pulses", "Spices & seasonings", "Dairy & eggs", "Meat & fish", "Canned & packaged foods", "Snacks", "Drinks", "Other");
 var ProductSchema = Struct({

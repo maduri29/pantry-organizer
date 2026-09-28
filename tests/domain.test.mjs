@@ -19,6 +19,14 @@ test('same food keeps separate batches; incompatible units stay separate', () =>
   assert.equal(s.batches.length, 3);
   assert.equal(D.total(s, s.products[0]), 10);
 });
+test('pounds are an exact-stock unit and stay separate from other units', () => {
+  const s = D.empty();
+  const p = D.add(s, food({ name: 'Bread flour', unit: 'lb', quantity: 1, minimum: 0 }));
+  assert.equal(p.unit, 'lb');
+  assert.equal(D.total(s, p), 1);
+  D.add(s, food({ name: 'Bread flour', unit: 'g', quantity: 454, minimum: 0 }));
+  assert.equal(s.products.length, 2);
+});
 test('stock check sets remaining amount without inventing consumption', () => {
   const s = D.empty();
   D.add(s, food());
