@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pantry-cache-v5';
+const CACHE_NAME = 'pantry-cache-v6';
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
 const PRECACHE = [
   '/',
@@ -45,6 +45,9 @@ self.addEventListener('fetch', (event) => {
 
   if (!url.protocol.startsWith('http')) return;
   if (url.pathname.startsWith('/api/')) return;
+  // The browser must fetch the worker script itself from the network so a
+  // previously installed worker cannot keep serving its own stale source.
+  if (url.pathname === '/sw.js') return;
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -62,6 +65,16 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => cached);
+      // Always check the live app shell first. Use the installed copy only
+      // when offline, while retaining stale-while-revalidate for other assets.
+      if (
+        event.request.mode === 'navigate' ||
+        url.pathname === '/index.html' ||
+        url.pathname === '/src/app.js' ||
+        url.pathname === '/src/firebase.js'
+      ) {
+        return (await fetchPromise) || cached;
+      }
       return cached || fetchPromise;
     })
   );
