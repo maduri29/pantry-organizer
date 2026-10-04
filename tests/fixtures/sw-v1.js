@@ -1,5 +1,4 @@
-const CACHE_NAME = 'pantry-cache-v2';
-const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
+const CACHE_NAME = 'pantry-cache-v1';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -8,21 +7,12 @@ const PRECACHE = [
   '/favicon.svg',
   '/manifest.webmanifest'
 ];
-const versionedRequest = (request) => {
-  const url = new URL(request.url);
-  url.searchParams.set(CACHE_KEY_PARAMETER, CACHE_NAME);
-  return new Request(url);
-};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) =>
-        cache.addAll(
-          PRECACHE.map((path) => versionedRequest(new Request(new URL(path, self.location.origin))))
-        )
-      )
+      .then((cache) => cache.addAll(PRECACHE))
       .then(() => self.skipWaiting())
   );
 });
@@ -32,7 +22,7 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
       )
       .then(() => self.clients.claim())
   );
@@ -45,9 +35,7 @@ self.addEventListener('fetch', (event) => {
   if (!url.protocol.startsWith('http')) return;
 
   event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cacheRequest = versionedRequest(event.request);
-      const cached = await cache.match(cacheRequest);
+    caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
           if (
@@ -55,7 +43,8 @@ self.addEventListener('fetch', (event) => {
             networkResponse.status === 200 &&
             networkResponse.type === 'basic'
           ) {
-            cache.put(cacheRequest, networkResponse.clone());
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
           }
           return networkResponse;
         })

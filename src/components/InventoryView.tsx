@@ -288,7 +288,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         <button
                           data-action="use"
                           data-id={b.id}
-                          aria-label={`Update ${p.name} batch`}
+                          aria-label={`Check stock for ${p.name} in ${b.location}`}
+                          title={`Check stock for ${p.name} in ${b.location}`}
                           onClick={() => onCheckStock(b, p)}
                         >
                           Check stock

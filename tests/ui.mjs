@@ -117,7 +117,7 @@ try {
   let card = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
-  await card.getByRole('button', { name: 'Update Avocados batch' }).click();
+  await card.getByRole('button', { name: 'Check stock for Avocados in Pantry' }).click();
   await page.locator('input[name="quantity"]').fill('0');
   await page.getByRole('button', { name: 'Save update', exact: true }).click();
   await page.locator('dialog').waitFor({ state: 'hidden' });
@@ -258,14 +258,14 @@ try {
   const staleCard = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) });
-  await staleCard.getByRole('button', { name: 'Update Rice batch' }).click();
+  await staleCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
   await page.locator('select[name="quantity"]').selectOption('0.25');
   const second = await page.context().newPage();
   await second.goto('http://localhost:4173');
   const secondCard = second
     .locator('.card')
     .filter({ has: second.getByRole('heading', { name: 'Rice', exact: true }) });
-  await secondCard.getByRole('button', { name: 'Update Rice batch' }).click();
+  await secondCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
   await second.locator('select[name="quantity"]').selectOption('0.5');
   await second.getByRole('button', { name: 'Save update', exact: true }).click();
   await second.locator('dialog').waitFor({ state: 'hidden' });
