@@ -1,19 +1,9 @@
 import { Context, Schema } from 'effect';
+import { categories } from './category-taxonomy.ts';
 
 export const units = ['level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs'] as const;
 export const locations = ['Pantry', 'Fridge', 'Freezer'] as const;
-export const categories = [
-  'Vegetables',
-  'Fruit',
-  'Grains & pulses',
-  'Spices & seasonings',
-  'Dairy & eggs',
-  'Meat & fish',
-  'Canned & packaged foods',
-  'Snacks',
-  'Drinks',
-  'Other'
-] as const;
+export { categories };
 
 export const UnitSchema = Schema.Literal('level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs');
 export type Unit = (typeof units)[number];
@@ -21,18 +11,7 @@ export type Unit = (typeof units)[number];
 export const LocationSchema = Schema.Literal('Pantry', 'Fridge', 'Freezer');
 export type Location = (typeof locations)[number];
 
-export const CategorySchema = Schema.Literal(
-  'Vegetables',
-  'Fruit',
-  'Grains & pulses',
-  'Spices & seasonings',
-  'Dairy & eggs',
-  'Meat & fish',
-  'Canned & packaged foods',
-  'Snacks',
-  'Drinks',
-  'Other'
-);
+export const CategorySchema = Schema.String;
 export type Category = (typeof categories)[number];
 
 export interface Product {

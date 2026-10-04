@@ -1,3 +1,5 @@
+import { categoryTaxonomy } from '../src/category-taxonomy.ts';
+
 type SuggestionInput = { id: string; name: string };
 type RequestLike = {
   method?: string;
@@ -23,7 +25,6 @@ type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_ITEMS = 10;
-const MAX_CATEGORIES = 40;
 const MAX_PER_MINUTE = 24;
 const rateWindows = new Map<string, { start: number; count: number }>();
 
@@ -76,28 +77,12 @@ async function readJson(req: RequestLike): Promise<unknown> {
   }
 }
 
-function validateInput(value: unknown): { items: SuggestionInput[]; categories: string[] } {
+function validateInput(value: unknown): { items: SuggestionInput[] } {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw Object.assign(new Error(), { status: 400 });
   }
-  const input = value as { items?: unknown; categories?: unknown };
+  const input = value as { items?: unknown };
   if (!Array.isArray(input.items) || input.items.length < 1 || input.items.length > MAX_ITEMS) {
-    throw Object.assign(new Error(), { status: 400 });
-  }
-  if (
-    !Array.isArray(input.categories) ||
-    input.categories.length < 2 ||
-    input.categories.length > MAX_CATEGORIES
-  ) {
-    throw Object.assign(new Error(), { status: 400 });
-  }
-  const categories = input.categories.map((category) =>
-    typeof category === 'string' ? category.trim() : ''
-  );
-  if (
-    categories.some((category) => !category || category.length > 60) ||
-    new Set(categories.map((category) => category.toLowerCase())).size !== categories.length
-  ) {
     throw Object.assign(new Error(), { status: 400 });
   }
   const ids = new Set<string>();
@@ -114,7 +99,7 @@ function validateInput(value: unknown): { items: SuggestionInput[]; categories: 
     ids.add(id);
     return { id, name };
   });
-  return { items, categories };
+  return { items };
 }
 
 async function withTimeout(
@@ -206,9 +191,10 @@ export function createCategorySuggestionHandler(dependencies: Dependencies) {
     }
 
     let items: SuggestionInput[];
-    let categories: string[];
+    let categories: readonly (typeof categoryTaxonomy)[number][];
     try {
-      ({ items, categories } = validateInput(await readJson(req)));
+      ({ items } = validateInput(await readJson(req)));
+      categories = categoryTaxonomy;
     } catch (error) {
       const status = (error as Error & { status?: number }).status || 400;
       respond(res, status, {
@@ -218,13 +204,18 @@ export function createCategorySuggestionHandler(dependencies: Dependencies) {
     }
 
     const categoryKeys = categories.map((_, index) => `category_${index}`);
-    const criteria = Object.fromEntries(categoryKeys.map((key, index) => [key, categories[index]]));
+    const criteria = Object.fromEntries(
+      categoryKeys.map((key, index) => {
+        const category = categories[index];
+        return [key, `${category.label}: ${category.guidance}`];
+      })
+    );
     const questions = Object.fromEntries(
-      items.map((_, index) => [
+      items.map((item, index) => [
         `food_${index}`,
         {
           type: 'choice',
-          instructions: `Choose the best pantry category for food number ${index + 1} in state. Use only the category that fits the food name.`,
+          instructions: `Choose the best category for the named pantry item “${item.name}”. Use its food meaning, not an unrelated household use of the same word. Choose only a category whose description fits; use Other only if none fits confidently.`,
           criteria
         }
       ])
@@ -289,7 +280,7 @@ export function createCategorySuggestionHandler(dependencies: Dependencies) {
       ) {
         return null;
       }
-      return { id: item.id, category: categories[categoryIndex], confidence };
+      return { id: item.id, category: categories[categoryIndex].label, confidence };
     });
     if (suggestions.some((suggestion) => !suggestion)) {
       respond(res, 502, { error: 'The suggestion service returned an invalid category.' });

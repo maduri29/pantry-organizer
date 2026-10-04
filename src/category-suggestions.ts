@@ -14,7 +14,7 @@ export async function requestCategorySuggestions(
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ items, categories })
+    body: JSON.stringify({ items })
   });
   const result = (await response.json().catch(() => null)) as {
     suggestions?: unknown;

@@ -26,7 +26,7 @@ export const CategoryReviewDialog: React.FC<CategoryReviewDialogProps> = ({
   onApply
 }) => {
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(review?.entries.map((entry) => entry.id) || [])
+    () => new Set(review?.entries.filter((entry) => entry.confidence >= 0.8).map((entry) => entry.id) || [])
   );
   const [categoriesById, setCategoriesById] = useState<Record<string, string>>(() =>
     Object.fromEntries((review?.entries || []).map((entry) => [entry.id, entry.category]))
@@ -120,6 +120,7 @@ export const CategoryReviewDialog: React.FC<CategoryReviewDialogProps> = ({
                     {entry.currentCategory} → {entry.category} ·{' '}
                     {Math.round(entry.confidence * 100)}% confidence
                   </small>
+                  {entry.confidence < 0.8 && <small className="category-review-low-confidence">Review carefully · lower confidence</small>}
                 </span>
               </label>
               <label className="category-review-select">

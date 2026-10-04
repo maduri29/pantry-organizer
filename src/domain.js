@@ -12111,24 +12111,46 @@ class DateFromSelf extends (/* @__PURE__ */ declare(isDate, {
 function getDisableValidationMakeOption(options) {
   return isBoolean(options) ? options : options?.disableValidation ?? false;
 }
+// src/category-taxonomy.ts
+var categoryTaxonomy = [
+  { label: "Vegetables", guidance: "Fresh or frozen vegetables, roots, and alliums. Examples: onions, potatoes. Excludes herbs and spices." },
+  { label: "Fruit", guidance: "Fresh or frozen fruit. Excludes dried fruit and sweeteners." },
+  { label: "Rice & grains", guidance: "Rice and grain foods, including poha, flattened rice, idli rava, quinoa, and oats. Excludes millets, flours, and pasta." },
+  { label: "Millets", guidance: "Whole millet grains and millet products such as jowar, ragi, and bajra. Excludes millets milled into flour." },
+  { label: "Dals & beans", guidance: "Dried pulses, lentils, beans, and peas. Excludes soy-based meat alternatives." },
+  { label: "Atta & flours", guidance: "Wheat atta and cooking flours such as rice, jowar, besan, and all-purpose flour. Excludes baking mixes and semolina." },
+  { label: "Rava & semolina", guidance: "Sooji, rava, and semolina. Excludes poha and rice grains." },
+  { label: "Pasta & noodles", guidance: "Pasta, instant noodles, seviyan, and vermicelli noodles. Examples: Maggi, poha noodles. Excludes rice vermicelli dessert preparations." },
+  { label: "Baking & dessert ingredients", guidance: "Baking ingredients and dessert mixes, including yeast, cocoa powder, custard powder, and falooda mix. Excludes ready-made sweets." },
+  { label: "Whole spices & herbs", guidance: "Dried whole spices and culinary herbs, including bay leaves, coriander seeds, mustard seeds, and dried chillies. Excludes edible seeds and ground masalas." },
+  { label: "Ground spices & masalas", guidance: "Ground spices and spice blends, including chaat masala and sambar powder. Excludes whole spices and cooking sauces." },
+  { label: "Oils & ghee", guidance: "Cooking oils, ghee, and other cooking fats. Excludes dairy butter and sauces." },
+  { label: "Pickles, chutneys & condiments", guidance: "Pickles, chutneys, sauces, vinegar, and table condiments. Excludes dry spice blends." },
+  { label: "Sugar, jaggery & sweeteners", guidance: "Sugar, jaggery, mishri, honey, and other sweeteners. Excludes dried fruit." },
+  { label: "Nuts & seeds", guidance: "Edible nuts and seeds used as foods, including cashews, chia, flax, hemp, pumpkin, sesame, sunflower, and mustard seeds only when sold for eating. Culinary spice seeds belong in Whole spices & herbs." },
+  { label: "Dried fruit", guidance: "Dried or dehydrated fruit such as raisins, dates, and dried apricots. Excludes fresh fruit and nuts." },
+  { label: "Bread & bakery", guidance: "Ready-to-eat bread, baked goods, and bakery products. Excludes flour and baking ingredients." },
+  { label: "Dairy & eggs", guidance: "Milk, cheese, yogurt, eggs, and refrigerated dairy products. Excludes ghee." },
+  { label: "Meat & poultry", guidance: "Fresh, frozen, or packaged meat and poultry. Excludes fish and meat alternatives." },
+  { label: "Fish & seafood", guidance: "Fish, shellfish, and other seafood, fresh, frozen, or packaged." },
+  { label: "Plant-based proteins", guidance: "Tofu, tempeh, seitan, and plant-based meat alternatives. Excludes beans and lentils." },
+  { label: "Packaged meals", guidance: "Ready-to-heat meals and packaged meal kits. Excludes snacks and instant noodles." },
+  { label: "Snacks & sweets", guidance: "Ready-to-eat snack foods, confectionery, and sweets. Excludes ingredients used to prepare desserts." },
+  { label: "Drinks", guidance: "Beverages and drink mixes. Excludes soups and liquid cooking ingredients." },
+  { label: "Kitchen & food storage supplies", guidance: "Food preparation, wrapping, and storage supplies, including foil, food bags, takeaway containers, and shelf liners. Excludes cleaning products." },
+  { label: "Cleaning & laundry", guidance: "Dishwashing, cleaning, laundry, paper towels, and household cleaning refills, including Bounty towels, Dawn soap, dishwasher pods, Swiffer refills, and toilet wand refills." },
+  { label: "Personal care", guidance: "Personal hygiene and grooming products, including toothpaste." },
+  { label: "Household essentials", guidance: "General household utility items such as candles, lighters, and appliance filters. Excludes food and cleaning supplies." },
+  { label: "Other", guidance: "Use only when no category above fits confidently. Prefer the narrowest accurate category; do not guess." }
+];
+var categories = categoryTaxonomy.map(({ label }) => label);
+
 // src/types.ts
 var units = ["level", "items", "g", "kg", "lb", "ml", "L", "packs"];
 var locations = ["Pantry", "Fridge", "Freezer"];
-var categories = [
-  "Vegetables",
-  "Fruit",
-  "Grains & pulses",
-  "Spices & seasonings",
-  "Dairy & eggs",
-  "Meat & fish",
-  "Canned & packaged foods",
-  "Snacks",
-  "Drinks",
-  "Other"
-];
 var UnitSchema = Literal2("level", "items", "g", "kg", "lb", "ml", "L", "packs");
 var LocationSchema = Literal2("Pantry", "Fridge", "Freezer");
-var CategorySchema = Literal2("Vegetables", "Fruit", "Grains & pulses", "Spices & seasonings", "Dairy & eggs", "Meat & fish", "Canned & packaged foods", "Snacks", "Drinks", "Other");
+var CategorySchema = String$;
 var ProductSchema = Struct({
   id: String$,
   name: String$,

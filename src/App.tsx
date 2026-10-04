@@ -275,17 +275,7 @@ export const App: React.FC = () => {
     const categories = [
       ...new Set([...D.categories, ...snapshot.state.products.map((p) => p.category)])
     ]
-      .sort()
-      .slice(0, 40);
-    if (
-      categories.length < 2 ||
-      new Set([...D.categories, ...snapshot.state.products.map((p) => p.category)]).size > 40
-    ) {
-      showToast(
-        'This pantry has too many categories for suggestions. You can still edit each category manually.'
-      );
-      return;
-    }
+      .sort();
 
     setSuggestingCategories(true);
     try {

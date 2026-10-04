@@ -10,6 +10,7 @@ const env = {
 };
 const input = {
   items: [{ id: 'food-1', name: 'Long grain rice' }],
+  // Legacy client categories must not become Jev destinations.
   categories: ['Fruit', 'Grains & pulses', 'Other']
 };
 
@@ -106,7 +107,7 @@ describe('Jev category API', () => {
       return new Response(
         JSON.stringify({
           answers: {
-            food_0: { type: 'choice', choice: 'category_1', confidence: 0.94 }
+            food_0: { type: 'choice', choice: 'category_2', confidence: 0.94 }
           }
         }),
         { status: 200 }
@@ -115,21 +116,25 @@ describe('Jev category API', () => {
     const response = await call({ authorization: 'Bearer member-token', fetcher });
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      suggestions: [{ id: 'food-1', category: 'Grains & pulses', confidence: 0.94 }]
+      suggestions: [{ id: 'food-1', category: 'Rice & grains', confidence: 0.94 }]
     });
     const provider = calls[1];
     expect(provider.url).toBe('https://api.typesafe.ai/v1/systemone');
     expect(new Headers(provider.init?.headers).get('authorization')).toBe('Bearer server-test-key');
     const body = JSON.parse(String(provider.init?.body));
     expect(body.model).toBe('jev-latest');
-    expect(body.state).toBe(
-      JSON.stringify({ foods: ['Long grain rice'], categories: input.categories })
-    );
-    expect(body.questions.food_0.criteria).toEqual({
-      category_0: 'Fruit',
-      category_1: 'Grains & pulses',
-      category_2: 'Other'
-    });
+    const providerState = JSON.parse(body.state);
+    expect(providerState.foods).toEqual(['Long grain rice']);
+    expect(providerState.categories).toHaveLength(29);
+    expect(providerState.categories[2].label).toBe('Rice & grains');
+    expect(providerState.categories[2].guidance).toContain('poha');
+    expect(providerState.categories.some((category: { label: string }) => category.label === 'Grains & pulses')).toBe(false);
+    expect(body.questions.food_0.instructions).toContain('Long grain rice');
+    expect(body.questions.food_0.criteria.category_2).toContain('Rice & grains:');
+    expect(body.questions.food_0.criteria.category_4).toContain('Dals & beans:');
+    expect(body.questions.food_0.criteria.category_14).toContain('Nuts & seeds:');
+    expect(body.questions.food_0.criteria.category_29).toBeUndefined();
+    expect(Object.keys(body.questions.food_0.criteria)).toHaveLength(29);
     expect(JSON.stringify(body)).not.toContain('food-1');
     expect(JSON.stringify(body)).not.toContain('amount');
     expect(response.headers['cache-control']).toContain('no-store');

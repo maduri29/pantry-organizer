@@ -431,15 +431,14 @@ try {
     if (item.name === 'Slow food') {
       await new Promise((resolve) => (releaseSlowResponse = resolve));
     }
-    const suggested = item.name === 'Lentils' ? 'Vegetables' : 'Fruit';
     await route
       .fulfill({
         contentType: 'application/json',
         body: JSON.stringify({
           suggestions: request.items.map((entry) => ({
             id: entry.id,
-            category: entry.name === 'Lentils' ? 'Vegetables' : suggested,
-            confidence: 0.94
+            category: entry.name === 'Lentils' || entry.name === 'Black beans' ? 'Dals & beans' : 'Fruit',
+            confidence: entry.name === 'Black beans' ? 0.55 : 0.94
           }))
         })
       })
@@ -536,10 +535,14 @@ try {
     clientWidth: dialog.clientWidth
   }));
   assert.ok(reviewBounds.width <= 370 && reviewBounds.scrollWidth <= reviewBounds.clientWidth);
+  const lowConfidence = reviewDialog.getByRole('checkbox', { name: 'Apply suggestion for Black beans' });
+  assert.equal(await lowConfidence.evaluate((checkbox) => checkbox.checked), false);
+  await reviewDialog.getByText('Review carefully · lower confidence').waitFor();
   await reviewDialog.getByRole('checkbox', { name: 'Apply suggestion for Black beans' }).uncheck();
   await reviewDialog
     .getByRole('combobox', { name: 'Category for Lentils' })
-    .selectOption({ label: 'Grains & pulses' });
+    .selectOption({ label: 'Rice & grains' });
+  assert.equal(await reviewDialog.getByText(/changes selected/).innerText(), '1 of 2 changes selected');
   await reviewDialog.getByRole('button', { name: 'Apply 1 selected' }).click();
   await reviewDialog.waitFor({ state: 'hidden' });
   assert.deepEqual(
@@ -548,7 +551,7 @@ try {
         window.__testPantry.state.products.map((food) => [food.name, food.category])
       )
     ),
-    { 'Black beans': 'Other', Lentils: 'Grains & pulses', Peaches: 'Fruit' }
+    { 'Black beans': 'Other', Lentils: 'Rice & grains', Peaches: 'Fruit' }
   );
   pass(
     'phone review applies one checked, manually adjusted suggestion and leaves the other unchanged'
@@ -560,14 +563,14 @@ try {
   await signedInEditor.getByRole('status').filter({ hasText: 'Jev unavailable' }).waitFor();
   await signedInEditor
     .locator('[name="category-choice"]')
-    .selectOption({ label: 'Spices & seasonings' });
+    .selectOption({ label: 'Ground spices & masalas' });
   await signedInEditor.getByRole('button', { name: 'Add food', exact: true }).click();
   await signedInEditor.waitFor({ state: 'hidden' });
   assert.equal(
     await authPage.evaluate(
       () => window.__testPantry.state.products.find((food) => food.name === 'Manual only')?.category
     ),
-    'Spices & seasonings'
+    'Ground spices & masalas'
   );
   pass('manual category selection and save remain available when Jev is unavailable');
 
