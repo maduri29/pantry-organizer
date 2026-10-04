@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pantry-cache-v3';
+const CACHE_NAME = 'pantry-cache-v4';
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
 const PRECACHE = [
   '/',

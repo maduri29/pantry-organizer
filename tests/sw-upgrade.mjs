@@ -61,16 +61,16 @@ try {
   await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
   await page.waitForFunction(async () => {
     const keys = await caches.keys();
-    return keys.includes('pantry-cache-v3') && !keys.includes('pantry-cache-v1');
+    return keys.includes('pantry-cache-v4') && !keys.includes('pantry-cache-v1');
   });
   await page.waitForFunction(async () => {
-    const cache = await caches.open('pantry-cache-v3');
-    return (await cache.match('/src/app.js?__pantry_cache_v3=pantry-cache-v3')) !== undefined;
+    const cache = await caches.open('pantry-cache-v4');
+    return (await cache.match('/src/app.js?__pantry_cache_v4=pantry-cache-v4')) !== undefined;
   });
   const cacheContents = await page.evaluate(async () => {
-    const cache = await caches.open('pantry-cache-v3');
+    const cache = await caches.open('pantry-cache-v4');
     const keys = (await cache.keys()).map((request) => request.url);
-    const response = await cache.match('/src/app.js?__pantry_cache_v3=pantry-cache-v3');
+    const response = await cache.match('/src/app.js?__pantry_cache_v4=pantry-cache-v4');
     return { keys, app: await response?.text() };
   });
   const cachedApp = cacheContents.app;
@@ -82,7 +82,7 @@ try {
     await page.evaluate(() => localStorage.getItem('pantry-organizer.demo.v1')),
     pantryData
   );
-  assert.deepEqual(await page.evaluate(() => caches.keys()), ['pantry-cache-v3']);
+  assert.deepEqual(await page.evaluate(() => caches.keys()), ['pantry-cache-v4']);
   console.log(
     'PASS service worker update replaces stale app assets and preserves pantry localStorage'
   );
