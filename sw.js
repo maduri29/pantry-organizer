@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pantry-cache-v2';
+const CACHE_NAME = 'pantry-cache-v3';
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
 const PRECACHE = [
   '/',
@@ -43,6 +43,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   if (!url.protocol.startsWith('http')) return;
+  if (url.pathname.startsWith('/api/')) return;
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {

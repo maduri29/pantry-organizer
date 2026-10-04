@@ -4,9 +4,19 @@ interface HeroProps {
   hasProducts: boolean;
   onAdd: () => void;
   onBulk: () => void;
+  canSuggestCategories?: boolean;
+  suggestingCategories?: boolean;
+  onSuggestCategories?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ hasProducts, onAdd, onBulk }) => {
+export const Hero: React.FC<HeroProps> = ({
+  hasProducts,
+  onAdd,
+  onBulk,
+  canSuggestCategories = false,
+  suggestingCategories = false,
+  onSuggestCategories
+}) => {
   return (
     <section className="hero">
       <div>
@@ -21,6 +31,15 @@ export const Hero: React.FC<HeroProps> = ({ hasProducts, onAdd, onBulk }) => {
         {hasProducts && (
           <button data-action="bulk" onClick={onBulk}>
             Restock several
+          </button>
+        )}
+        {hasProducts && canSuggestCategories && (
+          <button
+            data-action="suggest-categories"
+            onClick={onSuggestCategories}
+            disabled={suggestingCategories}
+          >
+            {suggestingCategories ? 'Suggesting…' : 'Suggest categories'}
           </button>
         )}
       </div>

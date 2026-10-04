@@ -12199,6 +12199,24 @@ var positive = (n) => {
 var total = (s, p) => p.unit === "level" ? Math.max(0, ...s.batches.filter((b) => b.productId === p.id).map((b) => b.quantity)) : s.batches.filter((b) => b.productId === p.id).reduce((n, b) => n + b.quantity, 0);
 var level = (n) => n === 0 ? "Out" : n <= 0.25 ? "Low" : n <= 0.5 ? "Half" : "Full";
 var isLow = (s, p) => total(s, p) <= p.minimum;
+function applyCategorySuggestions(state, assignments) {
+  const seen = new Set;
+  const validated = [];
+  for (const assignment of assignments) {
+    const category = assignment.category.trim();
+    if (!assignment.productId || seen.has(assignment.productId) || !category || category.length > 60) {
+      throw new DomainValidationError({ message: "Choose one valid category per food." });
+    }
+    const product = state.products.find((candidate) => candidate.id === assignment.productId);
+    if (!product) {
+      throw new DomainNotFoundError({ message: "A selected food is no longer in this pantry." });
+    }
+    seen.add(assignment.productId);
+    validated.push({ product, category });
+  }
+  for (const { product, category } of validated)
+    product.category = category;
+}
 var expiryDays = (date) => pipe(fromNullable(date), map2((d) => Math.round((Date.parse(`${d}T12:00:00`) - Date.parse(`${today()}T12:00:00`)) / 86400000)), getOrElse2(() => Infinity));
 function addEffect(s, input) {
   return gen2(function* () {
@@ -12443,6 +12461,7 @@ export {
   DomainValidationError,
   add5 as add,
   addEffect,
+  applyCategorySuggestions,
   bulkRestock,
   bulkRestockEffect,
   categories,

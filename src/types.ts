@@ -128,6 +128,22 @@ export interface PantryRecord {
   revision: number;
 }
 
+export interface CategorySuggestionInput {
+  id: string;
+  name: string;
+}
+
+export interface CategorySuggestion {
+  id: string;
+  category: string;
+  confidence: number;
+}
+
+export interface CategoryAssignment {
+  productId: string;
+  category: string;
+}
+
 export const PantryRecordSchema = Schema.Struct({
   state: PantryStateSchema,
   revision: Schema.Number
@@ -163,6 +179,7 @@ export interface PantryConfig {
 export interface PantryRepository {
   load(): Promise<PantryRecord>;
   save(state: PantryState, revision: number): Promise<PantryRecord>;
+  getIdToken?(): Promise<string>;
   subscribe?(
     callback: (record: PantryRecord) => void,
     onError?: (err: unknown) => void

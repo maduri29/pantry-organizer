@@ -51,6 +51,104 @@ dialog:has(.bulk-item) {
     max-width: 100%;
   }
 }
+
+.category-suggestion {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -4px;
+}
+.category-suggestion button,
+.category-review-content .actions button {
+  min-height: 44px;
+}
+.category-suggestion-result {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #53624f;
+  font-size: 13px;
+}
+dialog#category-review {
+  width: min(660px, calc(100% - 32px));
+  max-width: 660px;
+  padding: 24px;
+}
+.category-review-content h2 {
+  margin: 0 0 8px;
+}
+.category-review-content > p {
+  margin: 0 0 12px;
+  color: #687363;
+  line-height: 1.45;
+}
+.category-review-meta {
+  margin-bottom: 10px;
+  color: #53624f;
+  font-size: 13px;
+}
+.category-review-list {
+  display: grid;
+  gap: 6px;
+  max-height: 56vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.category-review-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid #e0e6dc;
+  border-radius: 10px;
+}
+.category-review-pick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.category-review-pick input {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+.category-review-pick span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.category-review-pick strong,
+.category-review-pick small {
+  overflow-wrap: anywhere;
+}
+.category-review-pick small {
+  color: #687363;
+  font-size: 12px;
+}
+.category-review-select select {
+  min-height: 44px;
+  width: 100%;
+}
+@media (max-width: 470px) {
+  dialog#category-review {
+    width: calc(100% - 20px);
+    padding: 18px 14px;
+  }
+  .category-review-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .category-review-content .actions {
+    flex-wrap: wrap;
+  }
+  .category-review-content .actions button {
+    flex: 1 1 130px;
+  }
+}
 .category-heading {
   grid-column: 1/-1;
   font-size: 16px;

@@ -177,6 +177,12 @@ export class FirebaseRepository implements PantryRepository {
     return exit.value;
   }
 
+  async getIdToken(): Promise<string> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('Sign in to suggest categories for this shared pantry.');
+    return user.getIdToken();
+  }
+
   subscribe(callback: (record: PantryRecord) => void, onError?: (err: unknown) => void) {
     return onSnapshot(
       this.ref,

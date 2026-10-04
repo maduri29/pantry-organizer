@@ -141,6 +141,41 @@ test('deleting an unknown food leaves the pantry unchanged', () => {
   assert.throws(() => D.deleteFood(s, 'missing-food'), /no longer exists/);
   assert.deepEqual(s, before);
 });
+test('category suggestions only change selected product categories', () => {
+  const s = D.empty();
+  const rice = D.add(s, food()),
+    tea = D.add(s, food({ name: 'Tea', unit: 'items', quantity: 2 }));
+  const before = structuredClone(s);
+  D.applyCategorySuggestions(s, [{ productId: rice.id, category: ' Pantry staples ' }]);
+  assert.equal(rice.category, 'Pantry staples');
+  assert.equal(tea.category, before.products[1].category);
+  assert.deepEqual(s.batches, before.batches);
+  assert.deepEqual(s.movements, before.movements);
+  assert.deepEqual(s.shopping, before.shopping);
+});
+test('category suggestions reject duplicate, missing or empty assignments atomically', () => {
+  const s = D.empty();
+  const rice = D.add(s, food());
+  const before = structuredClone(s);
+  assert.throws(
+    () =>
+      D.applyCategorySuggestions(s, [
+        { productId: rice.id, category: 'Rice' },
+        { productId: rice.id, category: 'Grains' }
+      ]),
+    /one valid category/
+  );
+  assert.deepEqual(s, before);
+  assert.throws(
+    () => D.applyCategorySuggestions(s, [{ productId: 'gone', category: 'Other' }]),
+    /no longer/
+  );
+  assert.throws(
+    () => D.applyCategorySuggestions(s, [{ productId: rice.id, category: '  ' }]),
+    /one valid category/
+  );
+  assert.deepEqual(s, before);
+});
 test('local demo saves durably and rejects stale revisions', async () => {
   const values = new Map();
   globalThis.localStorage = {

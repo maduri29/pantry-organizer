@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as D from '../domain.ts';
-import type { Batch, PantryState, Product, ShoppingItem } from '../types.ts';
+import type { Batch, CategorySuggestion, PantryState, Product, ShoppingItem } from '../types.ts';
 import { formatAmount } from './InventoryView.tsx';
 
 export type ModalType =
@@ -28,6 +28,11 @@ interface DialogModalProps {
   state: PantryState;
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
+  onSuggestCategory?: (
+    name: string,
+    categories: string[],
+    signal: AbortSignal
+  ) => Promise<CategorySuggestion>;
 }
 
 interface ModalFormContentProps {
@@ -35,17 +40,81 @@ interface ModalFormContentProps {
   state: PantryState;
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
+  onSuggestCategory?: (
+    name: string,
+    categories: string[],
+    signal: AbortSignal
+  ) => Promise<CategorySuggestion>;
 }
 
 const CategoryField: React.FC<{
   categories: string[];
   initialCategory: string;
-}> = ({ categories, initialCategory }) => {
+  itemName?: string;
+  onSuggestCategory?: (
+    name: string,
+    categories: string[],
+    signal: AbortSignal
+  ) => Promise<CategorySuggestion>;
+}> = ({ categories, initialCategory, itemName = '', onSuggestCategory }) => {
   const initialIndex = categories.indexOf(initialCategory);
   const [selection, setSelection] = useState(
     initialIndex >= 0 ? `existing:${encodeURIComponent(initialCategory)}` : 'new'
   );
   const [customCategory, setCustomCategory] = useState(initialIndex >= 0 ? '' : initialCategory);
+  const [suggestion, setSuggestion] = useState<{ name: string; result: CategorySuggestion } | null>(
+    null
+  );
+  const [suggestingName, setSuggestingName] = useState<string | null>(null);
+  const [suggestionError, setSuggestionError] = useState<{ name: string; message: string } | null>(
+    null
+  );
+  const controller = useRef<AbortController | null>(null);
+  const nameRef = useRef(itemName);
+
+  useLayoutEffect(() => {
+    nameRef.current = itemName.trim();
+    controller.current?.abort();
+    controller.current = null;
+  }, [itemName]);
+  useEffect(() => () => controller.current?.abort(), []);
+
+  const requestSuggestion = async () => {
+    if (!onSuggestCategory || !itemName.trim()) return;
+    controller.current?.abort();
+    const requestController = new AbortController();
+    controller.current = requestController;
+    setSuggestingName(itemName);
+    setSuggestionError(null);
+    try {
+      const requestedName = itemName.trim();
+      const result = await onSuggestCategory(requestedName, categories, requestController.signal);
+      if (!requestController.signal.aborted && nameRef.current === requestedName) {
+        setSuggestion({ name: requestedName, result });
+      }
+    } catch (error) {
+      if (!requestController.signal.aborted) {
+        setSuggestionError({
+          name: itemName.trim(),
+          message:
+            error instanceof Error ? error.message : 'Could not suggest a category right now.'
+        });
+      }
+    } finally {
+      if (!requestController.signal.aborted) setSuggestingName(null);
+    }
+  };
+
+  const useSuggestion = () => {
+    const currentSuggestion = suggestion?.name === itemName.trim() ? suggestion.result : null;
+    if (!currentSuggestion) return;
+    setSelection(`existing:${encodeURIComponent(currentSuggestion.category)}`);
+    setCustomCategory('');
+  };
+
+  const currentSuggestion = suggestion?.name === itemName.trim() ? suggestion.result : null;
+  const currentError = suggestionError?.name === itemName.trim() ? suggestionError.message : '';
+  const suggesting = suggestingName === itemName;
 
   return (
     <>
@@ -78,6 +147,34 @@ const CategoryField: React.FC<{
           />
         </label>
       )}
+      {onSuggestCategory && (
+        <div className="category-suggestion">
+          <button
+            type="button"
+            aria-label="Suggest category with Jev"
+            onClick={() => void requestSuggestion()}
+            disabled={!itemName.trim() || suggesting}
+          >
+            {suggesting ? 'Suggesting…' : 'Suggest category'}
+          </button>
+          {currentSuggestion && (
+            <div className="category-suggestion-result" role="status">
+              <span>
+                Jev suggests <strong>{currentSuggestion.category}</strong> ·{' '}
+                {Math.round(currentSuggestion.confidence * 100)}% confidence
+              </span>
+              <button type="button" onClick={useSuggestion}>
+                Use {currentSuggestion.category}
+              </button>
+            </div>
+          )}
+          {currentError && (
+            <span className="error" role="status">
+              {currentError}
+            </span>
+          )}
+        </div>
+      )}
     </>
   );
 };
@@ -86,12 +183,14 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   modal,
   state: s,
   onClose,
-  onSubmit
+  onSubmit,
+  onSuggestCategory
 }) => {
   const [error, setError] = useState<string>('');
   const [busy, setBusy] = useState<boolean>(false);
   const [trackingUnit, setTrackingUnit] = useState<string>('level');
   const [pickedIds, setPickedIds] = useState<Record<string, boolean>>({});
+  const [foodName, setFoodName] = useState('');
 
   const allCategories = useMemo(() => {
     return [...new Set([...D.categories, ...s.products.map((p) => p.category)])].sort();
@@ -143,7 +242,14 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
         <form onSubmit={handleSubmit}>
           <label>
             Food name
-            <input name="name" required maxLength={80} placeholder="e.g. Eggs" />
+            <input
+              name="name"
+              value={foodName}
+              onChange={(event) => setFoodName(event.target.value)}
+              required
+              maxLength={80}
+              placeholder="e.g. Eggs"
+            />
           </label>
           <label>
             Tracking
@@ -188,7 +294,12 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           </div>
 
           <div className="two">
-            <CategoryField categories={allCategories} initialCategory="Other" />
+            <CategoryField
+              categories={allCategories}
+              initialCategory="Other"
+              itemName={foodName}
+              onSuggestCategory={onSuggestCategory}
+            />
             <label id="minimum-field" hidden={trackingUnit === 'level'}>
               Low-stock minimum
               <input name="minimum" type="number" min="0" step="any" defaultValue="0" />
@@ -629,7 +740,13 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   return null;
 };
 
-export const DialogModal: React.FC<DialogModalProps> = ({ modal, state: s, onClose, onSubmit }) => {
+export const DialogModal: React.FC<DialogModalProps> = ({
+  modal,
+  state: s,
+  onClose,
+  onSubmit,
+  onSuggestCategory
+}) => {
   useEffect(() => {
     const dialog = document.getElementById('editor') as HTMLDialogElement | null;
     if (!dialog) return;
@@ -671,6 +788,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({ modal, state: s, onClo
       state={s}
       onClose={onClose}
       onSubmit={onSubmit}
+      onSuggestCategory={onSuggestCategory}
     />,
     dialogElement
   );

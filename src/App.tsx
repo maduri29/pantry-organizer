@@ -1,13 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Effect } from 'effect';
 import * as D from './domain.ts';
+import { requestCategorySuggestions } from './category-suggestions.ts';
 import { LocalDemoRepository } from './storage.ts';
 import type {
   FoodInput,
   PantryRecord,
   PantryRepository,
   PantryState,
-  RestockInput
+  RestockInput,
+  CategorySuggestionInput,
+  CategorySuggestion,
+  CategoryAssignment
 } from './types.ts';
 import { Header } from './components/Header.tsx';
 import { Hero } from './components/Hero.tsx';
@@ -17,6 +21,10 @@ import { InventoryView } from './components/InventoryView.tsx';
 import { ShoppingView } from './components/ShoppingView.tsx';
 import { HistoryView } from './components/HistoryView.tsx';
 import { DialogModal, type ModalState } from './components/DialogModal.tsx';
+import {
+  CategoryReviewDialog,
+  type CategoryReviewData
+} from './components/CategoryReviewDialog.tsx';
 import { Toast } from './components/Toast.tsx';
 
 export const App: React.FC = () => {
@@ -55,6 +63,8 @@ export const App: React.FC = () => {
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [categoryReview, setCategoryReview] = useState<CategoryReviewData | null>(null);
+  const [suggestingCategories, setSuggestingCategories] = useState(false);
 
   const [modal, setModal] = useState<ModalState | null>(null);
   const modalRef = useRef<ModalState | null>(null);
@@ -170,7 +180,11 @@ export const App: React.FC = () => {
   }, []);
 
   const mutate = useCallback(
-    async (fn: (s: PantryState) => void, message: string): Promise<void> => {
+    async (
+      fn: (s: PantryState) => void,
+      message: string,
+      expectedRevision?: number
+    ): Promise<void> => {
       if (busyRef.current) return;
       setBusy(true);
 
@@ -185,6 +199,11 @@ export const App: React.FC = () => {
         }
 
         if (!currentData) throw new Error('No pantry data available.');
+        if (expectedRevision !== undefined && currentData.revision !== expectedRevision) {
+          throw new Error(
+            'Pantry changed while you reviewed these suggestions. Close this review and request fresh suggestions.'
+          );
+        }
 
         const program = Effect.gen(function* () {
           const next = structuredClone(currentData.state);
@@ -201,7 +220,7 @@ export const App: React.FC = () => {
         setModal(null);
         showToast(message);
       } catch (err: any) {
-        if (!currentModal) {
+        if (!currentModal && expectedRevision === undefined) {
           showToast(err.message || 'An error occurred.');
         }
         throw err;
@@ -218,6 +237,122 @@ export const App: React.FC = () => {
       }
     },
     [showToast]
+  );
+
+  const requestSuggestions = useCallback(
+    async (
+      items: CategorySuggestionInput[],
+      categories: string[],
+      signal?: AbortSignal
+    ): Promise<CategorySuggestion[]> => {
+      if (!onlineRef.current) {
+        throw new Error('Connect your shared pantry to get Jev category suggestions.');
+      }
+      const getIdToken = repositoryRef.current.getIdToken;
+      if (!getIdToken) throw new Error('Sign in to get Jev category suggestions.');
+      const token = await getIdToken.call(repositoryRef.current);
+      return requestCategorySuggestions(token, items, categories, signal);
+    },
+    []
+  );
+
+  const suggestNewItemCategory = useCallback(
+    async (name: string, categories: string[], signal: AbortSignal) => {
+      const [suggestion] = await requestSuggestions([{ id: 'new-item', name }], categories, signal);
+      if (!suggestion) throw new Error('No category suggestion was returned.');
+      return suggestion;
+    },
+    [requestSuggestions]
+  );
+
+  const handleSuggestPantryCategories = useCallback(async () => {
+    const snapshot = dataRef.current;
+    if (!snapshot?.state.products.length || suggestingCategories) return;
+    if (!onlineRef.current) {
+      showToast('Connect your shared pantry to get Jev category suggestions.');
+      return;
+    }
+    const categories = [
+      ...new Set([...D.categories, ...snapshot.state.products.map((p) => p.category)])
+    ]
+      .sort()
+      .slice(0, 40);
+    if (
+      categories.length < 2 ||
+      new Set([...D.categories, ...snapshot.state.products.map((p) => p.category)]).size > 40
+    ) {
+      showToast(
+        'This pantry has too many categories for suggestions. You can still edit each category manually.'
+      );
+      return;
+    }
+
+    setSuggestingCategories(true);
+    try {
+      const proposals: CategoryReviewData['entries'] = [];
+      const products = snapshot.state.products;
+      for (let index = 0; index < products.length; index += 10) {
+        const batch = products.slice(index, index + 10);
+        const results = await requestSuggestions(
+          batch.map((product) => ({ id: product.id, name: product.name })),
+          categories
+        );
+        if (dataRef.current?.revision !== snapshot.revision) {
+          throw new Error(
+            'Pantry changed while suggestions were being prepared. Refresh and try again.'
+          );
+        }
+        for (const result of results) {
+          const product = batch.find((candidate) => candidate.id === result.id);
+          if (product && result.category !== product.category) {
+            proposals.push({
+              id: product.id,
+              name: product.name,
+              currentCategory: product.category,
+              category: result.category,
+              confidence: result.confidence
+            });
+          }
+        }
+      }
+      if (dataRef.current?.revision !== snapshot.revision) {
+        throw new Error(
+          'Pantry changed while suggestions were being prepared. Refresh and try again.'
+        );
+      }
+      if (!proposals.length) {
+        showToast('Jev found no category changes to review.');
+        return;
+      }
+      setCategoryReview({
+        reviewId: crypto.randomUUID(),
+        revision: snapshot.revision,
+        categories,
+        entries: proposals
+      });
+    } catch (error) {
+      showToast(
+        error instanceof Error
+          ? error.message
+          : 'Category suggestions are temporarily unavailable. You can still edit categories manually.'
+      );
+    } finally {
+      setSuggestingCategories(false);
+    }
+  }, [requestSuggestions, showToast, suggestingCategories]);
+
+  const applyCategoryAssignments = useCallback(
+    async (assignments: CategoryAssignment[]) => {
+      const review = categoryReview;
+      if (!review) return;
+      await mutate(
+        (state) => D.applyCategorySuggestions(state, assignments),
+        `${assignments.length} categories updated`,
+        review.revision
+      );
+      setCategoryReview(null);
+    },
+    [categoryReview, mutate]
   );
 
   const handleExport = useCallback(() => {
@@ -430,6 +565,9 @@ export const App: React.FC = () => {
       <main>
         <Hero
           hasProducts={s.products.length > 0}
+          canSuggestCategories={online}
+          suggestingCategories={suggestingCategories}
+          onSuggestCategories={handleSuggestPantryCategories}
           onAdd={() =>
             setModal({
               type: 'add',
@@ -568,6 +706,14 @@ export const App: React.FC = () => {
         state={s}
         onClose={() => setModal(null)}
         onSubmit={handleModalSubmit}
+        onSuggestCategory={online ? suggestNewItemCategory : undefined}
+      />
+
+      <CategoryReviewDialog
+        key={categoryReview?.reviewId || 'closed'}
+        review={categoryReview}
+        onClose={() => setCategoryReview(null)}
+        onApply={applyCategoryAssignments}
       />
 
       <Toast message={toastMessage} onClear={() => setToastMessage(null)} />

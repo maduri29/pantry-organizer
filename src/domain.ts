@@ -9,6 +9,7 @@ import {
   type Product,
   type Batch,
   type PantryState,
+  type CategoryAssignment,
   type FoodInput,
   type RestockInput
 } from './types.js';
@@ -55,6 +56,32 @@ export const level = (n: number): 'Out' | 'Low' | 'Half' | 'Full' =>
   n === 0 ? 'Out' : n <= 0.25 ? 'Low' : n <= 0.5 ? 'Half' : 'Full';
 
 export const isLow = (s: PantryState, p: Product): boolean => total(s, p) <= p.minimum;
+
+export function applyCategorySuggestions(
+  state: PantryState,
+  assignments: CategoryAssignment[]
+): void {
+  const seen = new Set<string>();
+  const validated: Array<{ product: Product; category: string }> = [];
+  for (const assignment of assignments) {
+    const category = assignment.category.trim();
+    if (
+      !assignment.productId ||
+      seen.has(assignment.productId) ||
+      !category ||
+      category.length > 60
+    ) {
+      throw new DomainValidationError({ message: 'Choose one valid category per food.' });
+    }
+    const product = state.products.find((candidate) => candidate.id === assignment.productId);
+    if (!product) {
+      throw new DomainNotFoundError({ message: 'A selected food is no longer in this pantry.' });
+    }
+    seen.add(assignment.productId);
+    validated.push({ product, category });
+  }
+  for (const { product, category } of validated) product.category = category;
+}
 
 export const expiryDays = (date?: string | null): number =>
   pipe(

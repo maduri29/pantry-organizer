@@ -120,7 +120,7 @@ try {
   await card.getByRole('button', { name: 'Check stock for Avocados in Pantry' }).click();
   await page.locator('input[name="quantity"]').fill('0');
   await page.getByRole('button', { name: 'Save update', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.innerText(), /Out of stock/);
   pass('check-in sets remaining quantity; out-of-stock food stays visible');
   await page.reload();
@@ -138,7 +138,7 @@ try {
   await row.getByRole('button', { name: 'Restock', exact: true }).click();
   await page.locator('input[name="quantity"]').fill('4');
   await page.getByRole('button', { name: 'Add to pantry', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.equal(
     await page
       .locator('.shopping-row')
@@ -159,7 +159,7 @@ try {
   await settingsCategory.selectOption('new');
   await page.locator('[name="category-custom"]').fill('Breakfast');
   await page.getByRole('button', { name: 'Save settings' }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
@@ -188,7 +188,7 @@ try {
   assert.equal(await addDialog.getByRole('alert').innerText(), 'Enter a category name.');
   await addDialog.locator('select[name="category-choice"]').selectOption({ label: 'Other' });
   await page.getByRole('button', { name: 'Add food', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   await page.getByLabel('Food category').selectOption('all');
   assert.match(
     await page
@@ -211,7 +211,7 @@ try {
   await avocado.getByRole('checkbox').check();
   await avocado.locator('input[name^="quantity-"]').fill('2');
   await page.getByRole('button', { name: 'Confirm restock', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   const after = await page.evaluate(
     () => JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state
   );
@@ -268,7 +268,7 @@ try {
   await secondCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
   await second.locator('select[name="quantity"]').selectOption('0.5');
   await second.getByRole('button', { name: 'Save update', exact: true }).click();
-  await second.locator('dialog').waitFor({ state: 'hidden' });
+  await second.locator('#editor').waitFor({ state: 'hidden' });
   await page.getByRole('button', { name: 'Save update', exact: true }).click();
   assert.match(await page.locator('dialog .error').innerText(), /Stock changed/);
   const savedLevel = await page.evaluate(() => {
@@ -301,11 +301,11 @@ try {
     .click();
   await page.getByRole('heading', { name: 'Delete Rice?' }).waitFor();
   assert.match(
-    await page.locator('dialog').innerText(),
+    await page.locator('#editor').innerText(),
     /stock batches, activity history, and shopping-list entries/
   );
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.deepEqual(
     await page.evaluate(() => JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state),
     beforeDelete
@@ -317,7 +317,7 @@ try {
     .getByRole('button', { name: 'Delete Rice' })
     .click();
   await page.getByRole('button', { name: 'Delete food' }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.equal(
     await page
       .locator('.card')
@@ -380,7 +380,7 @@ try {
   await page.locator('select[name="category-choice"]').selectOption('new');
   await page.locator('[name="category-custom"]').fill('  Grains & pulses  ');
   await page.getByRole('button', { name: 'Add food', exact: true }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   const flour = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Bread flour', exact: true }) });
@@ -400,7 +400,7 @@ try {
   }));
   assert.ok(editModalSize.scrollWidth <= editModalSize.clientWidth);
   await page.getByRole('button', { name: 'Save settings' }).click();
-  await page.locator('dialog').waitFor({ state: 'hidden' });
+  await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.equal(
     await page.evaluate(() => {
       const state = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state;
@@ -416,6 +416,35 @@ try {
   const authContext = await browser.newContext({ viewport: { width: 390, height: 844 } }),
     authPage = await authContext.newPage(),
     authErrors = [];
+  let releaseSlowResponse;
+  await authContext.route('**/api/category-suggestions', async (route) => {
+    const request = route.request().postDataJSON();
+    const item = request.items[0];
+    if (item.name === 'Manual only') {
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: '{"error":"Jev unavailable"}'
+      });
+      return;
+    }
+    if (item.name === 'Slow food') {
+      await new Promise((resolve) => (releaseSlowResponse = resolve));
+    }
+    const suggested = item.name === 'Lentils' ? 'Vegetables' : 'Fruit';
+    await route
+      .fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          suggestions: request.items.map((entry) => ({
+            id: entry.id,
+            category: entry.name === 'Lentils' ? 'Vegetables' : suggested,
+            confidence: 0.94
+          }))
+        })
+      })
+      .catch(() => {});
+  });
   authPage.on('pageerror', (e) => authErrors.push(e.message));
   await authContext.route('**/config.js', (route) =>
     route.fulfill({
@@ -426,7 +455,31 @@ try {
   await authContext.route('**/src/firebase.js', (route) =>
     route.fulfill({
       contentType: 'application/javascript',
-      body: 'export class FirebaseRepository{static async resume(){return null}static async connect(){return{async load(){return{state:{products:[],batches:[],movements:[],shopping:[]},revision:1}},subscribe(){},async signOut(){}}}}'
+      body: `export class FirebaseRepository {
+        static async resume(){ return null; }
+        static async connect(){
+          const initial = {state:{
+            products:[
+              {id:'beans',name:'Black beans',unit:'items',category:'Other',minimum:0,checkedAt:'2026-10-04'},
+              {id:'lentils',name:'Lentils',unit:'items',category:'Other',minimum:0,checkedAt:'2026-10-04'}
+            ],
+            batches:[
+              {id:'beans-batch',productId:'beans',quantity:2,location:'Pantry',expiry:null,checkedAt:'2026-10-04'},
+              {id:'lentils-batch',productId:'lentils',quantity:1,location:'Pantry',expiry:null,checkedAt:'2026-10-04'}
+            ],movements:[],shopping:[]},revision:1};
+          window.__testPantry = initial;
+          return {
+            async getIdToken(){return 'test-id-token'},
+            async load(){return window.__testPantry},
+            async save(state,revision){
+              if(revision!==window.__testPantry.revision) throw new Error('Pantry changed');
+              window.__testPantry={state,revision:revision+1};
+              return window.__testPantry;
+            },
+            subscribe(){return ()=>{}},async signOut(){}
+          };
+        }
+      }`
     })
   );
   await authPage.goto('http://localhost:4173');
@@ -453,6 +506,89 @@ try {
       .count(),
     1
   );
+  await authPage.getByRole('button', { name: 'Profile' }).press('Escape');
+  await authPage.getByRole('button', { name: 'Add food', exact: false }).click();
+  const signedInEditor = authPage.locator('#editor');
+  await signedInEditor.locator('[name="name"]').fill('Peaches');
+  await authPage.getByRole('button', { name: 'Suggest category with Jev' }).click();
+  await signedInEditor.getByText(/Jev suggests/).waitFor();
+  await signedInEditor.getByRole('button', { name: 'Use Fruit' }).click();
+  assert.equal(
+    await signedInEditor.locator('[name="category-choice"]').inputValue(),
+    'existing:Fruit'
+  );
+  await signedInEditor.getByRole('button', { name: 'Add food', exact: true }).click();
+  await signedInEditor.waitFor({ state: 'hidden' });
+  assert.equal(
+    await authPage.evaluate(
+      () => window.__testPantry.state.products.find((food) => food.name === 'Peaches')?.category
+    ),
+    'Fruit'
+  );
+  pass('signed-in new-item Jev suggestion is explicitly accepted and saved');
+
+  await authPage.getByRole('button', { name: 'Suggest categories' }).click();
+  const reviewDialog = authPage.locator('#category-review');
+  await reviewDialog.getByRole('heading', { name: 'Review category suggestions' }).waitFor();
+  const reviewBounds = await reviewDialog.evaluate((dialog) => ({
+    width: dialog.getBoundingClientRect().width,
+    scrollWidth: dialog.scrollWidth,
+    clientWidth: dialog.clientWidth
+  }));
+  assert.ok(reviewBounds.width <= 370 && reviewBounds.scrollWidth <= reviewBounds.clientWidth);
+  await reviewDialog.getByRole('checkbox', { name: 'Apply suggestion for Black beans' }).uncheck();
+  await reviewDialog
+    .getByRole('combobox', { name: 'Category for Lentils' })
+    .selectOption({ label: 'Grains & pulses' });
+  await reviewDialog.getByRole('button', { name: 'Apply 1 selected' }).click();
+  await reviewDialog.waitFor({ state: 'hidden' });
+  assert.deepEqual(
+    await authPage.evaluate(() =>
+      Object.fromEntries(
+        window.__testPantry.state.products.map((food) => [food.name, food.category])
+      )
+    ),
+    { 'Black beans': 'Other', Lentils: 'Grains & pulses', Peaches: 'Fruit' }
+  );
+  pass(
+    'phone review applies one checked, manually adjusted suggestion and leaves the other unchanged'
+  );
+
+  await authPage.getByRole('button', { name: 'Add food', exact: false }).click();
+  await signedInEditor.locator('[name="name"]').fill('Manual only');
+  await authPage.getByRole('button', { name: 'Suggest category with Jev' }).click();
+  await signedInEditor.getByRole('status').filter({ hasText: 'Jev unavailable' }).waitFor();
+  await signedInEditor
+    .locator('[name="category-choice"]')
+    .selectOption({ label: 'Spices & seasonings' });
+  await signedInEditor.getByRole('button', { name: 'Add food', exact: true }).click();
+  await signedInEditor.waitFor({ state: 'hidden' });
+  assert.equal(
+    await authPage.evaluate(
+      () => window.__testPantry.state.products.find((food) => food.name === 'Manual only')?.category
+    ),
+    'Spices & seasonings'
+  );
+  pass('manual category selection and save remain available when Jev is unavailable');
+
+  await authPage.getByRole('button', { name: 'Add food', exact: false }).click();
+  await signedInEditor.locator('[name="name"]').fill('Slow food');
+  await authPage.getByRole('button', { name: 'Suggest category with Jev' }).click();
+  while (!releaseSlowResponse) await new Promise((resolve) => setTimeout(resolve, 5));
+  await signedInEditor.locator('[name="name"]').fill('Changed name');
+  releaseSlowResponse();
+  await authPage.waitForTimeout(80);
+  assert.equal(await signedInEditor.locator('.category-suggestion-result').count(), 0);
+  await authPage.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await signedInEditor.waitFor({ state: 'hidden' });
+  pass('late Jev response is ignored after the item name changes');
+
+  await authPage.setViewportSize({ width: 1280, height: 900 });
+  await authPage.getByRole('button', { name: 'Suggest categories' }).click();
+  await reviewDialog.getByRole('heading', { name: 'Review category suggestions' }).waitFor();
+  assert.ok((await reviewDialog.evaluate((dialog) => dialog.getBoundingClientRect().width)) <= 660);
+  await reviewDialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  pass('desktop category review dialog remains within its readable width');
   assert.deepEqual(authErrors, []);
   pass('profile menu shows signed-in state and Sign out while preserving the auth flow');
   await authContext.close();
