@@ -7,6 +7,7 @@
     "start": "node server.mjs",
     "dev": "bun server.mjs",
     "preview": "bun server.mjs",
+    "prototype": "bun prototype/server.mjs",
     "bundle": "bun build.mjs --bundle-only",
     "build": "bun build.mjs",
     "search": "tgrep --no-index",

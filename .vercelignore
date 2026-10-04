@@ -1,0 +1,7 @@
+# The UI-study branch is a standalone static preview with mocked local state.
+api/
+src/
+config.js
+sw.js
+tests/
+docs/

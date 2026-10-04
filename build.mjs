@@ -1,5 +1,10 @@
 import { mkdir, copyFile, cp, writeFile, stat } from 'node:fs/promises';
 
+if (process.env.VERCEL_GIT_COMMIT_REF === 'prototype/pantry-ui-variations') {
+  await import('./prototype/build.mjs');
+  process.exit(0);
+}
+
 const t0 = performance.now();
 
 // 1. Parallel bundling using Bun when available
