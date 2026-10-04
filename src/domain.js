@@ -12203,10 +12203,11 @@ var expiryDays = (date) => pipe(fromNullable(date), map2((d) => Math.round((Date
 function addEffect(s, input) {
   return gen2(function* () {
     const name = input.name?.trim();
+    const category = input.category?.trim();
     if (!name) {
       return yield* fail3(new DomainValidationError({ message: "Give this food a name." }));
     }
-    if (!units.includes(input.unit) || !locations.includes(input.location) || !input.category?.trim() || input.category.length > 60) {
+    if (!units.includes(input.unit) || !locations.includes(input.location) || !category || category.length > 60) {
       return yield* fail3(new DomainValidationError({ message: "Choose a valid unit, category and location." }));
     }
     let min = input.minimum;
@@ -12231,7 +12232,7 @@ function addEffect(s, input) {
         id: id(),
         name,
         unit: input.unit,
-        category: input.category,
+        category,
         minimum: min ?? 0,
         checkedAt: now
       };

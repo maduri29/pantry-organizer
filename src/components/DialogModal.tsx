@@ -37,6 +37,51 @@ interface ModalFormContentProps {
   onSubmit: (values: Record<string, any>) => Promise<void>;
 }
 
+const CategoryField: React.FC<{
+  categories: string[];
+  initialCategory: string;
+}> = ({ categories, initialCategory }) => {
+  const initialIndex = categories.indexOf(initialCategory);
+  const [selection, setSelection] = useState(
+    initialIndex >= 0 ? `existing:${encodeURIComponent(initialCategory)}` : 'new'
+  );
+  const [customCategory, setCustomCategory] = useState(initialIndex >= 0 ? '' : initialCategory);
+
+  return (
+    <>
+      <label>
+        Category
+        <select
+          name="category-choice"
+          value={selection}
+          onChange={(event) => setSelection(event.target.value)}
+        >
+          {categories.map((category) => (
+            <option key={category} value={`existing:${encodeURIComponent(category)}`}>
+              {category}
+            </option>
+          ))}
+          <option value="new">Add a custom category…</option>
+        </select>
+      </label>
+      {selection === 'new' && (
+        <label>
+          Custom category
+          <input
+            name="category-custom"
+            value={customCategory}
+            onChange={(event) => setCustomCategory(event.target.value)}
+            maxLength={60}
+            required
+            autoComplete="off"
+            placeholder="e.g. Baking supplies"
+          />
+        </label>
+      )}
+    </>
+  );
+};
+
 const ModalFormContent: React.FC<ModalFormContentProps> = ({
   modal,
   state: s,
@@ -59,6 +104,22 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
 
     const formData = new FormData(e.currentTarget);
     const values = Object.fromEntries(formData.entries());
+    if (values['category-choice'] !== undefined) {
+      const choice = String(values['category-choice']);
+      values.category =
+        choice === 'new'
+          ? String(values['category-custom'] ?? '').trim()
+          : choice.startsWith('existing:')
+            ? decodeURIComponent(choice.slice('existing:'.length))
+            : '';
+      delete values['category-choice'];
+      delete values['category-custom'];
+      if (!values.category) {
+        setError('Enter a category name.');
+        setBusy(false);
+        return;
+      }
+    }
 
     try {
       await onSubmit(values);
@@ -127,23 +188,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           </div>
 
           <div className="two">
-            <label>
-              Category
-              <input
-                name="category"
-                list="categories"
-                maxLength={60}
-                required
-                defaultValue="Other"
-              />
-              <datalist id="categories">
-                {allCategories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </datalist>
-            </label>
+            <CategoryField categories={allCategories} initialCategory="Other" />
             <label id="minimum-field" hidden={trackingUnit === 'level'}>
               Low-stock minimum
               <input name="minimum" type="number" min="0" step="any" defaultValue="0" />
@@ -238,23 +283,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
         <h2>Food settings</h2>
         <p>Suggest shopping when {p.name} reaches this amount.</p>
         <form onSubmit={handleSubmit}>
-          <label>
-            Category
-            <input
-              name="category"
-              list="categories"
-              maxLength={60}
-              required
-              defaultValue={p.category}
-            />
-            <datalist id="categories">
-              {allCategories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </datalist>
-          </label>
+          <CategoryField categories={allCategories} initialCategory={p.category} />
           {p.unit === 'level' ? (
             <>
               <input type="hidden" name="quantity" value="0.25" />

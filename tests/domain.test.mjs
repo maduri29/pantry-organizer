@@ -63,9 +63,10 @@ test('suggestions require acceptance, deduplicate and purchase exactly once', ()
 });
 test('category is independent from storage and permits a custom category', () => {
   const s = D.empty();
-  const p = D.add(s, food({ category: 'Baking supplies', location: 'Freezer' }));
+  const p = D.add(s, food({ category: '  Baking supplies  ', location: 'Freezer' }));
   assert.equal(p.category, 'Baking supplies');
   assert.equal(s.batches[0].location, 'Freezer');
+  assert.throws(() => D.add(D.empty(), food({ category: '   ' })));
 });
 test('usage estimates are not a low-stock trigger', () => {
   const s = D.empty();

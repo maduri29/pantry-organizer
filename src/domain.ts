@@ -71,14 +71,15 @@ export function addEffect(
 ): Effect.Effect<Product, DomainValidationError> {
   return Effect.gen(function* () {
     const name = input.name?.trim();
+    const category = input.category?.trim();
     if (!name) {
       return yield* Effect.fail(new DomainValidationError({ message: 'Give this food a name.' }));
     }
     if (
       !units.includes(input.unit) ||
       !locations.includes(input.location) ||
-      !input.category?.trim() ||
-      input.category.length > 60
+      !category ||
+      category.length > 60
     ) {
       return yield* Effect.fail(
         new DomainValidationError({ message: 'Choose a valid unit, category and location.' })
@@ -114,7 +115,7 @@ export function addEffect(
         id: id(),
         name,
         unit: input.unit,
-        category: input.category,
+        category,
         minimum: min ?? 0,
         checkedAt: now
       };

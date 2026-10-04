@@ -154,15 +154,39 @@ try {
   assert.match(await card.locator('.amount').innerText(), /4 items/);
   pass('restock adds quantity once');
   await card.getByRole('button', { name: 'Edit settings for Avocados' }).click();
-  await page.locator('[name="category"]').fill('Breakfast');
+  const settingsCategory = page.locator('select[name="category-choice"]');
+  assert.equal(await settingsCategory.evaluate((e) => e.tagName), 'SELECT');
+  await settingsCategory.selectOption('new');
+  await page.locator('[name="category-custom"]').fill('Breakfast');
   await page.getByRole('button', { name: 'Save settings' }).click();
   await page.locator('dialog').waitFor({ state: 'hidden' });
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
   await page.getByRole('button', { name: 'Add food', exact: false }).click();
+  const addDialog = page.locator('dialog[open]');
+  assert.equal(
+    await addDialog.locator('select[name="category-choice"]').evaluate((e) => e.tagName),
+    'SELECT'
+  );
+  const mobileModal = await addDialog.evaluate((dialog) => ({
+    width: dialog.getBoundingClientRect().width,
+    scrollWidth: dialog.scrollWidth,
+    clientWidth: dialog.clientWidth,
+    categoryWidth: dialog.querySelector('[name="category-choice"]').getBoundingClientRect().width
+  }));
+  assert.ok(mobileModal.width <= 370 && mobileModal.scrollWidth <= mobileModal.clientWidth);
+  assert.ok(mobileModal.categoryWidth > 250);
+  pass('Add modal category picker is native and usable at 390px');
   await page.locator('[name="name"]').fill('Rice');
   await page.locator('[name="quantity"]').selectOption('0.5');
+  await addDialog.locator('select[name="category-choice"]').selectOption('new');
+  assert.equal(await addDialog.locator('[name="category-custom"]').inputValue(), '');
+  await addDialog.locator('[name="category-custom"]').fill('   ');
+  await page.getByRole('button', { name: 'Add food', exact: true }).click();
+  assert.equal(await addDialog.isVisible(), true);
+  assert.equal(await addDialog.getByRole('alert').innerText(), 'Enter a category name.');
+  await addDialog.locator('select[name="category-choice"]').selectOption({ label: 'Other' });
   await page.getByRole('button', { name: 'Add food', exact: true }).click();
   await page.locator('dialog').waitFor({ state: 'hidden' });
   await page.getByLabel('Food category').selectOption('all');
@@ -173,7 +197,7 @@ try {
       .innerText(),
     /Half/
   );
-  pass('new food defaults to rough levels');
+  pass('new food defaults to rough levels with the default Other category');
   const before = await page.evaluate(
     () => JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state
   );
@@ -340,10 +364,21 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   pass('desktop toolbar preserves flex layout with no horizontal overflow');
   await page.getByRole('button', { name: 'Add food', exact: false }).click();
+  const desktopModal = await page.locator('dialog[open]').evaluate((dialog) => ({
+    width: dialog.getBoundingClientRect().width,
+    categoryWidth: dialog.querySelector('[name="category-choice"]').getBoundingClientRect().width,
+    scrollWidth: dialog.scrollWidth,
+    clientWidth: dialog.clientWidth
+  }));
+  assert.ok(desktopModal.width > 400 && desktopModal.width <= 480);
+  assert.ok(desktopModal.categoryWidth > 150);
+  assert.ok(desktopModal.scrollWidth <= desktopModal.clientWidth);
+  pass('Add modal category picker fits the desktop dialog');
   await page.locator('[name="name"]').fill('Bread flour');
   await page.getByLabel('Tracking').selectOption('lb');
   await page.locator('[name="quantity"]').fill('1');
-  await page.locator('[name="category"]').fill('Grains & pulses');
+  await page.locator('select[name="category-choice"]').selectOption('new');
+  await page.locator('[name="category-custom"]').fill('  Grains & pulses  ');
   await page.getByRole('button', { name: 'Add food', exact: true }).click();
   await page.locator('dialog').waitFor({ state: 'hidden' });
   const flour = page
@@ -352,6 +387,27 @@ try {
   assert.equal(await flour.locator('.amount').innerText(), '1 lb');
   assert.match(await flour.innerText(), /Grains & pulses/);
   assert.match(await flour.innerText(), /Pantry/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await flour.getByRole('button', { name: 'Edit settings for Bread flour' }).click();
+  const editModal = page.locator('dialog[open]');
+  assert.equal(
+    await editModal.locator('select[name="category-choice"]').inputValue(),
+    'existing:Grains%20%26%20pulses'
+  );
+  const editModalSize = await editModal.evaluate((dialog) => ({
+    scrollWidth: dialog.scrollWidth,
+    clientWidth: dialog.clientWidth
+  }));
+  assert.ok(editModalSize.scrollWidth <= editModalSize.clientWidth);
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.locator('dialog').waitFor({ state: 'hidden' });
+  assert.equal(
+    await page.evaluate(() => {
+      const state = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state;
+      return state.products.find((product) => product.name === 'Bread flour').category;
+    }),
+    'Grains & pulses'
+  );
   pass('pound tracking saves and displays one lb with category and location');
   await profileButton.click();
   await page.getByRole('menuitem', { name: 'Connect', exact: true }).click();

@@ -570,6 +570,16 @@ label {
   }
 }
 @media (max-width: 470px) {
+  dialog {
+    padding: 22px 18px;
+    max-width: calc(100% - 20px);
+  }
+  dialog .two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  dialog .actions button {
+    min-height: 44px;
+  }
   .grid {
     grid-template-columns: 1fr;
   }
