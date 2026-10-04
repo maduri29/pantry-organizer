@@ -26,6 +26,9 @@ const server = createServer((request, response) => {
   } else if (pathname === '/src/app.js') {
     response.writeHead(200, { 'Content-Type': 'text/javascript' });
     response.end(`document.querySelector('#version').textContent = '${release}';`);
+  } else if (pathname === '/src/firebase.js') {
+    response.writeHead(200, { 'Content-Type': 'text/javascript' });
+    response.end(`window.firebaseBuild = '${release}';`);
   } else if (pathname === '/styles.css') {
     response.writeHead(200, { 'Content-Type': 'text/css' }).end('body { color: #222; }');
   } else if (pathname === '/favicon.svg') {
@@ -61,20 +64,26 @@ try {
   await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
   await page.waitForFunction(async () => {
     const keys = await caches.keys();
-    return keys.includes('pantry-cache-v4') && !keys.includes('pantry-cache-v1');
+    return keys.includes('pantry-cache-v5') && !keys.includes('pantry-cache-v1');
   });
   await page.waitForFunction(async () => {
-    const cache = await caches.open('pantry-cache-v4');
-    return (await cache.match('/src/app.js?__pantry_cache_v4=pantry-cache-v4')) !== undefined;
+    const cache = await caches.open('pantry-cache-v5');
+    return (await cache.match('/src/app.js?__pantry_cache_v5=pantry-cache-v5')) !== undefined;
   });
   const cacheContents = await page.evaluate(async () => {
-    const cache = await caches.open('pantry-cache-v4');
+    const cache = await caches.open('pantry-cache-v5');
     const keys = (await cache.keys()).map((request) => request.url);
-    const response = await cache.match('/src/app.js?__pantry_cache_v4=pantry-cache-v4');
-    return { keys, app: await response?.text() };
+    const response = await cache.match('/src/app.js?__pantry_cache_v5=pantry-cache-v5');
+    const firebase = await cache.match('/src/firebase.js?__pantry_cache_v5=pantry-cache-v5');
+    return { keys, app: await response?.text(), firebase: await firebase?.text() };
   });
   const cachedApp = cacheContents.app;
   assert.match(await cachedApp, /current/, 'new worker precaches the current app bundle');
+  assert.match(
+    cacheContents.firebase,
+    /firebaseBuild = 'current'/,
+    'new worker precaches the current Firebase module'
+  );
 
   await page.reload();
   assert.equal(await page.locator('#version').innerText(), 'current');
@@ -82,7 +91,7 @@ try {
     await page.evaluate(() => localStorage.getItem('pantry-organizer.demo.v1')),
     pantryData
   );
-  assert.deepEqual(await page.evaluate(() => caches.keys()), ['pantry-cache-v4']);
+  assert.deepEqual(await page.evaluate(() => caches.keys()), ['pantry-cache-v5']);
   console.log(
     'PASS service worker update replaces stale app assets and preserves pantry localStorage'
   );

@@ -4,7 +4,7 @@ const t0 = performance.now();
 
 // 1. Parallel bundling using Bun when available
 if (typeof Bun !== 'undefined') {
-  const [appBuild, domainBuild, storageBuild] = await Promise.all([
+  const [appBuild, domainBuild, storageBuild, firebaseBuild] = await Promise.all([
     Bun.build({
       entrypoints: ['src/main.tsx'],
       naming: 'app.js',
@@ -29,10 +29,18 @@ if (typeof Bun !== 'undefined') {
       outdir: './src',
       target: 'node',
       minify: false
+    }),
+    Bun.build({
+      entrypoints: ['src/firebase.ts'],
+      naming: 'firebase.js',
+      outdir: './src',
+      target: 'browser',
+      minify: true,
+      external: ['https://www.gstatic.com/firebasejs/12.19.0/*']
     })
   ]);
 
-  for (const b of [appBuild, domainBuild, storageBuild]) {
+  for (const b of [appBuild, domainBuild, storageBuild, firebaseBuild]) {
     if (!b.success) {
       for (const message of b.logs) {
         console.error(message);

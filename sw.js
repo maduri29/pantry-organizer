@@ -1,10 +1,11 @@
-const CACHE_NAME = 'pantry-cache-v4';
+const CACHE_NAME = 'pantry-cache-v5';
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
 const PRECACHE = [
   '/',
   '/index.html',
   '/styles.css',
   '/src/app.js',
+  '/src/firebase.js',
   '/favicon.svg',
   '/manifest.webmanifest'
 ];
