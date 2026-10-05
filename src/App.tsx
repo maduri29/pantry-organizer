@@ -105,6 +105,11 @@ export const App: React.FC = () => {
   const activateShared = useCallback(
     async (candidate: any) => {
       const loaded = await candidate.load();
+      // Update the refs before rendering the shared state so immediately
+      // available actions (including Jev) cannot read the previous demo repo.
+      repositoryRef.current = candidate;
+      dataRef.current = loaded;
+      onlineRef.current = true;
       setRepository(candidate);
       setData(loaded);
       setOnline(true);
