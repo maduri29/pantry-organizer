@@ -437,21 +437,24 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                 ) : (
                   <label>Shop when below ({trackingUnit})<input name="minimum" type="number" min="0" step="any" required defaultValue={String(p.minimum)} /></label>
                 )}
-                <details className="manage-danger">
-                  <summary>Delete this item</summary>
-                  <p>This removes its batches, activity history, and shopping-list entries. This cannot be undone.</p>
-                  {!confirmDelete ? (
-                    <button type="button" className="danger-prepare" onClick={() => setConfirmDelete(true)} disabled={busy}>Continue to delete</button>
-                  ) : (
-                    <div className="delete-confirm" role="group" aria-label={`Confirm deleting ${p.name}`}>
-                      <strong>Delete {p.name} permanently?</strong>
-                      <div className="manage-actions">
-                        <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy}>Keep item</button>
-                        <button type="button" className="danger-confirm" onClick={() => void submitDelete()} disabled={busy}>{busy ? 'Deleting…' : 'Delete food'}</button>
-                      </div>
+                {!confirmDelete ? (
+                  <div className="manage-delete-row">
+                    <button type="button" className="manage-delete-icon" aria-label={`Delete ${p.name}`} title={`Delete ${p.name}`} onClick={() => setConfirmDelete(true)} disabled={busy}>
+                      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="delete-confirm" role="group" aria-label={`Confirm deleting ${p.name}`}>
+                    <div>
+                      <strong>Delete {p.name}?</strong>
+                      <p>This removes its batches, activity, and shopping entries. This cannot be undone.</p>
                     </div>
-                  )}
-                </details>
+                    <div className="manage-actions">
+                      <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy}>Keep item</button>
+                      <button type="button" className="danger-confirm" onClick={() => void submitDelete()} disabled={busy}>{busy ? 'Deleting…' : 'Delete item'}</button>
+                    </div>
+                  </div>
+                )}
               </section>
             </div>
             <div className="manage-panel" role="tabpanel" id="manage-panel-stock" aria-labelledby="manage-tab-stock" tabIndex={-1} hidden={manageSection !== 'stock'}>

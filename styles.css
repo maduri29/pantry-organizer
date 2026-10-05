@@ -57,8 +57,8 @@ dialog:has(.bulk-item) {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: -4px;
+  gap: 6px;
+  margin-top: -6px;
 }
 .category-suggestion button,
 .category-review-content .actions button {
@@ -1868,20 +1868,23 @@ dialog:has(.manage-shell) {
 .manage-form { display: flex; flex: 1; flex-direction: column; gap: 0; min-height: 0; overflow: hidden; }
 .manage-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 18px 18px; }
 .manage-panel[hidden] { display: none; }
-.manage-section { display: grid; gap: 13px; }
-.manage-batch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; min-width: 0; margin: 0 0 12px; padding: 12px; border: 1px solid #eadfd8; border-radius: 14px; }
+.manage-section { display: grid; gap: 11px; }
+.manage-batch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; min-width: 0; margin: 0 0 8px; padding: 10px; border: 1px solid #eee7e1; border-radius: 11px; }
 .manage-batch legend { padding: 0 5px; color: #5b4851; font-size: 12px; font-weight: 800; }
 .manage-batch label { display: grid; align-content: start; gap: 5px; min-width: 0; color: #685a61; font-size: 12px; font-weight: 700; }
 .manage-batch input, .manage-batch select { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid #ded1c9; border-radius: 10px; color: #372d33; background: white; font: inherit; }
 .manage-note { margin: 0; color: #75666e; font-size: 12px; line-height: 1.45; }
-.manage-add-stock { margin-top: 2px; border-top: 1px solid #eadfd8; }
-.manage-add-stock > summary { min-height: 48px; display: flex; align-items: center; color: #62494f; font-weight: 800; cursor: pointer; }
+.manage-add-stock { margin-top: 0; }
+.manage-add-stock > summary { min-height: 44px; display: flex; align-items: center; padding: 0 8px; color: #62494f; font-weight: 800; cursor: pointer; }
 .manage-add-submit { min-height: 44px; margin-top: 6px; padding: 0 14px; border: 1px solid #bf674d; border-radius: 10px; color: white; background: #bf674d; font-weight: 700; }
-.manage-danger { padding: 10px 12px; border: 1px solid #ecd3cf; border-radius: 13px; color: #7a3936; background: #fff9f7; }
-.manage-danger > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 800; }
-.manage-danger p { font-size: 12px; }
-.manage-danger button { min-height: 44px; }
-.delete-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.manage-delete-row { display: flex; justify-content: flex-end; margin-top: -2px; }
+.manage-delete-icon { display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 11px; color: #8b514b; background: transparent; cursor: pointer; }
+.manage-delete-icon:hover { background: #fff1ee; }
+.manage-delete-icon:focus-visible { outline: 2px solid #a95c4a; outline-offset: 2px; }
+.manage-delete-icon:disabled { opacity: .55; cursor: not-allowed; }
+.manage-delete-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.delete-confirm { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #efd8d3; border-radius: 11px; color: #713d39; background: #fff9f7; }
+.delete-confirm p { margin: 3px 0 0; color: #75666e; font-size: 12px; line-height: 1.4; }
 .delete-confirm button { min-height: 44px; padding: 0 13px; border-radius: 10px; cursor: pointer; }
 .manage-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .manage-actions button { min-height: 44px; padding: 0 16px; border-radius: 11px; cursor: pointer; }

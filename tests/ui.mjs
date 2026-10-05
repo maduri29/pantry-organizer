@@ -382,12 +382,18 @@ try {
     .getByRole('button', { name: 'Manage Rice' })
     .click();
   await page.getByRole('tab', { name: 'Details' }).click();
-  await page.getByText('Delete this item', { exact: true }).click();
-  await page.getByRole('button', { name: 'Continue to delete' }).click();
-  await page.getByText('Delete Rice permanently?', { exact: true }).waitFor();
+  const deleteRice = page.getByRole('button', { name: 'Delete Rice', exact: true });
+  const deleteTarget = await deleteRice.evaluate((button) => {
+    const rect = button.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, svgCount: button.querySelectorAll('svg').length };
+  });
+  assert.ok(deleteTarget.width >= 44 && deleteTarget.height >= 44);
+  assert.equal(deleteTarget.svgCount, 1);
+  await deleteRice.click();
+  await page.getByText('Delete Rice?', { exact: true }).waitFor();
   assert.match(
     await page.locator('#editor').innerText(),
-    /batches, activity history, and shopping-list entries/
+    /batches, activity, and shopping entries/
   );
   await page.getByRole('button', { name: 'Keep item', exact: true }).click();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
@@ -403,9 +409,8 @@ try {
     .getByRole('button', { name: 'Manage Rice' })
     .click();
   await page.getByRole('tab', { name: 'Details' }).click();
-  await page.getByText('Delete this item', { exact: true }).click();
-  await page.getByRole('button', { name: 'Continue to delete' }).click();
-  await page.getByRole('button', { name: 'Delete food' }).click();
+  await page.getByRole('button', { name: 'Delete Rice', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete item', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.equal(
     await page
