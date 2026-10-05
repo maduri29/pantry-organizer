@@ -51,6 +51,14 @@ const server = Bun.serve({
       const screenshot = Bun.file(resolve(import.meta.dir, 'screenshots', fileName));
       if (await screenshot.exists()) return new Response(screenshot, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=3600' } });
     }
+    if (pathname === '/prototype-shots/pantry-items.png') {
+      const sprite = Bun.file(resolve(import.meta.dir, 'assets/pantry-items.png'));
+      if (await sprite.exists()) return new Response(sprite, { headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=3600' } });
+    }
+    if (pathname === '/prototype-shots/pantry-items.prompt.txt') {
+      const prompt = Bun.file(resolve(import.meta.dir, 'assets/pantry-items.prompt.txt'));
+      if (await prompt.exists()) return new Response(prompt, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    }
     return new Response('Not found', { status: 404 });
   },
 });

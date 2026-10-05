@@ -30,6 +30,8 @@ const screenshotFiles = (await readdir(screenshots)).filter((name) => name.endsW
 if (screenshotFiles.length < 12) throw new Error(`Expected desktop and phone screenshots for six variants, found ${screenshotFiles.length}`);
 await mkdir(resolve(publicDir, 'prototype-shots'), { recursive: true });
 for (const name of screenshotFiles) await copyFile(resolve(screenshots, name), resolve(publicDir, 'prototype-shots', name));
+await copyFile(resolve('prototype/assets/pantry-items.png'), resolve(publicDir, 'prototype-shots/pantry-items.png'));
+await copyFile(resolve('prototype/assets/pantry-items.prompt.txt'), resolve(publicDir, 'prototype-shots/pantry-items.prompt.txt'));
 const fontFiles = await readdir(resolve('prototype/fonts'));
 if (fontFiles.length < 4) throw new Error(`Expected four self-hosted prototype font files, found ${fontFiles.length}`);
 await mkdir(resolve(publicDir, 'prototype-fonts'), { recursive: true });
