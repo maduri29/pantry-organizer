@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { Batch, PantryState, Product } from '../types.ts';
+import { FoodIllustration } from './FoodIllustration.tsx';
 
 interface InventoryViewProps {
   state: PantryState;
@@ -24,66 +25,6 @@ interface InventoryViewProps {
   onDelete: (product: Product) => void;
   onAddToList: (product: Product) => void;
 }
-
-const categoryIllustrations: Record<string, number> = {
-  Vegetables: 8,
-  Fruit: 8,
-  'Rice & grains': 1,
-  Millets: 1,
-  'Dals & beans': 9,
-  'Atta & flours': 0,
-  'Rava & semolina': 0,
-  'Pasta & noodles': 2,
-  'Baking & dessert ingredients': 0,
-  'Whole spices & herbs': 11,
-  'Ground spices & masalas': 3,
-  'Oils & ghee': 6,
-  'Pickles, chutneys & condiments': 3,
-  'Sugar, jaggery & sweeteners': 6,
-  'Nuts & seeds': 4,
-  'Dried fruit': 5,
-  'Bread & bakery': 7,
-  'Dairy & eggs': 10,
-  'Plant-based proteins': 9,
-  'Kitchen & food storage supplies': 13,
-  'Cleaning & laundry': 12,
-  'Personal care': 14,
-  'Household essentials': 15,
-  'Grains & pulses': 1,
-  'Meat & fish': 10,
-  Snacks: 7
-};
-
-const namedIllustrations: Record<string, number> = {
-  honey: 6,
-  jaggery: 6,
-  mishri: 6,
-  raisins: 5,
-  'red chillis': 3,
-  'chaat masala': 3,
-  salt: 3,
-  'sambar powder': 3,
-  'coriander seeds': 11,
-  'mustard seeds': 11
-};
-
-export const FoodIllustration: React.FC<{ product: Product }> = ({ product }) => {
-  const index = namedIllustrations[product.name.trim().toLowerCase()] ?? categoryIllustrations[product.category];
-  const position = index === undefined ? undefined : `${(index % 4) * (100 / 3)}% ${Math.floor(index / 4) * (100 / 3)}%`;
-  return (
-    <span className={`food-art${index === undefined ? ' food-art-generic' : ''}`} aria-hidden="true">
-      <span
-        className="food-art-sprite"
-        style={{ ...(position ? { backgroundPosition: position } : {}), ...(index === undefined ? { backgroundImage: 'none' } : {}) }}
-      />
-      {index === undefined && (
-        <svg viewBox="0 0 24 24" focusable="false">
-          <path d="M5 8h14v11H5zM8 8V5h8v3m-8 5h.01M12 13h.01M16 13h.01" />
-        </svg>
-      )}
-    </span>
-  );
-};
 
 export const fmt = (n: number): string => Number(n.toFixed(3)).toLocaleString();
 

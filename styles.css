@@ -871,9 +871,16 @@ label {
 /* Selected Kitchen shelves direction: product data, forms, and handlers remain live. */
 @font-face {
   font-family: Manrope;
-  src: url('/assets/manrope.__PANTRY_FONT_HASH__.woff2') format('woff2');
+  src: url('/assets/manrope.__PANTRY_MANROPE_HASH__.woff2') format('woff2');
   font-style: normal;
   font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: Fraunces;
+  src: url('/assets/fraunces.__PANTRY_FRAUNCES_HASH__.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
   font-display: swap;
 }
 :root {
@@ -1204,13 +1211,6 @@ header {
   color: #718b68;
   background: #f2f4e9;
 }
-.food-art-sprite {
-  position: absolute;
-  inset: 0;
-  background-image: url('/assets/pantry-items.__PANTRY_SPRITE_HASH__.png');
-  background-repeat: no-repeat;
-  background-size: 400% 400%;
-}
 .food-art svg {
   position: relative;
   width: 23px;
@@ -1461,4 +1461,237 @@ header {
   .shelf-card > .batch {
     align-items: flex-start;
   }
+}
+
+/* Playful kitchen journal: warm paper, expressive editorial headings, live pantry kept intact. */
+:root {
+  font-family: Manrope, system-ui, sans-serif;
+  color: #382a38;
+  background: #fbf7ef;
+  --journal-ink: #382a38;
+  --journal-muted: #776b70;
+  --journal-paper: #fffdf8;
+  --journal-line: #eadfd5;
+  --journal-coral: #d86f59;
+  --journal-saffron: #dfa83e;
+  --journal-lilac: #eee4eb;
+}
+body {
+  color: var(--journal-ink);
+  background: #fbf7ef;
+}
+header {
+  border-color: var(--journal-line);
+}
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 28px;
+  row-gap: 14px;
+  min-height: 226px;
+  padding: 25px 32px 24px;
+  overflow: hidden;
+  border: 1px solid #e9d8ce;
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 88% 12%, rgba(239, 193, 126, .3), transparent 39%),
+    linear-gradient(112deg, #fffaf1 0%, #fff5ec 61%, #f7eae2 100%);
+  box-shadow: 0 12px 28px rgba(73, 44, 55, .055);
+}
+.hero-copy {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  z-index: 1;
+}
+.hero .eyebrow,
+.inventory-eyebrow {
+  color: #a1574d;
+}
+.hero h1 {
+  max-width: 620px;
+  margin: 8px 0 8px;
+  color: var(--journal-ink);
+  font-family: Fraunces, Georgia, serif;
+  font-size: clamp(36px, 4.2vw, 52px);
+  font-weight: 650;
+  letter-spacing: -.045em;
+  line-height: .99;
+  font-variation-settings: 'SOFT' 35, 'WONK' 1;
+}
+.hero p {
+  max-width: 480px;
+  color: var(--journal-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.hero-art {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  width: 202px;
+  height: 160px;
+  transform: rotate(1deg);
+}
+.hero-art svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: #513a48;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hero-art .hero-bowl { fill: #e7b756; }
+.hero-art .hero-bowl-rim { fill: #fff8ec; }
+.hero-art .hero-leaf { fill: #a7b184; }
+.hero-art .hero-stem { fill: none; }
+.hero-art .hero-grain { fill: #d77661; }
+.hero-art .hero-shelf { fill: none; stroke: #b88772; stroke-width: 3; }
+.hero-art .hero-spark { fill: #d97961; stroke: none; }
+.hero-art .hero-cloth { fill: #d9a2a9; }
+.hero-actions {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  max-width: none;
+  justify-content: flex-start;
+  gap: 9px;
+}
+.hero-actions button {
+  min-height: 44px;
+  border: 1px solid #e4cfc4;
+  border-radius: 14px;
+  color: #513a48;
+  background: rgba(255, 253, 248, .82);
+  font-family: Manrope, system-ui, sans-serif;
+  font-weight: 700;
+}
+.hero-actions .primary {
+  border-color: #bd5e50;
+  color: #fffaf5;
+  background: #bd5e50;
+  box-shadow: 0 4px 0 #994c45;
+}
+.hero-actions button:hover { transform: translateY(-1px); }
+.shopping-glance {
+  border-color: #ead8cc;
+  border-radius: 20px;
+  background: linear-gradient(110deg, #fffdf8, #fbf1e9);
+  box-shadow: 0 8px 22px rgba(73, 44, 55, .045);
+}
+.glance-mark {
+  border-radius: 14px;
+  color: #a45149;
+  background: #f5e2d8;
+}
+.glance-heading h2 {
+  color: var(--journal-ink);
+  font-family: Fraunces, Georgia, serif;
+  font-size: 23px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+.glance-eyebrow,
+.shelf-kicker,
+.inventory-eyebrow { color: #a1574d; }
+.glance-counts { color: #74676f; }
+.glance-counts strong { color: var(--journal-ink); }
+.glance-item {
+  border-color: #eee0d5;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .72);
+}
+.stat,
+.shelf-card,
+.shopping-row,
+.filter-bar,
+.nav {
+  border-color: var(--journal-line);
+}
+.stat { background: var(--journal-paper); }
+.stat.active {
+  border-color: #c77b64;
+  box-shadow: 0 0 0 1px #c77b64;
+}
+.stat-icon { color: #a1574d; background: #f5e2d8; }
+.nav button.active {
+  border-color: #c77b64;
+  color: #8e493f;
+}
+.shelf-card {
+  border-radius: 18px;
+  background: var(--journal-paper);
+  box-shadow: 0 5px 17px rgba(73, 44, 55, .035);
+}
+.shelf-card .amount { color: #4a3745; }
+.food-art {
+  border: 1px solid rgba(81, 58, 72, .1);
+  border-radius: 16px 13px 17px 12px;
+  color: #493745;
+  background: #f4e6d6;
+  box-shadow: inset 0 -3px rgba(81, 58, 72, .035);
+}
+.food-art svg {
+  width: 31px;
+  height: 31px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.food-art .art-ground {
+  fill: none;
+  stroke: #d4a482;
+  stroke-width: 1.05;
+}
+.food-art-grain, .food-art-flour { background: #f2e4ca; }
+.food-art-noodles, .food-art-spice { background: #f5e1d4; }
+.food-art-seeds, .food-art-fruit { background: #f0e5e8; }
+.food-art-honey, .food-art-oil { background: #f7edcf; }
+.food-art-bread, .food-art-vegetable { background: #e9edda; }
+.food-art-beans, .food-art-herbs { background: #e5ecdf; }
+.food-art-dairy, .food-art-jar { background: #ece7f0; }
+.food-art-cleaning, .food-art-storage { background: #e1ecec; }
+.food-art-care, .food-art-home, .food-art-meal { background: #f1e4df; }
+.card-foot button,
+.batch button,
+.shopping-row button {
+  border-radius: 12px;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(198, 112, 82, .5);
+  outline-offset: 2px;
+}
+@media (max-width: 680px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 116px;
+    column-gap: 8px;
+    min-height: 214px;
+    padding: 20px 17px;
+    border-radius: 21px;
+  }
+  .hero-art { width: 120px; height: 105px; }
+  .hero h1 { font-size: clamp(31px, 8vw, 40px); }
+  .hero p { max-width: 340px; font-size: 13px; }
+  .hero-actions { grid-column: 1 / -1; }
+}
+@media (max-width: 390px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 84px;
+    min-height: 0;
+    padding: 17px 13px;
+  }
+  .hero-art { width: 90px; height: 82px; }
+  .hero h1 { max-width: 250px; font-size: 32px; }
+  .hero p { max-width: 270px; font-size: 12px; }
+  .hero-actions button { flex: 1 1 130px; padding-inline: 10px; }
 }

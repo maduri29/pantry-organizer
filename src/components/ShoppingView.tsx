@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { PantryState, Product, ShoppingItem } from '../types.ts';
-import { fmt, formatAmount, FoodIllustration } from './InventoryView.tsx';
+import { fmt, formatAmount } from './InventoryView.tsx';
+import { FoodIllustration } from './FoodIllustration.tsx';
 
 interface ShoppingViewProps {
   state: PantryState;

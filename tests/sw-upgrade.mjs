@@ -9,8 +9,8 @@ const workerTemplate = await readFile(new URL('../sw.js', import.meta.url), 'utf
 const releaseId = 'test-current';
 const currentWorker = workerTemplate
   .replaceAll('__PANTRY_RELEASE_ID__', releaseId)
-  .replaceAll('__PANTRY_SPRITE_HASH__', 'test-sprite')
-  .replaceAll('__PANTRY_FONT_HASH__', 'test-font');
+  .replaceAll('__PANTRY_MANROPE_HASH__', 'test-manrope')
+  .replaceAll('__PANTRY_FRAUNCES_HASH__', 'test-fraunces');
 const currentCacheName = `pantry-cache-${releaseId}`;
 const previousWorker = await readFile(new URL('./fixtures/sw-v1.js', import.meta.url), 'utf8');
 assert.notEqual(previousWorker, currentWorker, 'cache version and cache keys must change');
@@ -42,7 +42,7 @@ const server = createServer((request, response) => {
   } else if (pathname === '/manifest.webmanifest') {
     response.writeHead(200, { 'Content-Type': 'application/manifest+json' }).end('{}');
   } else if (pathname.startsWith('/assets/')) {
-    response.writeHead(200, { 'Content-Type': pathname.endsWith('.png') ? 'image/png' : 'font/woff2' }).end('asset');
+    response.writeHead(200, { 'Content-Type': 'font/woff2' }).end('asset');
   } else {
     response.writeHead(404).end();
   }
@@ -90,9 +90,9 @@ try {
     const response = await findByPath('/src/app.js');
     const firebase = await findByPath('/src/firebase.js');
     const css = await findByPath('/styles.css');
-    const sprite = keys.some((key) => key.includes('/assets/pantry-items.test-sprite.png?'));
-    const font = keys.some((key) => key.includes('/assets/manrope.test-font.woff2?'));
-    return { keys, app: await response?.text(), firebase: await firebase?.text(), css: await css?.text(), sprite, font };
+    const manrope = keys.some((key) => key.includes('/assets/manrope.test-manrope.woff2?'));
+    const fraunces = keys.some((key) => key.includes('/assets/fraunces.test-fraunces.woff2?'));
+    return { keys, app: await response?.text(), firebase: await firebase?.text(), css: await css?.text(), manrope, fraunces };
   });
   const cachedApp = cacheContents.app;
   assert.match(await cachedApp, /current/, 'new worker precaches the current app bundle');
@@ -101,8 +101,8 @@ try {
     /firebaseBuild = 'current'/,
     'new worker precaches the current Firebase module'
   );
-  assert.equal(cacheContents.sprite, true, 'new worker precaches the versioned illustration sprite');
-  assert.equal(cacheContents.font, true, 'new worker precaches the versioned self-hosted font');
+  assert.equal(cacheContents.manrope, true, 'new worker precaches the versioned self-hosted UI font');
+  assert.equal(cacheContents.fraunces, true, 'new worker precaches the versioned self-hosted display font');
   assert.match(cacheContents.css, /#222/, 'new worker precaches the current stylesheet');
 
   await page.reload();

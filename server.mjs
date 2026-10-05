@@ -9,7 +9,8 @@ const types = {
   '.css': 'text/css',
   '.json': 'application/json',
   '.svg': 'image/svg+xml',
-  '.webmanifest': 'application/manifest+json'
+  '.webmanifest': 'application/manifest+json',
+  '.woff2': 'font/woff2'
 };
 const allowedStatic = new Set([
   '/',
@@ -30,7 +31,9 @@ if (typeof Bun !== 'undefined') {
       const url = new URL(req.url);
       const path = resolve(
         root,
-        '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname)
+        url.pathname.startsWith('/assets/') || url.pathname === '/styles.css'
+          ? './public' + decodeURIComponent(url.pathname)
+          : '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname)
       );
       if (!path.startsWith(root + '\\') && !path.startsWith(root + '/')) {
         return new Response('Forbidden', { status: 403 });
@@ -39,7 +42,7 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (!allowedStatic.has(url.pathname) && !allowedSource) {
+      if (!allowedStatic.has(url.pathname) && !allowedSource && !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)) {
         return new Response('Not found', { status: 404 });
       }
       const file = Bun.file(path);
@@ -66,7 +69,9 @@ if (typeof Bun !== 'undefined') {
       const url = new URL(req.url, 'http://localhost');
       const path = resolve(
         root,
-        '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname)
+        url.pathname.startsWith('/assets/') || url.pathname === '/styles.css'
+          ? './public' + decodeURIComponent(url.pathname)
+          : '.' + decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname)
       );
       if (!path.startsWith(root + '\\') && !path.startsWith(root + '/')) {
         res.writeHead(403).end();
@@ -76,7 +81,7 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (!allowedStatic.has(url.pathname) && !allowedSource) {
+      if (!allowedStatic.has(url.pathname) && !allowedSource && !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)) {
         res.writeHead(404).end();
         return;
       }

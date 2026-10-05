@@ -52,7 +52,13 @@ try {
   assert.match(glanceCounts, /0\s+out/);
   assert.match(glanceCounts, /2\s+running low/);
   assert.equal(await page.locator('.card .food-art').count(), 5);
-  pass('shopping glance derives 0 out and 2 low from the current sample; all five foods are illustrated');
+  assert.equal(await page.locator('.card .food-art svg').count(), 5);
+  assert.equal(await page.locator('.hero-art svg').count(), 1);
+  assert.match(await page.locator('.hero h1').evaluate((node) => getComputedStyle(node).fontFamily), /Fraunces/);
+  assert.match(await page.locator('body').evaluate((node) => getComputedStyle(node).fontFamily), /Manrope/);
+  assert.equal(await page.evaluate(() => document.fonts.check('600 38px Fraunces')), true);
+  assert.equal(await page.evaluate(() => document.fonts.check('400 14px Manrope')), true);
+  pass('glance derives 0 out and 2 low; five inline SVG foods, editorial hero art, and both self-hosted fonts render');
   await page.getByLabel('Storage location').selectOption('Fridge');
   await page.getByLabel('Food category').selectOption('Fruit');
   await page.getByLabel('Search food').fill('blue');
