@@ -195,6 +195,8 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   const [foodName, setFoodName] = useState(modal.product?.name ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [manageSection, setManageSection] = useState<'details' | 'stock'>(modal.section ?? 'stock');
+  const [restockQuantity, setRestockQuantity] = useState('');
+  const [restockLocation, setRestockLocation] = useState('Pantry');
   const [batchQuantities, setBatchQuantities] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       s.batches
@@ -369,11 +371,16 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     const handleManageInvalid = (event: React.InvalidEvent<HTMLFormElement>) => {
       const field = event.target as HTMLInputElement | HTMLSelectElement;
       const panel = field.closest<HTMLElement>('[role="tabpanel"]');
-      if (!panel?.hidden) return;
+      const collapsedDetails = field.closest<HTMLDetailsElement>('details:not([open])');
+      if (!panel?.hidden && !collapsedDetails) return;
       event.preventDefault();
-      const section = panel.id === 'manage-panel-stock' ? 'stock' : 'details';
-      setManageSection(section);
+      if (panel?.hidden) setManageSection(panel.id === 'manage-panel-stock' ? 'stock' : 'details');
       requestAnimationFrame(() => {
+        let details = field.closest<HTMLDetailsElement>('details:not([open])');
+        while (details) {
+          details.open = true;
+          details = field.closest<HTMLDetailsElement>('details:not([open])');
+        }
         field.focus({ preventScroll: true });
         field.scrollIntoView({ block: 'center' });
         field.reportValidity();
@@ -410,33 +417,36 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                   <input name="name" value={foodName} onChange={(event) => setFoodName(event.target.value)} maxLength={80} required autoComplete="off" />
                 </label>
                 <CategoryField categories={allCategories} initialCategory={p.category} itemName={foodName} onSuggestCategory={onSuggestCategory} />
-                <label>
-                  Tracking and unit
-                  <select
-                    name="unit"
-                    value={trackingUnit}
-                    onChange={(event) => {
-                      const nextUnit = event.target.value;
-                      if (nextUnit === 'level' && trackingUnit !== 'level') {
-                        setBatchQuantities(Object.fromEntries(batches.map((batch) => [batch.id, ''])));
-                      }
-                      setTrackingUnit(nextUnit);
-                    }}
-                  >
-                    {D.units.map((unit) => <option key={unit} value={unit}>{unit === 'level' ? 'Rough level' : `Exact · ${unit}`}</option>)}
-                  </select>
-                </label>
-                {trackingUnit !== p.unit && batches.some((batch) => batch.quantity > 0) && (
-                  <p className="manage-note" role="status">Changing tracking relabels current amounts. Review each batch in Stock before saving.</p>
-                )}
-                {trackingUnit === 'level' ? (
-                  <>
-                    <input type="hidden" name="minimum" value="0.25" />
-                    <p className="manage-note">Rough levels use Full, Half, Low, and Out.</p>
-                  </>
-                ) : (
-                  <label>Shop when below ({trackingUnit})<input name="minimum" type="number" min="0" step="any" required defaultValue={String(p.minimum)} /></label>
-                )}
+                <details className="manage-settings">
+                  <summary>Stock settings</summary>
+                  <label>
+                    Tracking and unit
+                    <select
+                      name="unit"
+                      value={trackingUnit}
+                      onChange={(event) => {
+                        const nextUnit = event.target.value;
+                        if (nextUnit === 'level' && trackingUnit !== 'level') {
+                          setBatchQuantities(Object.fromEntries(batches.map((batch) => [batch.id, ''])));
+                        }
+                        setTrackingUnit(nextUnit);
+                      }}
+                    >
+                      {D.units.map((unit) => <option key={unit} value={unit}>{unit === 'level' ? 'Rough level' : `Exact · ${unit}`}</option>)}
+                    </select>
+                  </label>
+                  {trackingUnit !== p.unit && batches.some((batch) => batch.quantity > 0) && (
+                    <p className="manage-note" role="status">Changing tracking relabels current amounts. Review each batch in Stock before saving.</p>
+                  )}
+                  {trackingUnit === 'level' ? (
+                    <>
+                      <input type="hidden" name="minimum" value="0.25" />
+                      <p className="manage-note">Rough levels use Full, Half, Low, and Out.</p>
+                    </>
+                  ) : (
+                    <label>Shop when below ({trackingUnit})<input name="minimum" type="number" min="0" step="any" required defaultValue={String(p.minimum)} /></label>
+                  )}
+                </details>
                 {!confirmDelete ? (
                   <div className="manage-delete-row">
                     <button type="button" className="manage-delete-icon" aria-label={`Delete ${p.name}`} title={`Delete ${p.name}`} onClick={() => setConfirmDelete(true)} disabled={busy}>
@@ -460,35 +470,41 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             <div className="manage-panel" role="tabpanel" id="manage-panel-stock" aria-labelledby="manage-tab-stock" tabIndex={-1} hidden={manageSection !== 'stock'}>
               <section className="manage-section" id="manage-stock">
                 {batches.length === 0 && <p className="manage-note">No stock batches yet.</p>}
-                {batches.map((batch) => (
-                  <fieldset className="manage-batch" id={`manage-batch-${batch.id}`} key={batch.id}>
-                    <legend>{batch.location}</legend>
-                    {trackingUnit === 'level' ? (
-                      <label>What’s left?<select id={`manage-quantity-${batch.id}`} name={`quantity-${batch.id}`} value={batchQuantities[batch.id] ?? ''} onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))} required>
-                        <option value="">Choose a level…</option><option value="1">Full</option><option value="0.5">Half</option><option value="0.25">Low</option><option value="0">Out</option>
-                      </select></label>
-                    ) : (
-                      <label>Amount ({trackingUnit})<input id={`manage-quantity-${batch.id}`} name={`quantity-${batch.id}`} type="number" min="0" step="any" value={batchQuantities[batch.id] ?? ''} onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))} required /></label>
-                    )}
-                    <div className="two">
-                      <label>Store in<select name={`location-${batch.id}`} defaultValue={batch.location}>{D.locations.map((location) => <option key={location} value={location}>{location}</option>)}</select></label>
-                      <label>Date on package<input name={`expiry-${batch.id}`} type="date" defaultValue={batch.expiry || ''} /></label>
-                    </div>
-                  </fieldset>
-                ))}
+                {batches.map((batch, index) => {
+                  const days = D.expiryDays(batch.expiry);
+                  const expiryLabel = !batch.expiry ? '' : days < 0 ? `Expired ${-days}d ago` : days === 0 ? 'Due today' : days <= 3 ? `Due in ${days}d` : `Expires ${batch.expiry}`;
+                  return (
+                    <fieldset className="manage-batch" id={`manage-batch-${batch.id}`} key={batch.id}>
+                      <legend>{batches.length === 1 ? `Current stock · ${batch.location}` : `Batch ${index + 1} · ${batch.location}`}</legend>
+                      {trackingUnit === 'level' ? (
+                        <label>Current stock level<select id={`manage-quantity-${batch.id}`} name={`quantity-${batch.id}`} value={batchQuantities[batch.id] ?? ''} onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))} required>
+                          <option value="">Choose a level…</option><option value="1">Full</option><option value="0.5">Half</option><option value="0.25">Low</option><option value="0">Out</option>
+                        </select></label>
+                      ) : (
+                        <label>Current amount ({trackingUnit})<input id={`manage-quantity-${batch.id}`} name={`quantity-${batch.id}`} type="number" min="0" step="any" value={batchQuantities[batch.id] ?? ''} onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))} required /></label>
+                      )}
+                      {expiryLabel && <span className={`manage-expiry ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}>{expiryLabel}</span>}
+                      <details className="manage-batch-meta">
+                        <summary>Location &amp; expiry</summary>
+                        <div className="two">
+                          <label>Location<select name={`location-${batch.id}`} defaultValue={batch.location}>{D.locations.map((location) => <option key={location} value={location}>{location}</option>)}</select></label>
+                          <label>Expiry date<input name={`expiry-${batch.id}`} type="date" defaultValue={batch.expiry || ''} /></label>
+                        </div>
+                      </details>
+                    </fieldset>
+                  );
+                })}
                 <details className="manage-add-stock">
-                  <summary>Add stock</summary>
+                  <summary>Add purchased stock</summary>
                   <fieldset className="manage-batch add-batch">
-                    <legend>New stock batch</legend>
+                    <legend>New batch</legend>
                     {trackingUnit === 'level' ? (
-                      <label>What’s left?<select name="restock-quantity" defaultValue=""><option value="">Choose a level…</option><option value="1">Full</option><option value="0.5">Half</option><option value="0.25">Low</option><option value="0">Out</option></select></label>
+                      <label>New stock level<select name="restock-quantity" value={restockQuantity} onChange={(event) => setRestockQuantity(event.target.value)}><option value="">Choose a level…</option><option value="1">Full</option><option value="0.5">Half</option><option value="0.25">Low</option><option value="0">Out</option></select></label>
                     ) : (
-                      <label>Amount to add ({trackingUnit})<input name="restock-quantity" type="number" min="0.000001" step="any" /></label>
+                      <label>Amount purchased ({trackingUnit})<input name="restock-quantity" type="number" min="0.000001" step="any" value={restockQuantity} onChange={(event) => setRestockQuantity(event.target.value)} /></label>
                     )}
-                    <div className="two">
-                      <label>Store in<select name="restock-location" defaultValue="Pantry">{D.locations.map((location) => <option key={location} value={location}>{location}</option>)}</select></label>
-                      <label>Date on package<input name="restock-expiry" type="date" /></label>
-                    </div>
+                    <label>Store in<select name="restock-location" value={restockLocation} onChange={(event) => setRestockLocation(event.target.value)}>{D.locations.map((location) => <option key={location} value={location}>{location}</option>)}</select></label>
+                    <details className="manage-batch-meta"><summary>Expiry date (optional)</summary><label>Expiry date<input name="restock-expiry" type="date" /></label></details>
                   </fieldset>
                 </details>
               </section>
@@ -496,8 +512,15 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             <div className="error" role="alert">{error}</div>
           </div>
           <footer className="manage-footer">
+            {restockQuantity.trim() && (
+              <p className="manage-pending-stock" role="status">
+                {trackingUnit === 'level'
+                  ? `New ${restockLocation} level: ${Number(restockQuantity) === 1 ? 'Full' : Number(restockQuantity) === 0.5 ? 'Half' : Number(restockQuantity) === 0.25 ? 'Low' : 'Out'}`
+                  : `Will add ${restockQuantity} ${trackingUnit === 'items' ? Number(restockQuantity) === 1 ? 'item' : 'items' : trackingUnit === 'packs' ? Number(restockQuantity) === 1 ? 'pack' : 'packs' : trackingUnit} to ${restockLocation}`}
+                .</p>
+            )}
             <button type="button" className="manage-cancel" onClick={handleCancelClick} disabled={busy}>Cancel</button>
-            <button type="submit" className="primary" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
+            <button type="submit" className="primary" disabled={busy}>{busy ? 'Saving…' : restockQuantity.trim() ? trackingUnit === 'level' ? 'Save new level' : 'Save + add stock' : 'Save changes'}</button>
           </footer>
         </form>
       </div>

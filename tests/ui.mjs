@@ -137,6 +137,12 @@ try {
   assert.equal(await page.locator('#manage-stock').count(), 1);
   assert.equal(await page.getByRole('tab').count(), 2);
   assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
+  assert.equal(await page.getByText('Add purchased stock', { exact: true }).count(), 1);
+  assert.equal(await page.locator('.manage-batch-meta[open]').count(), 0);
+  assert.equal(await page.getByText(/^Current amount \(/).count(), 1);
+  assert.match(await page.locator('.manage-batch:not(.add-batch) legend').innerText(), /^Current stock · (Pantry|Fridge|Freezer)$/);
+  const currentAmountText = await page.locator('.manage-batch input[name^="quantity-"]').evaluate((input) => getComputedStyle(input).fontSize);
+  assert.ok(parseFloat(currentAmountText) >= 16);
   const manageMobile = await page.locator('dialog[open]').evaluate((dialog) => ({
     width: dialog.getBoundingClientRect().width,
     scrollWidth: dialog.scrollWidth,
@@ -238,7 +244,8 @@ try {
   await page.getByRole('tab', { name: 'Details' }).click();
   assert.equal(await page.locator('[name="category-custom"]').inputValue(), 'Breakfast');
   assert.equal(await page.locator('input[name="restock-quantity"]').inputValue(), '1');
-  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  assert.match(await page.locator('.manage-pending-stock').innerText(), /Will add 1 item to Pantry/);
+  await page.getByRole('button', { name: 'Save + add stock', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.locator('.amount').innerText(), /5 items/);
   pass('one Save changes action applies pending restock and preserves custom category edits through tab switches');
@@ -505,6 +512,7 @@ try {
   );
   await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
   await page.getByRole('tab', { name: 'Details' }).click();
+  await page.locator('.manage-settings > summary').click();
   await page.locator('select[name="unit"]').selectOption('level');
   await page.getByRole('button', { name: 'Save changes' }).click();
   assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
