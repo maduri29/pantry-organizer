@@ -1,4 +1,5 @@
-import { mkdir, copyFile, cp, writeFile, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { mkdir, copyFile, cp, writeFile, stat, readFile, rm } from 'node:fs/promises';
 
 const t0 = performance.now();
 
@@ -59,10 +60,38 @@ if (process.argv.includes('--bundle-only')) {
 
 // 2. Prepare static hosting in public/
 await mkdir('public', { recursive: true });
-for (const name of ['index.html', 'styles.css', 'favicon.svg', 'manifest.webmanifest', 'sw.js']) {
+for (const name of ['index.html', 'styles.css', 'favicon.svg', 'manifest.webmanifest']) {
   await copyFile(name, `public/${name}`);
 }
 await cp('src', 'public/src', { recursive: true });
+
+const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+const spriteBytes = await readFile('assets/pantry-items.png');
+const fontBytes = await readFile('assets/manrope-variable-latin.woff2');
+const spriteHash = sha256(spriteBytes).slice(0, 12);
+const fontHash = sha256(fontBytes).slice(0, 12);
+const fingerprint = createHash('sha256');
+for (const name of ['index.html', 'styles.css', 'src/app.js', 'src/firebase.js']) {
+  fingerprint.update(name);
+  fingerprint.update(await readFile(name));
+}
+fingerprint.update(spriteHash);
+fingerprint.update(fontHash);
+const releaseId = fingerprint.digest('hex').slice(0, 12);
+
+await rm('public/assets', { recursive: true, force: true });
+await mkdir('public/assets', { recursive: true });
+await writeFile(`public/assets/pantry-items.${spriteHash}.png`, spriteBytes);
+await writeFile(`public/assets/manrope.${fontHash}.woff2`, fontBytes);
+const builtCss = (await readFile('styles.css', 'utf8'))
+  .replaceAll('__PANTRY_SPRITE_HASH__', spriteHash)
+  .replaceAll('__PANTRY_FONT_HASH__', fontHash);
+await writeFile('public/styles.css', builtCss);
+const worker = (await readFile('sw.js', 'utf8'))
+  .replaceAll('__PANTRY_RELEASE_ID__', releaseId)
+  .replaceAll('__PANTRY_SPRITE_HASH__', spriteHash)
+  .replaceAll('__PANTRY_FONT_HASH__', fontHash);
+await writeFile('public/sw.js', worker);
 
 const env = {
   apiKey: process.env.PANTRY_FIREBASE_API_KEY,
@@ -91,5 +120,5 @@ if (Object.values(env).every(Boolean)) {
 const t1 = performance.now();
 const appSize = (await stat('public/src/app.js')).size;
 console.log(
-  `✓ Build completed in ${(t1 - t0).toFixed(1)}ms (app.js: ${(appSize / 1024).toFixed(1)} KB)`
+  `✓ Build completed in ${(t1 - t0).toFixed(1)}ms (app.js: ${(appSize / 1024).toFixed(1)} KB, release: ${releaseId})`
 );

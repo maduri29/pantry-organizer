@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { PantryState, Product, ShoppingItem } from '../types.ts';
-import { fmt, formatAmount, icon } from './InventoryView.tsx';
+import { fmt, formatAmount, FoodIllustration } from './InventoryView.tsx';
 
 interface ShoppingViewProps {
   state: PantryState;
@@ -35,7 +35,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
           if (!p) return null;
           return (
             <div key={i.id} className="shopping-row">
-              <div className="food">{icon(p)}</div>
+              <FoodIllustration product={p} />
               <div className="info">
                 <h2>{p.name}</h2>
                 <span className="meta">

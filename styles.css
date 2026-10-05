@@ -867,3 +867,598 @@ label {
     page-break-inside: avoid;
   }
 }
+
+/* Selected Kitchen shelves direction: product data, forms, and handlers remain live. */
+@font-face {
+  font-family: Manrope;
+  src: url('/assets/manrope.__PANTRY_FONT_HASH__.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+:root {
+  font-family: Manrope, system-ui, sans-serif;
+  color: #293a2e;
+  background: #f7f6ed;
+}
+body {
+  color: #293a2e;
+  background: #f7f6ed;
+}
+header {
+  border-color: #e6e3d6;
+}
+.hero {
+  padding: 30px 34px;
+  border: 1px solid #eee6d4;
+  border-radius: 22px;
+  background: linear-gradient(108deg, #fffaf0 0%, #fbf6e9 58%, #f3f0e3 100%);
+  box-shadow: 0 12px 34px rgba(92, 78, 48, 0.045);
+}
+.hero .eyebrow,
+.inventory-eyebrow {
+  color: #8b7852;
+}
+.hero h1 {
+  max-width: 570px;
+  color: #314338;
+  font-size: clamp(30px, 4vw, 43px);
+  line-height: 1.13;
+}
+.hero p {
+  color: #6f776b;
+}
+.hero-actions {
+  max-width: none;
+  justify-content: flex-start;
+}
+.hero-actions button {
+  border-radius: 12px;
+}
+.hero-actions .primary {
+  border-color: #496a4d;
+  background: #496a4d;
+}
+.stats {
+  gap: 12px;
+}
+.stat {
+  border-color: #e8e5d9;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(92, 78, 48, 0.025);
+}
+.stat.active {
+  border-color: #78916b;
+  box-shadow: 0 0 0 1px #78916b;
+}
+.stat-icon {
+  color: #7b8b68;
+  background: #f2efdf;
+}
+.nav {
+  border-color: #e2e2d7;
+}
+.nav button.active {
+  border-color: #718a65;
+  color: #415d46;
+}
+.shopping-glance {
+  margin: 0 0 27px;
+  padding: 19px 22px;
+  border: 1px solid #e8ddc8;
+  border-radius: 19px;
+  background: linear-gradient(108deg, #fffaf0 0%, #fbf5e8 54%, #f4f0df 100%);
+  box-shadow: 0 10px 28px rgba(92, 78, 48, 0.055);
+}
+.glance-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.glance-mark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 14px;
+  color: #927446;
+  background: #f1e5c9;
+}
+.glance-mark svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.glance-heading h2 {
+  margin: 3px 0 0;
+  color: #364638;
+  font: 700 20px Manrope, system-ui, sans-serif;
+  letter-spacing: -0.04em;
+}
+.glance-eyebrow,
+.shelf-kicker,
+.inventory-eyebrow {
+  color: #9b8151;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.glance-counts {
+  margin: 14px 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  color: #59695b;
+  font-size: 12px;
+}
+.glance-counts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.glance-counts strong {
+  color: #374a3b;
+  font-size: 14px;
+}
+.glance-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c9695b;
+}
+.glance-dot.low {
+  background: #d59d4c;
+}
+.glance-context {
+  margin-left: auto;
+  color: #929586;
+  font-size: 10px;
+}
+.glance-items {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+.glance-item {
+  min-width: 0;
+  min-height: 70px;
+  padding: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #ece5d5;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.76);
+}
+.glance-item-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.glance-item-copy strong {
+  overflow: hidden;
+  color: #38493c;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.glance-status {
+  font-size: 9px;
+  font-weight: 700;
+}
+.glance-status.is-out {
+  color: #a94e42;
+}
+.glance-status.is-low {
+  color: #946319;
+}
+.glance-clear {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  color: #4c7654;
+  font-size: 13px;
+}
+.glance-footer {
+  margin-top: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #8e8a78;
+  font-size: 10px;
+}
+.glance-link {
+  min-height: 44px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 12px;
+  color: #614f2d;
+  background: #eadbb9;
+  font-size: 11px;
+  font-weight: 800;
+}
+.glance-link:hover {
+  background: #e3cf9f;
+}
+.glance-link svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.inventory-heading {
+  margin: 0 0 11px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.inventory-heading h2 {
+  margin: 3px 0 0;
+  color: #35483a;
+  font-size: 22px;
+  letter-spacing: -0.7px;
+}
+.inventory-note {
+  padding-bottom: 3px;
+  color: #888a7d;
+  font-size: 11px;
+}
+.toolbar {
+  margin: 16px 0 22px;
+}
+.toolbar input,
+.toolbar select {
+  border-color: #e2e2d7;
+  border-radius: 12px;
+  background-color: #fffefa;
+}
+.shelf-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 9px;
+}
+.category-heading {
+  margin: 14px 0 0;
+  padding: 4px 2px 7px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  color: #344639;
+  border-bottom: 1px solid #e6e3d6;
+}
+.category-heading > div {
+  display: grid;
+  gap: 2px;
+}
+.category-heading .shelf-kicker {
+  color: #9b8151;
+  font-size: 9px;
+}
+.category-heading h2 {
+  margin: 0;
+  color: #344639;
+  font-size: 16px;
+  letter-spacing: -0.3px;
+}
+.category-count {
+  color: #888a7d;
+  font-size: 10px;
+}
+.shelf-card {
+  min-width: 0;
+  margin: 0;
+  padding: 14px 17px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  row-gap: 9px;
+  border-color: #e8e5d9;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px rgba(92, 78, 48, 0.025);
+}
+.shelf-card .card-top {
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-items: center;
+  gap: 12px;
+}
+.shelf-card .card-top > div:last-child {
+  min-width: 0;
+}
+.shelf-card .card-top h2 {
+  margin: 0 0 4px;
+  color: #35483a;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.shelf-card .card-top .meta {
+  color: #7d8579;
+  font-size: 11px;
+}
+.food-art {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  flex: 0 0 52px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #e9eddf;
+  border-radius: 15px;
+  color: #718b68;
+  background: #f2f4e9;
+}
+.food-art-sprite {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/pantry-items.__PANTRY_SPRITE_HASH__.png');
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+}
+.food-art svg {
+  position: relative;
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.shelf-card .amount {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  color: #36483a;
+  font-size: 20px;
+  text-align: right;
+  white-space: nowrap;
+}
+.shelf-card .amount small {
+  font-size: 11px;
+}
+.shelf-card > .badge {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  margin: 0;
+  border-radius: 999px;
+  background: #edf2e7;
+  color: #607752;
+  font-size: 10px;
+}
+.shelf-card > .badge.warn {
+  background: #fff0d9;
+  color: #8c5d19;
+}
+.shelf-card.is-out > .badge {
+  background: #fbe9e4;
+  color: #a34b3d;
+}
+.shelf-card > .batch {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #f0eee4;
+  border-radius: 11px;
+  background: #fbfaf5;
+}
+.shelf-card > .batch > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.shelf-card > .batch button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  border-color: #e2e6d9;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 11px;
+}
+.shelf-card > .card-foot {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  gap: 7px;
+  padding-top: 8px;
+  border-top: 1px solid #f0eee4;
+}
+.shelf-card > .card-foot .icon-action {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid #e6e8de;
+  border-radius: 12px;
+  color: #637a61;
+  background: #fffefa;
+}
+.shelf-card > .card-foot .icon-action.danger {
+  border-color: #efd9d3;
+  color: #a54d3f;
+  background: #fff8f5;
+}
+.shelf-card > .card-foot .icon-action:disabled {
+  color: #8a9388;
+}
+@media (max-width: 760px) {
+  .hero {
+    padding: 22px 19px;
+    align-items: stretch;
+  }
+  .hero-actions {
+    max-width: none;
+    justify-content: flex-start;
+  }
+  .hero-actions button {
+    width: auto;
+    min-height: 44px;
+    padding: 9px 12px;
+  }
+  .stats {
+    gap: 8px;
+  }
+  .stat {
+    min-width: 0;
+    padding: 13px 10px;
+    gap: 8px;
+  }
+  .stat-icon {
+    padding: 8px;
+  }
+  .stat strong {
+    font-size: 20px;
+  }
+  .shopping-glance {
+    padding: 14px;
+    border-radius: 16px;
+  }
+  .glance-heading {
+    gap: 8px;
+  }
+  .glance-mark {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+  .glance-heading h2 {
+    font-size: 17px;
+  }
+  .glance-eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .glance-counts {
+    flex-wrap: wrap;
+    gap: 9px 13px;
+    font-size: 10px;
+  }
+  .glance-context {
+    flex-basis: 100%;
+    margin-left: 0;
+    font-size: 9px;
+  }
+  .glance-items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .glance-item {
+    min-height: 64px;
+    padding: 6px;
+    gap: 6px;
+  }
+  .glance-item .food-art {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    border-radius: 11px;
+  }
+  .glance-item-copy strong {
+    font-size: 9px;
+  }
+  .glance-status {
+    font-size: 8px;
+  }
+  .glance-footer {
+    font-size: 9px;
+  }
+  .glance-link {
+    padding: 0 9px;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .inventory-heading h2 {
+    font-size: 20px;
+  }
+  .inventory-note {
+    font-size: 9px;
+  }
+  .shelf-card {
+    padding: 10px 9px;
+    column-gap: 7px;
+    row-gap: 7px;
+    border-radius: 13px;
+  }
+  .shelf-card .card-top {
+    gap: 8px;
+  }
+  .shelf-card .food-art {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+  .shelf-card .card-top h2 {
+    font-size: 12px;
+  }
+  .shelf-card .card-top .meta {
+    font-size: 9px;
+  }
+  .shelf-card .amount {
+    font-size: 16px;
+  }
+  .shelf-card .amount small {
+    font-size: 9px;
+  }
+  .shelf-card > .badge {
+    max-width: 146px;
+    font-size: 8px;
+  }
+  .shelf-card > .batch {
+    padding: 7px;
+    gap: 5px;
+    font-size: 11px;
+  }
+  .shelf-card > .batch button {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+  .shelf-card > .card-foot {
+    justify-content: flex-end;
+    gap: 6px;
+  }
+}
+@media (max-width: 470px) {
+  .hero {
+    display: grid;
+  }
+  .hero-actions {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .hero-actions button {
+    flex: 1 1 auto;
+  }
+  .glance-footer {
+    align-items: flex-start;
+  }
+  .shelf-card .card-top {
+    align-self: start;
+  }
+  .shelf-card > .badge {
+    max-width: 125px;
+    padding: 4px 6px;
+    white-space: normal;
+  }
+  .shelf-card > .batch {
+    align-items: flex-start;
+  }
+}

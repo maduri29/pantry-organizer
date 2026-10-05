@@ -604,6 +604,7 @@ export const App: React.FC = () => {
               onCategoryChange={setCategory}
               onSortChange={setSort}
               onClearFilter={() => setFilter('all')}
+              onShowNeeds={() => setFilter('low')}
               onAddFood={() =>
                 setModal({
                   type: 'add',

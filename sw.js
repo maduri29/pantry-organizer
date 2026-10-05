@@ -1,5 +1,8 @@
-const CACHE_NAME = 'pantry-cache-v6';
+const RELEASE_ID = '__PANTRY_RELEASE_ID__';
+const CACHE_NAME = `pantry-cache-${RELEASE_ID}`;
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
+const SPRITE_PATH = '/assets/pantry-items.__PANTRY_SPRITE_HASH__.png';
+const FONT_PATH = '/assets/manrope.__PANTRY_FONT_HASH__.woff2';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -7,7 +10,9 @@ const PRECACHE = [
   '/src/app.js',
   '/src/firebase.js',
   '/favicon.svg',
-  '/manifest.webmanifest'
+  '/manifest.webmanifest',
+  SPRITE_PATH,
+  FONT_PATH
 ];
 const versionedRequest = (request) => {
   const url = new URL(request.url);
@@ -45,6 +50,7 @@ self.addEventListener('fetch', (event) => {
 
   if (!url.protocol.startsWith('http')) return;
   if (url.pathname.startsWith('/api/')) return;
+  if (url.pathname === '/config.js') return;
   // The browser must fetch the worker script itself from the network so a
   // previously installed worker cannot keep serving its own stale source.
   if (url.pathname === '/sw.js') return;
@@ -53,7 +59,13 @@ self.addEventListener('fetch', (event) => {
     caches.open(CACHE_NAME).then(async (cache) => {
       const cacheRequest = versionedRequest(event.request);
       const cached = await cache.match(cacheRequest);
-      const fetchPromise = fetch(event.request)
+      const shellRequest =
+        event.request.mode === 'navigate' ||
+        url.pathname === '/index.html' ||
+        url.pathname === '/styles.css' ||
+        url.pathname === '/src/app.js' ||
+        url.pathname === '/src/firebase.js';
+      const fetchPromise = fetch(event.request, shellRequest ? { cache: 'reload' } : undefined)
         .then((networkResponse) => {
           if (
             networkResponse &&
@@ -65,14 +77,10 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => cached);
-      // Always check the live app shell first. Use the installed copy only
-      // when offline, while retaining stale-while-revalidate for other assets.
-      if (
-        event.request.mode === 'navigate' ||
-        url.pathname === '/index.html' ||
-        url.pathname === '/src/app.js' ||
-        url.pathname === '/src/firebase.js'
-      ) {
+      // Check the HTML, CSS, and executable bundles on the network first.
+      // Their build-derived worker cache and no-cache HTTP headers prevent an
+      // installed worker from pinning an older interface; cache is offline fallback.
+      if (shellRequest) {
         return (await fetchPromise) || cached;
       }
       return cached || fetchPromise;

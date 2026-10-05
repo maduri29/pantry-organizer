@@ -15,6 +15,7 @@ interface InventoryViewProps {
   onCategoryChange: (category: string) => void;
   onSortChange: (sort: string) => void;
   onClearFilter: () => void;
+  onShowNeeds: () => void;
   onAddFood: () => void;
   onTrySample: () => void;
   onCheckStock: (batch: Batch, product: Product) => void;
@@ -24,16 +25,65 @@ interface InventoryViewProps {
   onAddToList: (product: Product) => void;
 }
 
-export const icon = (p: { category: string }): string =>
-  ({
-    Vegetables: '🥬',
-    Fruit: '🍋',
-    'Grains & pulses': '🌾',
-    'Dairy & eggs': '🥛',
-    'Meat & fish': '🐟',
-    Snacks: '🥨',
-    Other: '🫙'
-  })[p.category] || '🫙';
+const categoryIllustrations: Record<string, number> = {
+  Vegetables: 8,
+  Fruit: 8,
+  'Rice & grains': 1,
+  Millets: 1,
+  'Dals & beans': 9,
+  'Atta & flours': 0,
+  'Rava & semolina': 0,
+  'Pasta & noodles': 2,
+  'Baking & dessert ingredients': 0,
+  'Whole spices & herbs': 11,
+  'Ground spices & masalas': 3,
+  'Oils & ghee': 6,
+  'Pickles, chutneys & condiments': 3,
+  'Sugar, jaggery & sweeteners': 6,
+  'Nuts & seeds': 4,
+  'Dried fruit': 5,
+  'Bread & bakery': 7,
+  'Dairy & eggs': 10,
+  'Plant-based proteins': 9,
+  'Kitchen & food storage supplies': 13,
+  'Cleaning & laundry': 12,
+  'Personal care': 14,
+  'Household essentials': 15,
+  'Grains & pulses': 1,
+  'Meat & fish': 10,
+  Snacks: 7
+};
+
+const namedIllustrations: Record<string, number> = {
+  honey: 6,
+  jaggery: 6,
+  mishri: 6,
+  raisins: 5,
+  'red chillis': 3,
+  'chaat masala': 3,
+  salt: 3,
+  'sambar powder': 3,
+  'coriander seeds': 11,
+  'mustard seeds': 11
+};
+
+export const FoodIllustration: React.FC<{ product: Product }> = ({ product }) => {
+  const index = namedIllustrations[product.name.trim().toLowerCase()] ?? categoryIllustrations[product.category];
+  const position = index === undefined ? undefined : `${(index % 4) * (100 / 3)}% ${Math.floor(index / 4) * (100 / 3)}%`;
+  return (
+    <span className={`food-art${index === undefined ? ' food-art-generic' : ''}`} aria-hidden="true">
+      <span
+        className="food-art-sprite"
+        style={{ ...(position ? { backgroundPosition: position } : {}), ...(index === undefined ? { backgroundImage: 'none' } : {}) }}
+      />
+      {index === undefined && (
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M5 8h14v11H5zM8 8V5h8v3m-8 5h.01M12 13h.01M16 13h.01" />
+        </svg>
+      )}
+    </span>
+  );
+};
 
 export const fmt = (n: number): string => Number(n.toFixed(3)).toLocaleString();
 
@@ -53,6 +103,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onCategoryChange,
   onSortChange,
   onClearFilter,
+  onShowNeeds,
   onAddFood,
   onTrySample,
   onCheckStock,
@@ -112,6 +163,21 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       };
     }, [s]);
 
+  const needsAttention = useMemo(
+    () =>
+      s.products
+        .filter((product) => productIsLow.get(product.id) ?? false)
+        .sort((a, b) => {
+          const outDifference =
+            Number((productTotals.get(b.id) ?? 0) === 0) -
+            Number((productTotals.get(a.id) ?? 0) === 0);
+          return outDifference || a.name.localeCompare(b.name);
+        }),
+    [s.products, productIsLow, productTotals]
+  );
+  const outCount = needsAttention.filter((product) => (productTotals.get(product.id) ?? 0) === 0).length;
+  const runningLowCount = needsAttention.length - outCount;
+
   const items = useMemo(() => {
     const term = search.toLowerCase();
     return s.products
@@ -158,6 +224,75 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
   return (
     <>
+      {s.products.length > 0 && (
+        <section className="shopping-glance" aria-labelledby="shopping-glance-title">
+          <div className="glance-heading">
+            <span className="glance-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 8h14v11H5zM8 8V5h8v3m-8 5h.01M12 13h.01M16 13h.01" /></svg>
+            </span>
+            <div>
+              <span className="glance-eyebrow">A QUICK LOOK BEFORE YOU SHOP</span>
+              <h2 id="shopping-glance-title">Shopping glance</h2>
+            </div>
+          </div>
+          <div className="glance-counts" aria-live="polite">
+            <span><i className="glance-dot out" /><strong>{outCount}</strong> out</span>
+            <span><i className="glance-dot low" /><strong>{runningLowCount}</strong> running low</span>
+            <span className="glance-context">From your latest stock checks</span>
+          </div>
+          {needsAttention.length ? (
+            <div className="glance-items">
+              {needsAttention.slice(0, 4).map((product) => {
+                const isOut = (productTotals.get(product.id) ?? 0) === 0;
+                return (
+                  <div className="glance-item" key={product.id}>
+                    <FoodIllustration product={product} />
+                    <div className="glance-item-copy">
+                      <strong>{product.name}</strong>
+                      <span className={`glance-status ${isOut ? 'is-out' : 'is-low'}`}>
+                        {isOut ? 'Out' : 'Running low'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="glance-clear">Everything looks stocked for now.</p>
+          )}
+          <div className="glance-footer">
+            <span>
+              {needsAttention.length > 4
+                ? `${needsAttention.length - 4} more need attention`
+                : needsAttention.length
+                  ? 'Your list of items to check'
+                  : 'You’re up to date'}
+            </span>
+            <button
+              type="button"
+              className="glance-link"
+              onClick={() => {
+                onSearchChange('');
+                onCategoryChange('all');
+                onLocationChange('all');
+                if (needsAttention.length) onShowNeeds();
+                else onClearFilter();
+              }}
+            >
+              {needsAttention.length ? `See all ${needsAttention.length} items` : 'See your pantry'}
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+            </button>
+          </div>
+        </section>
+      )}
+
+      <div className="inventory-heading">
+        <div>
+          <span className="inventory-eyebrow">YOUR KITCHEN</span>
+          <h2>Take a look around</h2>
+        </div>
+        <span className="inventory-note">Grouped by shelf</span>
+      </div>
       <div className="toolbar">
         <input
           id="search"
@@ -213,14 +348,21 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         )}
       </div>
 
-      <div className="grid">
+      <div className="grid shelf-grid">
         {items.length > 0 ? (
           items.map((p, index) => {
             const heading =
               sort === 'category' && (index === 0 || items[index - 1].category !== p.category) ? (
-                <h2 key={`cat-${p.category}`} className="category-heading">
-                  {p.category}
-                </h2>
+                <div key={`cat-${p.category}`} className="category-heading">
+                  <div>
+                    <span className="shelf-kicker">SHELF</span>
+                    <h2>{p.category}</h2>
+                  </div>
+                  <span className="category-count">
+                    {items.filter((item) => item.category === p.category).length}{' '}
+                    {items.filter((item) => item.category === p.category).length === 1 ? 'food' : 'foods'}
+                  </span>
+                </div>
               ) : null;
 
             const batches = productBatches.get(p.id) || [];
@@ -231,11 +373,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             return (
               <React.Fragment key={p.id}>
                 {heading}
-                <article className="card">
+                <article className={`card shelf-card ${totalQty === 0 ? 'is-out' : itemIsLow ? 'is-low' : 'is-ready'}`}>
                   <div className="card-top">
-                    <div className="food" aria-hidden="true">
-                      {icon(p)}
-                    </div>
+                  <FoodIllustration product={p} />
                     <div>
                       <h2>{p.name}</h2>
                       <span className="meta">{p.category}</span>

@@ -5,7 +5,13 @@ import { createServer } from 'node:http';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright-core');
-const currentWorker = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+const workerTemplate = await readFile(new URL('../sw.js', import.meta.url), 'utf8');
+const releaseId = 'test-current';
+const currentWorker = workerTemplate
+  .replaceAll('__PANTRY_RELEASE_ID__', releaseId)
+  .replaceAll('__PANTRY_SPRITE_HASH__', 'test-sprite')
+  .replaceAll('__PANTRY_FONT_HASH__', 'test-font');
+const currentCacheName = `pantry-cache-${releaseId}`;
 const previousWorker = await readFile(new URL('./fixtures/sw-v1.js', import.meta.url), 'utf8');
 assert.notEqual(previousWorker, currentWorker, 'cache version and cache keys must change');
 
@@ -30,11 +36,13 @@ const server = createServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'text/javascript' });
     response.end(`window.firebaseBuild = '${release}';`);
   } else if (pathname === '/styles.css') {
-    response.writeHead(200, { 'Content-Type': 'text/css' }).end('body { color: #222; }');
+    response.writeHead(200, { 'Content-Type': 'text/css' }).end(`body { color: ${release === 'previous' ? '#111' : '#222'}; }`);
   } else if (pathname === '/favicon.svg') {
     response.writeHead(200, { 'Content-Type': 'image/svg+xml' }).end('<svg></svg>');
   } else if (pathname === '/manifest.webmanifest') {
     response.writeHead(200, { 'Content-Type': 'application/manifest+json' }).end('{}');
+  } else if (pathname.startsWith('/assets/')) {
+    response.writeHead(200, { 'Content-Type': pathname.endsWith('.png') ? 'image/png' : 'font/woff2' }).end('asset');
   } else {
     response.writeHead(404).end();
   }
@@ -64,18 +72,27 @@ try {
   await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
   await page.waitForFunction(async () => {
     const keys = await caches.keys();
-    return keys.includes('pantry-cache-v6') && !keys.includes('pantry-cache-v1');
+    return keys.includes(`pantry-cache-${'test-current'}`) && !keys.includes('pantry-cache-v1');
   });
   await page.waitForFunction(async () => {
-    const cache = await caches.open('pantry-cache-v6');
-    return Boolean(await cache.match('/src/app.js?__pantry_cache_v6=pantry-cache-v6'));
+    const cache = await caches.open(`pantry-cache-${'test-current'}`);
+    const keys = await cache.keys();
+    return keys.length === 9 && keys.some((request) => new URL(request.url).pathname === '/src/app.js');
   });
+  await page.waitForTimeout(100);
   const cacheContents = await page.evaluate(async () => {
-    const cache = await caches.open('pantry-cache-v6');
+    const cache = await caches.open(`pantry-cache-${'test-current'}`);
     const keys = (await cache.keys()).map((request) => request.url);
-    const response = await cache.match('/src/app.js?__pantry_cache_v6=pantry-cache-v6');
-    const firebase = await cache.match('/src/firebase.js?__pantry_cache_v6=pantry-cache-v6');
-    return { keys, app: await response?.text(), firebase: await firebase?.text() };
+    const findByPath = async (path) => {
+      const key = keys.find((entry) => new URL(entry).pathname === path);
+      return key ? cache.match(key) : undefined;
+    };
+    const response = await findByPath('/src/app.js');
+    const firebase = await findByPath('/src/firebase.js');
+    const css = await findByPath('/styles.css');
+    const sprite = keys.some((key) => key.includes('/assets/pantry-items.test-sprite.png?'));
+    const font = keys.some((key) => key.includes('/assets/manrope.test-font.woff2?'));
+    return { keys, app: await response?.text(), firebase: await firebase?.text(), css: await css?.text(), sprite, font };
   });
   const cachedApp = cacheContents.app;
   assert.match(await cachedApp, /current/, 'new worker precaches the current app bundle');
@@ -84,14 +101,18 @@ try {
     /firebaseBuild = 'current'/,
     'new worker precaches the current Firebase module'
   );
+  assert.equal(cacheContents.sprite, true, 'new worker precaches the versioned illustration sprite');
+  assert.equal(cacheContents.font, true, 'new worker precaches the versioned self-hosted font');
+  assert.match(cacheContents.css, /#222/, 'new worker precaches the current stylesheet');
 
   await page.reload();
   assert.equal(await page.locator('#version').innerText(), 'current');
+  assert.equal(await page.locator('body').evaluate((body) => getComputedStyle(body).color), 'rgb(34, 34, 34)');
   assert.equal(
     await page.evaluate(() => localStorage.getItem('pantry-organizer.demo.v1')),
     pantryData
   );
-  assert.deepEqual(await page.evaluate(() => caches.keys()), ['pantry-cache-v6']);
+  assert.deepEqual(await page.evaluate(() => caches.keys()), [currentCacheName]);
   console.log(
     'PASS service worker update replaces stale app assets and preserves pantry localStorage'
   );

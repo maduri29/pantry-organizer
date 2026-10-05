@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright-core');
+const baseUrl = process.env.PANTRY_UI_URL || 'http://localhost:4173';
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const page = await context.newPage();
@@ -12,7 +13,7 @@ try {
   await context.route('**/config.js', (route) =>
     route.fulfill({ contentType: 'application/javascript', body: 'window.PANTRY_CONFIG = {};' })
   );
-  await page.goto('http://localhost:4173');
+  await page.goto(baseUrl);
   const exportButton = page.getByRole('button', { name: 'Export pantry data', exact: true });
   assert.equal(await exportButton.count(), 1);
   assert.equal(await exportButton.getAttribute('title'), 'Export pantry data');
@@ -47,6 +48,22 @@ try {
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);
   pass('sample pantry and category groups render');
+  const glanceCounts = await page.locator('.glance-counts').innerText();
+  assert.match(glanceCounts, /0\s+out/);
+  assert.match(glanceCounts, /2\s+running low/);
+  assert.equal(await page.locator('.card .food-art').count(), 5);
+  pass('shopping glance derives 0 out and 2 low from the current sample; all five foods are illustrated');
+  await page.getByLabel('Storage location').selectOption('Fridge');
+  await page.getByLabel('Food category').selectOption('Fruit');
+  await page.getByLabel('Search food').fill('blue');
+  await page.getByRole('button', { name: 'See all 2 items' }).click();
+  assert.equal(await page.getByLabel('Storage location').inputValue(), 'all');
+  assert.equal(await page.getByLabel('Food category').inputValue(), 'all');
+  assert.equal(await page.getByLabel('Search food').inputValue(), '');
+  assert.equal(await page.locator('.stat[data-filter="low"]').getAttribute('class'), 'stat active');
+  assert.equal(await page.locator('.shelf-card').count(), 2);
+  await page.locator('.toolbar button[data-filter="all"]').click();
+  pass('shopping glance reveals every low/out item after resetting location, category and search');
   const filters = await page.evaluate(() =>
     Object.fromEntries(
       ['#search', '#location', '#category', '#sort'].map((sel) => {
@@ -122,6 +139,9 @@ try {
   await page.getByRole('button', { name: 'Save update', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.innerText(), /Out of stock/);
+  const outSummary = (await page.locator('.glance-counts').innerText()).replace(/\s+/g, ' ');
+  assert.match(outSummary, /1 out/);
+  assert.match(outSummary, /1 running low/);
   pass('check-in sets remaining quantity; out-of-stock food stays visible');
   await page.reload();
   card = page
@@ -261,7 +281,7 @@ try {
   await staleCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
   await page.locator('select[name="quantity"]').selectOption('0.25');
   const second = await page.context().newPage();
-  await second.goto('http://localhost:4173');
+  await second.goto(baseUrl);
   const secondCard = second
     .locator('.card')
     .filter({ has: second.getByRole('heading', { name: 'Rice', exact: true }) });
