@@ -1,11 +1,14 @@
 import React from 'react';
 import { categories, type PantryItem } from './types.ts';
 
-export type VariantKey = 'A' | 'B' | 'C';
+export type VariantKey = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export const variantNames: Record<VariantKey, string> = {
   A: 'Kitchen shelves',
   B: 'Inventory workspace',
   C: 'Grocery trip',
+  D: 'Spice market',
+  E: 'Monsoon pantry',
+  F: 'Stockroom register',
 };
 
 export const Icon: React.FC<{ name: 'brand' | 'plus' | 'arrow' | 'box' | 'search' | 'check' | 'minus' | 'spark'; size?: number }> = ({ name, size = 18 }) => {
@@ -80,9 +83,7 @@ export const AddModal: React.FC<{ onClose: () => void; onSave: (values: { name: 
 };
 
 export const PrototypeSwitcher: React.FC<{ current: VariantKey; onChange: (key: VariantKey) => void }> = ({ current, onChange }) => {
-  // The prototype server binds to loopback only; this guard keeps the switcher out of production origins.
-  if (window.location.hostname !== '127.0.0.1' && window.location.hostname !== 'localhost') return null;
-  const keys: VariantKey[] = ['A', 'B', 'C'];
+  const keys: VariantKey[] = ['A', 'B', 'C', 'D', 'E', 'F'];
   const index = keys.indexOf(current);
   return <nav className="prototype-switcher" aria-label="Prototype variations"><button type="button" aria-label="Previous variation" onClick={() => onChange(keys[(index + keys.length - 1) % keys.length])}>←</button><span><b>{current}</b><span>{variantNames[current]}</span></span><button type="button" aria-label="Next variation" onClick={() => onChange(keys[(index + 1) % keys.length])}>→</button></nav>;
 };

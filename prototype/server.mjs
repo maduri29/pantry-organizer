@@ -41,7 +41,12 @@ const server = Bun.serve({
     if (pathname === '/screenshots.html') {
       return new Response(gallery, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
     }
-    if (/^\/prototype-shots\/variant-[ABC]-(desktop|mobile)\.jpg$/.test(pathname)) {
+    if (/^\/prototype-fonts\/[a-z0-9-]+\.woff2$/.test(pathname)) {
+      const fileName = pathname.split('/').at(-1);
+      const font = Bun.file(resolve(import.meta.dir, 'fonts', fileName));
+      if (await font.exists()) return new Response(font, { headers: { 'content-type': 'font/woff2', 'cache-control': 'public, max-age=3600' } });
+    }
+    if (/^\/prototype-shots\/variant-[A-F]-(desktop|mobile)\.jpg$/.test(pathname)) {
       const fileName = pathname.split('/').at(-1);
       const screenshot = Bun.file(resolve(import.meta.dir, 'screenshots', fileName));
       if (await screenshot.exists()) return new Response(screenshot, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=3600' } });

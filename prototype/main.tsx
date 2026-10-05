@@ -5,12 +5,15 @@ import { createRoot } from 'react-dom/client';
 import { VariantA } from './VariantA.tsx';
 import { VariantB } from './VariantB.tsx';
 import { VariantC } from './VariantC.tsx';
+import { VariantD } from './VariantD.tsx';
+import { VariantE } from './VariantE.tsx';
+import { VariantF } from './VariantF.tsx';
 import { AddModal, PrototypeSwitcher, type VariantKey, variantNames } from './ui.tsx';
 import { seedItems, type PantryItem, type StockLevel } from './types.ts';
 
 const readVariant = (): VariantKey => {
   const value = new URLSearchParams(window.location.search).get('variant');
-  return value === 'B' || value === 'C' ? value : 'A';
+  return value === 'A' || value === 'B' || value === 'C' || value === 'D' || value === 'E' || value === 'F' ? value : 'D';
 };
 
 const PrototypeApp: React.FC = () => {
@@ -36,7 +39,7 @@ const PrototypeApp: React.FC = () => {
       const target = event.target;
       if (target instanceof HTMLElement && (target.closest('input, textarea, select, [contenteditable="true"]') || target.isContentEditable)) return;
       event.preventDefault();
-      const keys: VariantKey[] = ['A', 'B', 'C'];
+      const keys: VariantKey[] = ['A', 'B', 'C', 'D', 'E', 'F'];
       const index = keys.indexOf(variant);
       changeVariant(keys[(index + (event.key === 'ArrowRight' ? 1 : keys.length - 1)) % keys.length]);
     };
@@ -89,7 +92,8 @@ const PrototypeApp: React.FC = () => {
   };
 
   const common = { items, filtered, search, category, lowOnly, tripIds, onSearch: setSearch, onCategory: setCategory, onLowOnly: () => setLowOnly((value) => !value), onAdd: () => setAddOpen(true), onRestock: restock, onUse: useOne, onToggleTrip: (id: string) => setTripIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]) };
-  const CurrentVariant = variant === 'A' ? VariantA : variant === 'B' ? VariantB : VariantC;
+  const variants = { A: VariantA, B: VariantB, C: VariantC, D: VariantD, E: VariantE, F: VariantF };
+  const CurrentVariant = variants[variant];
 
   return <div className={`prototype-root theme-${variant.toLowerCase()}`} data-variant={variant}>
     <div className="prototype-disclaimer"><span><i /> DESIGN PROTOTYPE</span><span>53 familiar foods · illustrative stock · no cloud connection</span><a href="/screenshots.html">Screenshots</a></div>

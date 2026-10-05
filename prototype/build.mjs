@@ -27,8 +27,12 @@ for (const name of ['index.html', 'prototype.css', 'screenshots.html']) {
 
 const screenshots = resolve('prototype/screenshots');
 const screenshotFiles = (await readdir(screenshots)).filter((name) => name.endsWith('.jpg'));
-if (screenshotFiles.length !== 6) throw new Error(`Expected six prototype screenshots, found ${screenshotFiles.length}`);
+if (screenshotFiles.length < 12) throw new Error(`Expected desktop and phone screenshots for six variants, found ${screenshotFiles.length}`);
 await mkdir(resolve(publicDir, 'prototype-shots'), { recursive: true });
 for (const name of screenshotFiles) await copyFile(resolve(screenshots, name), resolve(publicDir, 'prototype-shots', name));
+const fontFiles = await readdir(resolve('prototype/fonts'));
+if (fontFiles.length < 4) throw new Error(`Expected four self-hosted prototype font files, found ${fontFiles.length}`);
+await mkdir(resolve(publicDir, 'prototype-fonts'), { recursive: true });
+for (const name of fontFiles) await copyFile(resolve('prototype/fonts', name), resolve(publicDir, 'prototype-fonts', name));
 
-console.log(`Built standalone prototype preview (${screenshotFiles.length} screenshots, no app API or service worker).`);
+console.log(`Built standalone prototype preview (${screenshotFiles.length} screenshots, ${fontFiles.length} self-hosted fonts, no app API or service worker).`);
