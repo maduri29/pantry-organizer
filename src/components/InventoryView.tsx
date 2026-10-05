@@ -19,10 +19,7 @@ interface InventoryViewProps {
   onShowNeeds: () => void;
   onAddFood: () => void;
   onTrySample: () => void;
-  onCheckStock: (batch: Batch, product: Product) => void;
-  onRestock: (product: Product) => void;
-  onEditSettings: (product: Product) => void;
-  onDelete: (product: Product) => void;
+  onManage: (product: Product, section: 'details' | 'stock', batch?: Batch) => void;
   onAddToList: (product: Product) => void;
 }
 
@@ -47,10 +44,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onShowNeeds,
   onAddFood,
   onTrySample,
-  onCheckStock,
-  onRestock,
-  onEditSettings,
-  onDelete,
+  onManage,
   onAddToList
 }) => {
   const allCategories = useMemo(() => {
@@ -330,7 +324,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       data-id={batches[0].id}
                       aria-label={`Update stock for ${p.name}`}
                       title={`Update stock for ${p.name}`}
-                      onClick={() => onCheckStock(batches[0], p)}
+                      onClick={() => onManage(p, 'stock', batches[0])}
                     >
                       <span>{p.unit === 'level' ? D.level(totalQty) : <>{fmt(totalQty)} <small>{p.unit}</small></>}</span>
                       <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" /></svg>
@@ -383,7 +377,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                                 data-id={batch.id}
                                 aria-label={`Update stock for ${p.name} in ${batch.location}`}
                                 title={`Update stock for ${p.name} in ${batch.location}`}
-                                onClick={() => onCheckStock(batch, p)}
+                                onClick={() => onManage(p, 'stock', batch)}
                               >
                                 <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
                                 <span>Update</span>
@@ -398,38 +392,14 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <div className="card-foot">
                     <button
                       className="icon-action"
-                      data-action="restock"
+                      data-action="manage"
                       data-id={p.id}
-                      aria-label={`Restock ${p.name}`}
-                      title={`Restock ${p.name}`}
-                      onClick={() => onRestock(p)}
+                      aria-label={`Manage ${p.name}`}
+                      title={`Manage ${p.name}`}
+                      onClick={() => onManage(p, 'details')}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                    </button>
-                    <button
-                      className="icon-action"
-                      data-action="minimum"
-                      data-id={p.id}
-                      aria-label={`Edit settings for ${p.name}`}
-                      title={`Edit settings for ${p.name}`}
-                      onClick={() => onEditSettings(p)}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M2 14h4m4-6h4m4 8h4" />
-                      </svg>
-                    </button>
-                    <button
-                      className="icon-action danger"
-                      data-action="delete"
-                      data-id={p.id}
-                      aria-label={`Delete ${p.name}`}
-                      title={`Delete ${p.name}`}
-                      onClick={() => onDelete(p)}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M3 6h18m-2 0-1 14H6L5 6m4 0V4h6v2m-5 4v7m4-7v7" />
+                        <path d="M4 5h16v14H4zM8 9h8m-8 4h5M18 3v4M6 17v4" />
                       </svg>
                     </button>
                     <button

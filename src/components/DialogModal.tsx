@@ -8,6 +8,7 @@ export type ModalType =
   | 'add'
   | 'use'
   | 'minimum'
+  | 'manage'
   | 'restock'
   | 'buy'
   | 'delete'
@@ -18,6 +19,7 @@ export type ModalType =
 export interface ModalState {
   type: ModalType;
   revision: number;
+  section?: 'details' | 'stock';
   product?: Product;
   batch?: Batch;
   shoppingItem?: ShoppingItem;
@@ -188,9 +190,17 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
 }) => {
   const [error, setError] = useState<string>('');
   const [busy, setBusy] = useState<boolean>(false);
-  const [trackingUnit, setTrackingUnit] = useState<string>('level');
+  const [trackingUnit, setTrackingUnit] = useState<string>(modal.product?.unit ?? 'level');
   const [pickedIds, setPickedIds] = useState<Record<string, boolean>>({});
-  const [foodName, setFoodName] = useState('');
+  const [foodName, setFoodName] = useState(modal.product?.name ?? '');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [batchQuantities, setBatchQuantities] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      s.batches
+        .filter((batch) => batch.productId === modal.product?.id)
+        .map((batch) => [batch.id, String(batch.quantity)])
+    )
+  );
 
   const allCategories = useMemo(() => {
     return [...new Set([...D.categories, ...s.products.map((p) => p.category)])].sort();
@@ -201,7 +211,8 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     setError('');
     setBusy(true);
 
-    const formData = new FormData(e.currentTarget);
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLElement | null;
+    const formData = new FormData(e.currentTarget, submitter);
     const values = Object.fromEntries(formData.entries());
     if (values['category-choice'] !== undefined) {
       const choice = String(values['category-choice']);
@@ -333,6 +344,197 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             <button className="primary" type="submit" disabled={busy}>
               Add food
             </button>
+          </div>
+        </form>
+      </>
+    );
+  }
+
+  if (type === 'manage' && p) {
+    const batches = s.batches.filter((batch) => batch.productId === p.id);
+    const jumpTo = (id: string) =>
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const submitDelete = async () => {
+      setError('');
+      setBusy(true);
+      try {
+        await onSubmit({ 'manage-action': 'delete' });
+      } catch (err: any) {
+        setError(err?.message || 'Could not delete this item.');
+        setBusy(false);
+      }
+    };
+
+    return (
+      <>
+        <div className="manage-heading">
+          <div>
+            <span className="manage-kicker">ITEM WORKSPACE</span>
+            <h2>Manage {p.name}</h2>
+          </div>
+          <button type="button" className="manage-close" aria-label="Close manage item" onClick={onClose} disabled={busy}>×</button>
+        </div>
+        <p className="manage-intro">Edit item details and keep every location’s stock up to date in one place.</p>
+        <nav className="manage-jump" aria-label="Manage item sections">
+          <button type="button" onClick={() => jumpTo('manage-details')}>Item details</button>
+          <button type="button" onClick={() => jumpTo('manage-stock')}>Stock and locations</button>
+        </nav>
+        <form className="manage-form" onSubmit={handleSubmit}>
+          <input type="hidden" name="manage-action" value="save" />
+          <section className="manage-section" id="manage-details" aria-labelledby="manage-details-heading">
+            <h3 id="manage-details-heading" tabIndex={-1}>Item details</h3>
+            <label>
+              Food name
+              <input name="name" value={foodName} onChange={(event) => setFoodName(event.target.value)} maxLength={80} required autoComplete="off" />
+            </label>
+            <CategoryField
+              categories={allCategories}
+              initialCategory={p.category}
+              itemName={foodName}
+              onSuggestCategory={onSuggestCategory}
+            />
+            <label>
+              Tracking and unit
+              <select
+                name="unit"
+                value={trackingUnit}
+                onChange={(event) => {
+                  const nextUnit = event.target.value;
+                  if (nextUnit === 'level' && trackingUnit !== 'level') {
+                    setBatchQuantities(Object.fromEntries(batches.map((batch) => [batch.id, ''])));
+                  }
+                  setTrackingUnit(nextUnit);
+                }}
+              >
+                {D.units.map((unit) => (
+                  <option key={unit} value={unit}>{unit === 'level' ? 'Rough level' : `Exact · ${unit}`}</option>
+                ))}
+              </select>
+            </label>
+            {trackingUnit !== p.unit && batches.some((batch) => batch.quantity > 0) && (
+              <p className="manage-note" role="status">Changing tracking relabels current amounts. Review each batch in Stock and locations before saving.</p>
+            )}
+            {trackingUnit === 'level' ? (
+              <>
+                <input type="hidden" name="minimum" value="0.25" />
+                <p className="manage-note">Rough levels use Full, Half, Low, and Out.</p>
+              </>
+            ) : (
+              <label>
+                Shop when below ({trackingUnit})
+                <input name="minimum" type="number" min="0" step="any" required defaultValue={String(p.minimum)} />
+              </label>
+            )}
+          </section>
+
+          <section className="manage-section" id="manage-stock" aria-labelledby="manage-stock-heading">
+            <h3 id="manage-stock-heading" tabIndex={-1}>Stock and locations</h3>
+            {batches.length === 0 && <p className="manage-note">No stock batches yet. Add stock below when you have some.</p>}
+            {batches.map((batch) => (
+              <fieldset className="manage-batch" id={`manage-batch-${batch.id}`} key={batch.id}>
+                <legend>{batch.location} batch</legend>
+                {trackingUnit === 'level' ? (
+                  <label>
+                    What’s left in {batch.location}?
+                    <select
+                      id={`manage-quantity-${batch.id}`}
+                      name={`quantity-${batch.id}`}
+                      value={batchQuantities[batch.id] ?? ''}
+                      onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))}
+                      required
+                    >
+                      <option value="">Choose a level…</option>
+                      <option value="1">Full</option>
+                      <option value="0.5">Half</option>
+                      <option value="0.25">Low</option>
+                      <option value="0">Out</option>
+                    </select>
+                  </label>
+                ) : (
+                  <label>
+                    Amount ({trackingUnit})
+                    <input
+                      id={`manage-quantity-${batch.id}`}
+                      name={`quantity-${batch.id}`}
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={batchQuantities[batch.id] ?? ''}
+                      onChange={(event) => setBatchQuantities((previous) => ({ ...previous, [batch.id]: event.target.value }))}
+                      required
+                    />
+                  </label>
+                )}
+                <div className="two">
+                  <label>
+                    Store in
+                    <select name={`location-${batch.id}`} defaultValue={batch.location}>
+                      {D.locations.map((location) => <option key={location} value={location}>{location}</option>)}
+                    </select>
+                  </label>
+                  <label>
+                    Date on package (optional)
+                    <input name={`expiry-${batch.id}`} type="date" defaultValue={batch.expiry || ''} />
+                  </label>
+                </div>
+              </fieldset>
+            ))}
+
+            <fieldset className="manage-batch add-batch">
+              <legend>Add stock</legend>
+              {trackingUnit === 'level' ? (
+                <label>
+                  What’s left?
+                  <select name="restock-quantity" defaultValue="">
+                    <option value="">Choose a level…</option>
+                    <option value="1">Full</option>
+                    <option value="0.5">Half</option>
+                    <option value="0.25">Low</option>
+                    <option value="0">Out</option>
+                  </select>
+                </label>
+              ) : (
+                <label>
+                  Amount to add ({trackingUnit})
+                  <input name="restock-quantity" type="number" min="0.000001" step="any" />
+                </label>
+              )}
+              <div className="two">
+                <label>
+                  Store in
+                  <select name="restock-location" defaultValue="Pantry">
+                    {D.locations.map((location) => <option key={location} value={location}>{location}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Date on package (optional)
+                  <input name="restock-expiry" type="date" />
+                </label>
+              </div>
+              <p className="manage-note">Enter an amount here, then use “Add stock” to include this batch.</p>
+            </fieldset>
+          </section>
+
+          <details className="manage-danger">
+            <summary>Delete this item</summary>
+            <p>This removes its batches, activity history, and shopping-list entries. This cannot be undone.</p>
+            {!confirmDelete ? (
+              <button type="button" className="danger-prepare" onClick={() => setConfirmDelete(true)} disabled={busy}>Continue to delete</button>
+            ) : (
+              <div className="delete-confirm" role="group" aria-label={`Confirm deleting ${p.name}`}>
+                <strong>Delete {p.name} permanently?</strong>
+                <div className="manage-actions">
+                  <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy}>Keep item</button>
+                  <button type="button" className="danger-confirm" onClick={() => void submitDelete()} disabled={busy}>{busy ? 'Deleting…' : 'Delete food'}</button>
+                </div>
+              </div>
+            )}
+          </details>
+          <div className="error" role="alert">{error}</div>
+          <div className="manage-actions manage-footer">
+            <button type="button" onClick={handleCancelClick} disabled={busy}>Cancel</button>
+            <button type="submit" className="primary" disabled={busy}>{busy ? 'Saving…' : 'Save changes'}</button>
+            <button type="submit" name="manage-action" value="restock" className="manage-add-stock" disabled={busy}>{busy ? 'Saving…' : 'Add stock'}</button>
           </div>
         </form>
       </>
@@ -761,6 +963,17 @@ export const DialogModal: React.FC<DialogModalProps> = ({
         dialog.close();
       }
     }
+  }, [modal]);
+
+  useEffect(() => {
+    if (modal?.type !== 'manage' || modal.section !== 'stock') return;
+    requestAnimationFrame(() => {
+      const target = modal.batch
+        ? document.getElementById(`manage-quantity-${modal.batch.id}`)
+        : document.getElementById('manage-stock-heading');
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ block: 'start' });
+    });
   }, [modal]);
 
   useEffect(() => {
