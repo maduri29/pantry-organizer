@@ -59,6 +59,15 @@ try {
   assert.equal(await page.evaluate(() => document.fonts.check('600 38px Fraunces')), true);
   assert.equal(await page.evaluate(() => document.fonts.check('400 14px Manrope')), true);
   pass('glance derives 0 out and 2 low; five inline SVG foods, editorial hero art, and both self-hosted fonts render');
+  const initialAvocados = page.locator('.shelf-card').filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
+  assert.equal(await initialAvocados.locator('.amount-update').count(), 1);
+  assert.equal(await initialAvocados.locator('.batch, .batch-details').count(), 0);
+  assert.equal(await initialAvocados.getByRole('button', { name: 'Update stock for Avocados' }).count(), 1);
+  assert.match(await initialAvocados.locator('.stock-line').innerText(), /Pantry/);
+  assert.doesNotMatch(await initialAvocados.innerText(), /Checked/);
+  const blueberriesCard = page.locator('.shelf-card').filter({ has: page.getByRole('heading', { name: 'Blueberries', exact: true }) });
+  assert.match(await blueberriesCard.locator('.expiry-status').innerText(), /Due/);
+  pass('single-batch cards show quantity once as the stock-update button, compact location, and expiry without check dates');
   await page.getByLabel('Storage location').selectOption('Fridge');
   await page.getByLabel('Food category').selectOption('Fruit');
   await page.getByLabel('Search food').fill('blue');
@@ -140,11 +149,11 @@ try {
   let card = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
-  await card.getByRole('button', { name: 'Check stock for Avocados in Pantry' }).click();
+  await card.getByRole('button', { name: 'Update stock for Avocados' }).click();
   await page.locator('input[name="quantity"]').fill('0');
   await page.getByRole('button', { name: 'Save update', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
-  assert.match(await card.innerText(), /Out of stock/);
+  assert.match(await card.innerText(), /\bOut\b/);
   const outSummary = (await page.locator('.glance-counts').innerText()).replace(/\s+/g, ' ');
   assert.match(outSummary, /1 out/);
   assert.match(outSummary, /1 running low/);
@@ -154,7 +163,7 @@ try {
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
   await card.waitFor();
-  assert.match(await card.innerText(), /Out of stock/);
+  assert.match(await card.innerText(), /\bOut\b/);
   pass('stock persists across reload');
   await card.getByRole('button', { name: 'Add Avocados to shopping list' }).click();
   await page.getByRole('button', { name: /Shopping list/ }).click();
@@ -284,14 +293,14 @@ try {
   const staleCard = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) });
-  await staleCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
+  await staleCard.getByRole('button', { name: 'Update stock for Rice' }).click();
   await page.locator('select[name="quantity"]').selectOption('0.25');
   const second = await page.context().newPage();
   await second.goto(baseUrl);
   const secondCard = second
     .locator('.card')
     .filter({ has: second.getByRole('heading', { name: 'Rice', exact: true }) });
-  await secondCard.getByRole('button', { name: 'Check stock for Rice in Pantry' }).click();
+  await secondCard.getByRole('button', { name: 'Update stock for Rice' }).click();
   await second.locator('select[name="quantity"]').selectOption('0.5');
   await second.getByRole('button', { name: 'Save update', exact: true }).click();
   await second.locator('#editor').waitFor({ state: 'hidden' });
@@ -439,6 +448,43 @@ try {
   await page.getByRole('menuitem', { name: 'Connect', exact: true }).click();
   await page.getByRole('heading', { name: 'Connect your shared pantry' }).waitFor();
   pass('missing backend configuration is clearly explained');
+  const batchContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await batchContext.route('**/config.js', (route) =>
+    route.fulfill({ contentType: 'application/javascript', body: 'window.PANTRY_CONFIG = {};' })
+  );
+  const batchPage = await batchContext.newPage();
+  await batchPage.goto(baseUrl);
+  await batchPage.getByRole('button', { name: 'Try sample pantry' }).click();
+  const fixture = await batchPage.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1'));
+    const product = data.state.products.find((food) => food.name === 'Blueberries');
+    const firstBatch = data.state.batches.find((batch) => batch.productId === product.id);
+    const extraLocation = firstBatch.location === 'Fridge' ? 'Pantry' : 'Fridge';
+    data.state.batches.push({ ...firstBatch, id: 'fixture-blueberries-second', quantity: 3, location: extraLocation, expiry: '2026-10-20' });
+    localStorage.setItem('pantry-organizer.demo.v1', JSON.stringify(data));
+    return { extraLocation };
+  });
+  await batchPage.reload();
+  const multiBatchCard = batchPage
+    .locator('.shelf-card')
+    .filter({ has: batchPage.getByRole('heading', { name: 'Blueberries', exact: true }) });
+  assert.equal(await multiBatchCard.locator('.amount-update').count(), 0);
+  assert.match(await multiBatchCard.locator('.amount').innerText(), /4 packs/);
+  const batchDisclosure = multiBatchCard.locator('.batch-details');
+  assert.equal(await batchDisclosure.evaluate((details) => details.open), false);
+  assert.match(await batchDisclosure.locator('summary').innerText(), /2 batches/);
+  assert.match(await batchDisclosure.locator('summary').innerText(), new RegExp(fixture.extraLocation));
+  await batchDisclosure.locator('summary').click();
+  const batchUpdateButtons = batchDisclosure.getByRole('button', { name: /Update stock for Blueberries in/ });
+  assert.equal(await batchUpdateButtons.count(), 2);
+  await batchDisclosure.getByRole('button', { name: `Update stock for Blueberries in ${fixture.extraLocation}` }).click();
+  assert.equal(await batchPage.locator('input[name="quantity"]').inputValue(), '3');
+  await batchPage.locator('input[name="quantity"]').fill('2');
+  await batchPage.getByRole('button', { name: 'Save update', exact: true }).click();
+  await batchPage.locator('#editor').waitFor({ state: 'hidden' });
+  assert.match(await multiBatchCard.locator('.amount').innerText(), /3 packs/);
+  pass('multi-batch quantity aggregates once; collapsed location details expose batch-specific updates and save the selected batch');
+  await batchContext.close();
   const authContext = await browser.newContext({ viewport: { width: 390, height: 844 } }),
     authPage = await authContext.newPage(),
     authErrors = [];

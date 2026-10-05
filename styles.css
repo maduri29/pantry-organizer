@@ -1695,3 +1695,167 @@ select:focus-visible {
   .hero p { max-width: 270px; font-size: 12px; }
   .hero-actions button { flex: 1 1 130px; padding-inline: 10px; }
 }
+
+/* Compact stock cards: quantity is the single-batch update control. */
+.shelf-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  row-gap: 3px;
+  padding: 10px 14px;
+}
+.shelf-card .card-top {
+  grid-column: 1;
+  grid-row: 1;
+}
+.shelf-card .amount {
+  grid-column: 2;
+  grid-row: 1;
+}
+.shelf-card .amount-update {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 0 1px 0 8px;
+  border: 0;
+  color: #4a3745;
+  background: transparent;
+  cursor: pointer;
+  font: 600 20px Manrope, system-ui, sans-serif;
+  text-align: right;
+}
+.shelf-card .amount-update:hover { color: #a45149; }
+.shelf-card .amount-update svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: .72;
+}
+.shelf-card .stock-status {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 150px;
+  padding: 4px 8px;
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: normal;
+}
+.shelf-card .stock-line,
+.shelf-card .batch-details {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  min-width: 0;
+}
+.stock-line {
+  min-height: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.stock-location {
+  color: #74676f;
+  font-size: 12px;
+  font-weight: 650;
+}
+.expiry-status {
+  width: fit-content;
+  padding: 3px 7px;
+  font-size: 10px;
+}
+.batch-details {
+  border: 0;
+  color: #62575d;
+  font-size: 11px;
+}
+.batch-details > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0 5px;
+  color: #64565f;
+  cursor: pointer;
+  font-weight: 700;
+  list-style-position: inside;
+}
+.batch-details[open] {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  width: 100%;
+  margin-top: 4px;
+  border-top: 1px solid #eee2da;
+}
+.batch-list {
+  display: grid;
+  gap: 4px;
+  padding: 2px 0 3px;
+}
+.batch-line {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 3px 2px;
+}
+.batch-location {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 7px;
+  color: #74676f;
+  font-size: 11px;
+}
+.batch-location strong { color: #493745; }
+.stock-update {
+  min-width: 44px;
+  min-height: 44px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid #ead8cc;
+  border-radius: 12px;
+  color: #8e493f;
+  background: #fffdf8;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+.stock-update svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.shelf-card > .card-foot {
+  grid-column: 1 / -1;
+  grid-row: auto;
+  margin-top: 1px;
+  padding-top: 5px;
+}
+@media (max-width: 600px) {
+  .shelf-card { padding: 8px 9px; column-gap: 5px; row-gap: 2px; }
+  .shelf-card .food-art { width: 38px; height: 38px; flex-basis: 38px; }
+  .shelf-card .food-art svg { width: 27px; height: 27px; }
+  .shelf-card .card-top { gap: 7px; }
+  .shelf-card .amount-update { font-size: 17px; }
+  .shelf-card .amount-update svg { width: 13px; height: 13px; }
+  .shelf-card .stock-status { max-width: 142px; padding: 3px 6px; font-size: 9px; }
+  .stock-location { font-size: 11px; }
+  .batch-details > summary { min-height: 34px; font-size: 10px; }
+  .shelf-card > .card-foot { margin-top: 0; padding-top: 4px; }
+}

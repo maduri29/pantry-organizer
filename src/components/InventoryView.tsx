@@ -323,61 +323,77 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="amount">
-                    {p.unit === 'level' ? (
-                      D.level(totalQty)
-                    ) : (
-                      <>
-                        {fmt(totalQty)} <small>{p.unit}</small>
-                      </>
-                    )}
-                  </div>
+                  {batches.length === 1 ? (
+                    <button
+                      className="amount amount-update"
+                      data-action="use"
+                      data-id={batches[0].id}
+                      aria-label={`Update stock for ${p.name}`}
+                      title={`Update stock for ${p.name}`}
+                      onClick={() => onCheckStock(batches[0], p)}
+                    >
+                      <span>{p.unit === 'level' ? D.level(totalQty) : <>{fmt(totalQty)} <small>{p.unit}</small></>}</span>
+                      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" /></svg>
+                    </button>
+                  ) : (
+                    <div className="amount" aria-label={`Quantity: ${formatAmount(totalQty, p)}`}>
+                      {p.unit === 'level' ? D.level(totalQty) : <>{fmt(totalQty)} <small>{p.unit}</small></>}
+                    </div>
+                  )}
 
-                  <span className={`badge ${itemIsLow ? 'warn' : ''}`}>
-                    {totalQty === 0 ? 'Out of stock' : itemIsLow ? 'Running low' : 'Stocked up'}
-                    {p.unit === 'level' ? '' : ` · min ${fmt(p.minimum)} ${p.unit}`}
+                  <span className={`badge stock-status ${itemIsLow ? 'warn' : ''}`}>
+                    {totalQty === 0 ? 'Out' : itemIsLow ? 'Low' : 'Stocked'}
+                    {totalQty > 0 && itemIsLow && p.unit !== 'level' ? ` · min ${fmt(p.minimum)} ${p.unit}` : ''}
                   </span>
 
-                  {batches.map((b) => {
-                    const days = D.expiryDays(b.expiry);
+                  {batches.length === 1 && (() => {
+                    const batch = batches[0];
+                    const days = D.expiryDays(batch.expiry);
                     return (
-                      <div key={b.id} className="batch">
-                        <div>
-                          {formatAmount(b.quantity, p)} · {b.location}
-                          <br />
-                          <span className="meta">
-                            Checked{' '}
-                            {b.checkedAt ? new Date(b.checkedAt).toLocaleDateString() : 'not yet'}
+                      <div className="stock-line single-batch">
+                        <span className="stock-location">{batch.location}</span>
+                        {batch.expiry && (
+                          <span className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}>
+                            {days < 0 ? `Passed ${-days}d ago` : days === 0 ? 'Due today' : `Due ${batch.expiry}`}
                           </span>
-                          {b.expiry && (
-                            <>
-                              <br />
-                              <span
-                                className={`badge ${
-                                  days < 0 ? 'expired' : days <= 3 ? 'warn' : ''
-                                }`}
-                              >
-                                {days < 0
-                                  ? `Date passed ${-days}d ago`
-                                  : days === 0
-                                    ? 'Due today'
-                                    : `Due ${b.expiry}`}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <button
-                          data-action="use"
-                          data-id={b.id}
-                          aria-label={`Check stock for ${p.name} in ${b.location}`}
-                          title={`Check stock for ${p.name} in ${b.location}`}
-                          onClick={() => onCheckStock(b, p)}
-                        >
-                          Check stock
-                        </button>
+                        )}
                       </div>
                     );
-                  })}
+                  })()}
+
+                  {batches.length > 1 && (
+                    <details className="batch-details">
+                      <summary>{batches.length} batches · {Array.from(new Set(batches.map((batch) => batch.location))).join(', ')}</summary>
+                      <div className="batch-list">
+                        {batches.map((batch) => {
+                          const days = D.expiryDays(batch.expiry);
+                          return (
+                            <div key={batch.id} className="batch-line">
+                              <span className="batch-location">
+                                <strong>{formatAmount(batch.quantity, p)}</strong> · {batch.location}
+                                {batch.expiry && (
+                                  <span className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}>
+                                    {days < 0 ? `Passed ${-days}d ago` : days === 0 ? 'Due today' : `Due ${batch.expiry}`}
+                                  </span>
+                                )}
+                              </span>
+                              <button
+                                className="stock-update"
+                                data-action="use"
+                                data-id={batch.id}
+                                aria-label={`Update stock for ${p.name} in ${batch.location}`}
+                                title={`Update stock for ${p.name} in ${batch.location}`}
+                                onClick={() => onCheckStock(batch, p)}
+                              >
+                                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                                <span>Update</span>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </details>
+                  )}
 
                   <div className="card-foot">
                     <button
