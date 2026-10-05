@@ -396,7 +396,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       data-id={p.id}
                       aria-label={`Manage ${p.name}`}
                       title={`Manage ${p.name}`}
-                      onClick={() => onManage(p, 'details')}
+                      onClick={() => onManage(p, 'stock')}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M4 5h16v14H4zM8 9h8m-8 4h5M18 3v4M6 17v4" />

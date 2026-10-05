@@ -135,6 +135,8 @@ try {
   await page.getByRole('heading', { name: 'Manage Avocados' }).waitFor();
   assert.equal(await page.locator('#manage-details').count(), 1);
   assert.equal(await page.locator('#manage-stock').count(), 1);
+  assert.equal(await page.getByRole('tab').count(), 2);
+  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
   const manageMobile = await page.locator('dialog[open]').evaluate((dialog) => ({
     width: dialog.getBoundingClientRect().width,
     scrollWidth: dialog.scrollWidth,
@@ -142,11 +144,35 @@ try {
     footerTargets: [...dialog.querySelectorAll('.manage-footer button')].map((button) => button.getBoundingClientRect().height)
   }));
   assert.ok(manageMobile.width <= 382 && manageMobile.scrollWidth <= manageMobile.clientWidth);
+  assert.equal(manageMobile.footerTargets.length, 2);
   assert.ok(manageMobile.footerTargets.every((height) => height >= 44));
-  await page.getByRole('button', { name: 'Stock and locations' }).click();
-  await page.getByRole('button', { name: 'Item details' }).click();
+  for (const [width, height] of [[320, 640], [430, 760]]) {
+    await page.setViewportSize({ width, height });
+    const layout = await page.locator('dialog[open]').evaluate((dialog) => ({
+      width: dialog.getBoundingClientRect().width,
+      scrollWidth: dialog.scrollWidth,
+      clientWidth: dialog.clientWidth
+    }));
+    assert.ok(layout.width <= width && layout.scrollWidth <= layout.clientWidth);
+  }
+  await page.setViewportSize({ width: 320, height: 480 });
+  await page.locator('.manage-add-stock > summary').click();
+  const shortSheet = await page.locator('dialog[open]').evaluate((dialog) => {
+    const body = dialog.querySelector('.manage-body');
+    const footer = dialog.querySelector('.manage-footer').getBoundingClientRect();
+    const bounds = dialog.getBoundingClientRect();
+    return { overflow: body.scrollHeight > body.clientHeight, footerBottom: footer.bottom, dialogBottom: bounds.bottom, width: dialog.scrollWidth <= dialog.clientWidth };
+  });
+  assert.equal(shortSheet.overflow, true);
+  assert.ok(shortSheet.footerBottom <= shortSheet.dialogBottom && shortSheet.width);
+  await page.locator('.manage-add-stock > summary').click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('tab', { name: 'Stock' }).press('ArrowRight');
+  assert.equal(await page.getByRole('tab', { name: 'Details' }).getAttribute('aria-selected'), 'true');
+  await page.getByRole('tab', { name: 'Details' }).press('ArrowLeft');
+  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  pass('single Manage action keeps both sections mounted, scrollable, and 44px-footer reachable on mobile');
+  pass('Manage tabs and compact footer fit at 320/390/430px and keep actions visible while the short sheet body scrolls');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   pass('390px layout has no horizontal overflow');
   await page.getByLabel('Food category').selectOption('Fruit');
@@ -201,18 +227,21 @@ try {
   assert.match(await card.locator('.amount').innerText(), /4 items/);
   pass('restock adds quantity once');
   await card.getByRole('button', { name: 'Manage Avocados' }).click();
-  await page.locator('input[name="restock-quantity"]').fill('1');
-  await page.getByRole('button', { name: 'Add stock', exact: true }).click();
-  await page.locator('#editor').waitFor({ state: 'hidden' });
-  assert.match(await card.locator('.amount').innerText(), /5 items/);
-  pass('Manage item adds stock through the same form without losing item details');
-  await card.getByRole('button', { name: 'Manage Avocados' }).click();
+  await page.getByRole('tab', { name: 'Details' }).click();
   const settingsCategory = page.locator('select[name="category-choice"]');
   assert.equal(await settingsCategory.evaluate((e) => e.tagName), 'SELECT');
   await settingsCategory.selectOption('new');
   await page.locator('[name="category-custom"]').fill('Breakfast');
-  await page.getByRole('button', { name: 'Save changes' }).click();
+  await page.getByRole('tab', { name: 'Stock' }).click();
+  await page.locator('.manage-add-stock > summary').click();
+  await page.locator('input[name="restock-quantity"]').fill('1');
+  await page.getByRole('tab', { name: 'Details' }).click();
+  assert.equal(await page.locator('[name="category-custom"]').inputValue(), 'Breakfast');
+  assert.equal(await page.locator('input[name="restock-quantity"]').inputValue(), '1');
+  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
+  assert.match(await card.locator('.amount').innerText(), /5 items/);
+  pass('one Save changes action applies pending restock and preserves custom category edits through tab switches');
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
@@ -352,6 +381,7 @@ try {
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) })
     .getByRole('button', { name: 'Manage Rice' })
     .click();
+  await page.getByRole('tab', { name: 'Details' }).click();
   await page.getByText('Delete this item', { exact: true }).click();
   await page.getByRole('button', { name: 'Continue to delete' }).click();
   await page.getByText('Delete Rice permanently?', { exact: true }).waitFor();
@@ -372,6 +402,7 @@ try {
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) })
     .getByRole('button', { name: 'Manage Rice' })
     .click();
+  await page.getByRole('tab', { name: 'Details' }).click();
   await page.getByText('Delete this item', { exact: true }).click();
   await page.getByRole('button', { name: 'Continue to delete' }).click();
   await page.getByRole('button', { name: 'Delete food' }).click();
@@ -447,6 +478,7 @@ try {
   assert.match(await flour.innerText(), /Pantry/);
   await page.setViewportSize({ width: 390, height: 844 });
   await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
+  await page.getByRole('tab', { name: 'Details' }).click();
   const editModal = page.locator('dialog[open]');
   assert.equal(
     await editModal.locator('select[name="category-choice"]').inputValue(),
@@ -466,6 +498,21 @@ try {
     }),
     'Grains & pulses'
   );
+  await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
+  await page.getByRole('tab', { name: 'Details' }).click();
+  await page.locator('select[name="unit"]').selectOption('level');
+  await page.getByRole('button', { name: 'Save changes' }).click();
+  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
+  assert.match(await page.evaluate(() => document.activeElement.id), /^manage-quantity-/);
+  assert.equal(await page.locator('select[name^="quantity-"]').inputValue(), '');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  const unchangedFlour = await page.evaluate(() => {
+    const state = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state;
+    const product = state.products.find((item) => item.name === 'Bread flour');
+    return { unit: product.unit, quantity: state.batches.find((batch) => batch.productId === product.id).quantity };
+  });
+  assert.deepEqual(unchangedFlour, { unit: 'lb', quantity: 1 });
+  pass('hidden invalid batch reveals its Stock tab, focuses correction, and Cancel preserves exact lb stock');
   pass('pound tracking saves and displays one lb with category and location');
   await profileButton.click();
   await page.getByRole('menuitem', { name: 'Connect', exact: true }).click();

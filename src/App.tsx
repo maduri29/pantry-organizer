@@ -437,6 +437,8 @@ export const App: React.FC = () => {
         const category = String(values.category || '').trim();
         const unit = String(values.unit || '');
         const minimum = unit === 'level' ? 0.25 : Number(values.minimum);
+        const restockAmount = String(values['restock-quantity'] || '').trim();
+        const addStock = action === 'restock' || restockAmount.length > 0;
         if (!name || name.length > 80) throw new Error('Enter a food name (up to 80 characters).');
         if (!D.units.includes(unit as (typeof D.units)[number])) throw new Error('Choose a valid tracking unit.');
         if (!category || category.length > 60) throw new Error('Enter a category name up to 60 characters.');
@@ -472,8 +474,7 @@ export const App: React.FC = () => {
             savedBatch.expiry = expiry;
           }
 
-          if (action === 'restock') {
-            const restockAmount = String(values['restock-quantity'] || '').trim();
+          if (addStock) {
             if (!restockAmount) throw new Error('Enter an amount to add.');
             const quantity = Number(restockAmount);
             const location = String(values['restock-location'] || '');
@@ -486,10 +487,8 @@ export const App: React.FC = () => {
             const shoppingItem = s.shopping.find((item) => item.productId === p.id && item.status === 'open');
             if (shoppingItem) D.purchase(s, shoppingItem.id, { quantity, location: location as (typeof D.locations)[number], expiry });
             else D.add(s, { ...product, quantity, location: location as (typeof D.locations)[number], expiry } as FoodInput);
-          } else if (values['restock-quantity']) {
-            throw new Error('Use Add stock to save the new amount, or clear it before saving changes.');
           }
-        }, action === 'restock' ? 'Item updated and stock added' : 'Item updated');
+        }, addStock ? 'Item updated and stock added' : 'Item updated');
         return;
       }
 
