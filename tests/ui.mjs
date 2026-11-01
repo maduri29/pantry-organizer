@@ -154,14 +154,10 @@ try {
   pass('food card actions use labeled SVG icons with tooltips and 44px touch targets');
   await avocadoCard.getByRole('button', { name: 'Manage Avocados' }).click();
   await page.getByRole('heading', { name: 'Manage Avocados' }).waitFor();
-  await page.getByRole('tab', { name: 'Stock' }).click();
+  await page.locator('.batch-settings > summary').click();
   assert.equal(await page.locator('#manage-details').count(), 1);
   assert.equal(await page.locator('#manage-stock').count(), 1);
-  assert.equal(await page.getByRole('tab').count(), 2);
-  assert.equal(
-    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
-    'true'
-  );
+  assert.equal(await page.getByRole('tab').count(), 0);
   assert.equal(await page.getByText('Add purchased stock', { exact: true }).count(), 0);
   assert.equal(await page.locator('.manage-batch-meta[open]').count(), 0);
   assert.equal(await page.getByText(/^Current amount \(/).count(), 1);
@@ -213,16 +209,6 @@ try {
   assert.ok(shortSheet.footerBottom <= shortSheet.dialogBottom && shortSheet.width);
   await page.locator('.manage-batch-meta > summary').click();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('tab', { name: 'Stock' }).press('ArrowRight');
-  assert.equal(
-    await page.getByRole('tab', { name: 'Details' }).getAttribute('aria-selected'),
-    'true'
-  );
-  await page.getByRole('tab', { name: 'Details' }).press('ArrowLeft');
-  assert.equal(
-    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
-    'true'
-  );
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   pass(
     'Manage tabs and compact footer fit at 320/390/430px and keep actions visible while the short sheet body scrolls'
@@ -281,7 +267,6 @@ try {
   assert.match(await card.locator('.amount').innerText(), /4 items/);
   pass('restock adds quantity once');
   await card.getByRole('button', { name: 'Manage Avocados' }).click();
-  await page.getByRole('tab', { name: 'Details' }).click();
   const settingsCategory = page.locator('select[name="category-choice"]');
   assert.equal(await settingsCategory.evaluate((e) => e.tagName), 'SELECT');
   await settingsCategory.selectOption('new');
@@ -434,7 +419,6 @@ try {
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) })
     .getByRole('button', { name: 'Manage Rice' })
     .click();
-  await page.getByRole('tab', { name: 'Details' }).click();
   const deleteRice = page.getByRole('button', { name: 'Delete Rice', exact: true });
   const deleteTarget = await deleteRice.evaluate((button) => {
     const rect = button.getBoundingClientRect();
@@ -465,7 +449,6 @@ try {
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) })
     .getByRole('button', { name: 'Manage Rice' })
     .click();
-  await page.getByRole('tab', { name: 'Details' }).click();
   await page.getByRole('button', { name: 'Delete Rice', exact: true }).click();
   await page.getByRole('button', { name: 'Delete item', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
@@ -541,7 +524,6 @@ try {
   assert.match(await flour.innerText(), /Pantry/);
   await page.setViewportSize({ width: 390, height: 844 });
   await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
-  await page.getByRole('tab', { name: 'Details' }).click();
   const editModal = page.locator('dialog[open]');
   assert.equal(
     await editModal.locator('select[name="category-choice"]').inputValue(),
@@ -562,14 +544,10 @@ try {
     'Grains & pulses'
   );
   await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
-  await page.getByRole('tab', { name: 'Details' }).click();
   await page.locator('.manage-settings > summary').click();
   await page.locator('select[name="unit"]').selectOption('level');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  assert.equal(
-    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
-    'true'
-  );
+  assert.equal(await page.locator('.batch-settings').evaluate((e) => e.open), true);
   assert.match(await page.evaluate(() => document.activeElement.id), /^manage-quantity-/);
   assert.equal(await page.locator('select[name^="quantity-"]').inputValue(), '');
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();

@@ -1,4 +1,3 @@
-import { flushSync } from 'react-dom';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as D from '../domain.ts';
@@ -211,7 +210,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   const [trackingUnit, setTrackingUnit] = useState<string>(modal.product?.unit ?? 'level');
   const [foodName, setFoodName] = useState(modal.initialName ?? modal.product?.name ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [manageSection, setManageSection] = useState<'details' | 'stock'>(modal.section ?? 'stock');
   const [batchQuantities, setBatchQuantities] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       s.batches
@@ -464,39 +462,10 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
 
   if (type === 'manage' && p) {
     const batches = s.batches.filter((batch) => batch.productId === p.id);
-    const changeManageSection = (section: 'details' | 'stock', focusTab = false) => {
-      setManageSection(section);
-      if (focusTab)
-        requestAnimationFrame(() => document.getElementById(`manage-tab-${section}`)?.focus());
-    };
-    const handleManageTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      const next =
-        event.key === 'ArrowRight'
-          ? manageSection === 'stock'
-            ? 'details'
-            : 'stock'
-          : event.key === 'ArrowLeft'
-            ? manageSection === 'details'
-              ? 'stock'
-              : 'details'
-            : event.key === 'Home'
-              ? 'stock'
-              : event.key === 'End'
-                ? 'details'
-                : null;
-      if (!next) return;
-      event.preventDefault();
-      changeManageSection(next, true);
-    };
     const handleManageInvalid = (event: React.InvalidEvent<HTMLFormElement>) => {
       const field = event.target as HTMLInputElement | HTMLSelectElement;
-      const panel = field.closest<HTMLElement>('[role="tabpanel"]');
-      const collapsedDetails = field.closest<HTMLDetailsElement>('details:not([open])');
-      if (!panel?.hidden && !collapsedDetails) return;
+      if (!field.closest('details:not([open])')) return;
       event.preventDefault();
-      if (panel?.hidden) {
-        flushSync(() => setManageSection(panel.id === 'manage-panel-stock' ? 'stock' : 'details'));
-      }
       let details = field.closest<HTMLDetailsElement>('details:not([open])');
       while (details) {
         details.open = true;
@@ -531,36 +500,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             ×
           </button>
         </header>
-        <div
-          className="manage-tabs"
-          role="tablist"
-          tabIndex={-1}
-          aria-label="Manage item sections"
-          onKeyDown={handleManageTabKeyDown}
-        >
-          <button
-            type="button"
-            role="tab"
-            id="manage-tab-stock"
-            aria-controls="manage-panel-stock"
-            aria-selected={manageSection === 'stock'}
-            tabIndex={manageSection === 'stock' ? 0 : -1}
-            onClick={() => changeManageSection('stock')}
-          >
-            Stock
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="manage-tab-details"
-            aria-controls="manage-panel-details"
-            aria-selected={manageSection === 'details'}
-            tabIndex={manageSection === 'details' ? 0 : -1}
-            onClick={() => changeManageSection('details')}
-          >
-            Details
-          </button>
-        </div>
         <form
           className="manage-form"
           onSubmit={handleSubmit}
@@ -568,14 +507,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
         >
           <input type="hidden" name="manage-action" value="save" />
           <div className="manage-body">
-            <div
-              className="manage-panel"
-              role="tabpanel"
-              id="manage-panel-details"
-              aria-labelledby="manage-tab-details"
-              tabIndex={-1}
-              hidden={manageSection !== 'details'}
-            >
+            <div className="manage-panel" id="manage-panel-details">
               <section className="manage-section" id="manage-details">
                 <label>
                   Food name
@@ -620,7 +552,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                   </label>
                   {trackingUnit !== p.unit && batches.some((batch) => batch.quantity > 0) && (
                     <p className="manage-note" role="status">
-                      Changing tracking relabels current amounts. Review each batch in Stock before
+                      Changing tracking relabels current amounts. Review each batch below before
                       saving.
                     </p>
                   )}
@@ -688,14 +620,11 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                 )}
               </section>
             </div>
-            <div
-              className="manage-panel"
-              role="tabpanel"
-              id="manage-panel-stock"
-              aria-labelledby="manage-tab-stock"
-              tabIndex={-1}
-              hidden={manageSection !== 'stock'}
-            >
+            <details className="manage-panel batch-settings" id="manage-panel-stock">
+              <summary>Locations, dates &amp; batch amounts</summary>
+              <p className="manage-note">
+                Edit individual packages here. For everyday checks, use Update on your shelf.
+              </p>
               <section className="manage-section" id="manage-stock">
                 {batches.length === 0 && <p className="manage-note">No stock batches yet.</p>}
                 {batches.map((batch, index) => {
@@ -796,7 +725,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                   );
                 })}
               </section>
-            </div>
+            </details>
             <div className="error" role="alert">
               {error}
             </div>
@@ -1044,7 +973,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     requestAnimationFrame(() => {
       const target = modal.batch
         ? document.getElementById(`manage-quantity-${modal.batch.id}`)
-        : document.getElementById('manage-tab-stock');
+        : document.getElementById('manage-details');
       target?.focus({ preventScroll: true });
       target?.scrollIntoView({ block: 'start' });
     });

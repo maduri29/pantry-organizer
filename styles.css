@@ -2375,3 +2375,40 @@ dialog:has(.stock-shell) {
 .quantity-stepper input:focus-visible {
   outline: 0;
 }
+/* Food details use the same compact sheet as stock tasks. */
+.manage-heading {
+  padding: 20px 20px 12px;
+}
+.manage-heading h2 {
+  font-size: 21px;
+  font-weight: 500;
+}
+.manage-body {
+  padding: 12px 20px 20px;
+}
+.manage-settings > summary,
+.manage-batch-meta > summary,
+.batch-settings > summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+}
+.batch-settings {
+  border-top: 1px solid var(--border);
+}
+.batch-settings > .manage-note {
+  margin: 0 0 16px;
+}
+.manage-batch {
+  border-radius: 4px;
+  background: transparent;
+}
+.manage-footer {
+  padding: 12px 20px 16px;
+  background: var(--ground);
+}
