@@ -10,9 +10,12 @@ import type {
   Product,
   ShoppingItem
 } from '../types.ts';
+import { RestockTrip } from './RestockTrip.tsx';
+import { StockEditor } from './StockEditor.tsx';
 import { formatAmount } from './InventoryView.tsx';
 
 export type ModalType =
+  | 'stock'
   | 'add'
   | 'use'
   | 'minimum'
@@ -206,12 +209,9 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   const [error, setError] = useState<string>('');
   const [busy, setBusy] = useState<boolean>(false);
   const [trackingUnit, setTrackingUnit] = useState<string>(modal.product?.unit ?? 'level');
-  const [pickedIds, setPickedIds] = useState<Record<string, boolean>>({});
   const [foodName, setFoodName] = useState(modal.initialName ?? modal.product?.name ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [manageSection, setManageSection] = useState<'details' | 'stock'>(modal.section ?? 'stock');
-  const [restockQuantity, setRestockQuantity] = useState('');
-  const [restockLocation, setRestockLocation] = useState('Pantry');
   const [batchQuantities, setBatchQuantities] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       s.batches
@@ -445,6 +445,20 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           </div>
         </form>
       </div>
+    );
+  }
+
+  if ((type === 'stock' || type === 'restock' || type === 'buy') && p) {
+    return (
+      <StockEditor
+        state={s}
+        product={p}
+        batch={b}
+        shoppingItem={i}
+        initialAction={type === 'stock' ? 'update' : 'restock'}
+        onSubmit={onSubmit}
+        onClose={onClose}
+      />
     );
   }
 
@@ -781,61 +795,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                     </fieldset>
                   );
                 })}
-                <details className="manage-add-stock">
-                  <summary>Add purchased stock</summary>
-                  <fieldset className="manage-batch add-batch">
-                    <legend>New batch</legend>
-                    {trackingUnit === 'level' ? (
-                      <label>
-                        New stock level
-                        <select
-                          name="restock-quantity"
-                          value={restockQuantity}
-                          onChange={(event) => setRestockQuantity(event.target.value)}
-                        >
-                          <option value="">Choose a level…</option>
-                          <option value="1">Full</option>
-                          <option value="0.5">Half</option>
-                          <option value="0.25">Low</option>
-                          <option value="0">Out</option>
-                        </select>
-                      </label>
-                    ) : (
-                      <label>
-                        Amount purchased ({trackingUnit})
-                        <input
-                          name="restock-quantity"
-                          type="number"
-                          min="0.000001"
-                          step="any"
-                          value={restockQuantity}
-                          onChange={(event) => setRestockQuantity(event.target.value)}
-                        />
-                      </label>
-                    )}
-                    <label>
-                      Store in
-                      <select
-                        name="restock-location"
-                        value={restockLocation}
-                        onChange={(event) => setRestockLocation(event.target.value)}
-                      >
-                        {D.locations.map((location) => (
-                          <option key={location} value={location}>
-                            {location}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <details className="manage-batch-meta">
-                      <summary>Expiry date (optional)</summary>
-                      <label>
-                        Expiry date
-                        <input name="restock-expiry" type="date" />
-                      </label>
-                    </details>
-                  </fieldset>
-                </details>
               </section>
             </div>
             <div className="error" role="alert">
@@ -843,14 +802,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             </div>
           </div>
           <footer className="manage-footer">
-            {restockQuantity.trim() && (
-              <p className="manage-pending-stock" role="status">
-                {trackingUnit === 'level'
-                  ? `New ${restockLocation} level: ${Number(restockQuantity) === 1 ? 'Full' : Number(restockQuantity) === 0.5 ? 'Half' : Number(restockQuantity) === 0.25 ? 'Low' : 'Out'}`
-                  : `Will add ${restockQuantity} ${trackingUnit === 'items' ? (Number(restockQuantity) === 1 ? 'item' : 'items') : trackingUnit === 'packs' ? (Number(restockQuantity) === 1 ? 'pack' : 'packs') : trackingUnit} to ${restockLocation}`}
-                .
-              </p>
-            )}
             <button
               type="button"
               className="manage-cancel"
@@ -860,13 +811,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
               Cancel
             </button>
             <button type="submit" className="primary" disabled={busy}>
-              {busy
-                ? 'Saving…'
-                : restockQuantity.trim()
-                  ? trackingUnit === 'level'
-                    ? 'Save new level'
-                    : 'Save + add stock'
-                  : 'Save changes'}
+              {busy ? 'Saving…' : 'Save changes'}
             </button>
           </footer>
         </form>
@@ -964,131 +909,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     );
   }
 
-  if (type === 'restock' && p) {
-    return (
-      <>
-        <h2>Restock {p.name}</h2>
-        <p>
-          Confirm what is here now. Rough levels replace the level in this location. Exact
-          quantities add a batch.
-        </p>
-        <form onSubmit={handleSubmit}>
-          {p.unit === 'level' ? (
-            <label>
-              What’s left?
-              <select name="quantity" defaultValue="1">
-                <option value="1">Full</option>
-                <option value="0.5">Half</option>
-                <option value="0.25">Low</option>
-                <option value="0">Out</option>
-              </select>
-            </label>
-          ) : (
-            <label>
-              {p.unit}
-              <input
-                name="quantity"
-                type="number"
-                min="0.000001"
-                step="any"
-                required
-                defaultValue="1"
-              />
-            </label>
-          )}
-          <div className="two">
-            <label>
-              Store in
-              <select name="location" defaultValue="Pantry">
-                {D.locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Date on package (optional)
-              <input name="expiry" type="date" />
-            </label>
-          </div>
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Add stock
-            </button>
-          </div>
-        </form>
-      </>
-    );
-  }
-
-  if (type === 'buy' && i && p) {
-    return (
-      <>
-        <h2>Restock {p.name}</h2>
-        <p>Confirm what you bought. This updates your stock and completes the list item.</p>
-        <form onSubmit={handleSubmit}>
-          {p.unit === 'level' ? (
-            <label>
-              What’s left?
-              <select name="quantity" defaultValue="1">
-                <option value="1">Full</option>
-                <option value="0.5">Half</option>
-                <option value="0.25">Low</option>
-                <option value="0">Out</option>
-              </select>
-            </label>
-          ) : (
-            <label>
-              {p.unit}
-              <input
-                name="quantity"
-                type="number"
-                min="0.000001"
-                step="any"
-                required
-                defaultValue={String(i.quantity ?? 1)}
-              />
-            </label>
-          )}
-          <div className="two">
-            <label>
-              Store in
-              <select name="location" defaultValue="Pantry">
-                {D.locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Date on package (optional)
-              <input name="expiry" type="date" />
-            </label>
-          </div>
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Add to pantry
-            </button>
-          </div>
-        </form>
-      </>
-    );
-  }
-
   if (type === 'delete' && p) {
     return (
       <>
@@ -1116,98 +936,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   }
 
   if (type === 'bulk') {
-    const sortedProducts = s.products
-      .slice()
-      .sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
-
-    return (
-      <>
-        <h2>Back from the shops?</h2>
-        <p>
-          Select only what you bought, then confirm each level or amount. Unselected foods stay
-          exactly as they are.
-        </p>
-        <form onSubmit={handleSubmit}>
-          {sortedProducts.map((prod) => {
-            const last = s.batches.filter((b) => b.productId === prod.id).at(-1);
-            const isChecked = !!pickedIds[prod.id];
-
-            return (
-              <section key={prod.id} className="bulk-item">
-                <label className="bulk-pick">
-                  <input
-                    type="checkbox"
-                    name={`picked-${prod.id}`}
-                    data-pick={prod.id}
-                    checked={isChecked}
-                    onChange={(e) =>
-                      setPickedIds((prev) => ({ ...prev, [prod.id]: e.target.checked }))
-                    }
-                  />
-                  {prod.name} <span className="meta">{prod.category}</span>
-                </label>
-                <fieldset disabled={!isChecked} id={`fields-${prod.id}`}>
-                  <div className="two">
-                    {prod.unit === 'level' ? (
-                      <label>
-                        Level now
-                        <select required name={`quantity-${prod.id}`} defaultValue="">
-                          <option value="">Choose level</option>
-                          <option value="1">Full</option>
-                          <option value="0.5">Half</option>
-                          <option value="0.25">Low</option>
-                          <option value="0">Out</option>
-                        </select>
-                      </label>
-                    ) : (
-                      <label>
-                        Amount bought ({prod.unit})
-                        <input
-                          required
-                          type="number"
-                          min="0.000001"
-                          step="any"
-                          defaultValue="1"
-                          name={`quantity-${prod.id}`}
-                        />
-                      </label>
-                    )}
-                    <label>
-                      Store in
-                      <select
-                        name={`location-${prod.id}`}
-                        defaultValue={last?.location || 'Pantry'}
-                      >
-                        {D.locations.map((loc) => (
-                          <option key={loc} value={loc}>
-                            {loc}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                  <label>
-                    Package date (optional)
-                    <input type="date" name={`expiry-${prod.id}`} />
-                  </label>
-                </fieldset>
-              </section>
-            );
-          })}
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Confirm restock
-            </button>
-          </div>
-        </form>
-      </>
-    );
+    return <RestockTrip state={s} onSubmit={onSubmit} onClose={onClose} />;
   }
 
   if (type === 'connect_missing') {

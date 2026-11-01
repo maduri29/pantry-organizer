@@ -131,16 +131,16 @@ try {
       .locator('.card')
       .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) }),
     cardActions = avocadoCard.locator('.card-foot button');
-  assert.equal(await cardActions.count(), 2);
+  assert.equal(await cardActions.count(), 3);
   assert.deepEqual(
     await cardActions.evaluateAll((es) => es.map((e) => e.getAttribute('aria-label'))),
-    ['Manage Avocados', 'Add Avocados to shopping list']
+    ['Restock Avocados', 'Manage Avocados', 'Add Avocados to shopping list']
   );
   assert.deepEqual(
     await cardActions.evaluateAll((es) =>
       es.map((e) => e.querySelector('svg')?.getAttribute('aria-hidden'))
     ),
-    ['true', 'true']
+    ['true', 'true', 'true']
   );
   assert.equal(
     await cardActions.evaluateAll((es) =>
@@ -154,6 +154,7 @@ try {
   pass('food card actions use labeled SVG icons with tooltips and 44px touch targets');
   await avocadoCard.getByRole('button', { name: 'Manage Avocados' }).click();
   await page.getByRole('heading', { name: 'Manage Avocados' }).waitFor();
+  await page.getByRole('tab', { name: 'Stock' }).click();
   assert.equal(await page.locator('#manage-details').count(), 1);
   assert.equal(await page.locator('#manage-stock').count(), 1);
   assert.equal(await page.getByRole('tab').count(), 2);
@@ -161,7 +162,7 @@ try {
     await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
     'true'
   );
-  assert.equal(await page.getByText('Add purchased stock', { exact: true }).count(), 1);
+  assert.equal(await page.getByText('Add purchased stock', { exact: true }).count(), 0);
   assert.equal(await page.locator('.manage-batch-meta[open]').count(), 0);
   assert.equal(await page.getByText(/^Current amount \(/).count(), 1);
   assert.match(
@@ -196,7 +197,7 @@ try {
     assert.ok(layout.width <= width && layout.scrollWidth <= layout.clientWidth);
   }
   await page.setViewportSize({ width: 320, height: 480 });
-  await page.locator('.manage-add-stock > summary').click();
+  await page.locator('.manage-batch-meta > summary').click();
   const shortSheet = await page.locator('dialog[open]').evaluate((dialog) => {
     const body = dialog.querySelector('.manage-body');
     const footer = dialog.querySelector('.manage-footer').getBoundingClientRect();
@@ -210,7 +211,7 @@ try {
   });
   assert.equal(shortSheet.overflow, true);
   assert.ok(shortSheet.footerBottom <= shortSheet.dialogBottom && shortSheet.width);
-  await page.locator('.manage-add-stock > summary').click();
+  await page.locator('.manage-batch-meta > summary').click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('tab', { name: 'Stock' }).press('ArrowRight');
   assert.equal(
@@ -239,10 +240,10 @@ try {
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
   await card.getByRole('button', { name: 'Update stock for Avocados' }).click();
-  await page.getByRole('heading', { name: 'Manage Avocados' }).waitFor();
-  assert.equal(await page.locator('#manage-stock').count(), 1);
+  await page.getByRole('heading', { name: 'Avocados', exact: true }).last().waitFor();
+  assert.equal(await page.locator('.stock-batch').count(), 1);
   await page.locator('input[name^="quantity-"]').fill('0');
-  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await page.getByRole('button', { name: 'Save stock', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.innerText(), /\bOut\b/);
   const outSummary = (await page.locator('.glance-counts').innerText()).replace(/\s+/g, ' ');
@@ -285,22 +286,15 @@ try {
   assert.equal(await settingsCategory.evaluate((e) => e.tagName), 'SELECT');
   await settingsCategory.selectOption('new');
   await page.locator('[name="category-custom"]').fill('Breakfast');
-  await page.getByRole('tab', { name: 'Stock' }).click();
-  await page.locator('.manage-add-stock > summary').click();
-  await page.locator('input[name="restock-quantity"]').fill('1');
-  await page.getByRole('tab', { name: 'Details' }).click();
-  assert.equal(await page.locator('[name="category-custom"]').inputValue(), 'Breakfast');
-  assert.equal(await page.locator('input[name="restock-quantity"]').inputValue(), '1');
-  assert.match(
-    await page.locator('.manage-pending-stock').innerText(),
-    /Will add 1 item to Pantry/
-  );
-  await page.getByRole('button', { name: 'Save + add stock', exact: true }).click();
+  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await page.locator('#editor').waitFor({ state: 'hidden' });
+  await card.getByRole('button', { name: 'Restock Avocados', exact: true }).click();
+  await page.locator('input[name="quantity"]').fill('1');
+  assert.match(await page.locator('.stock-preview').innerText(), /4 \+ 1 = 5 items/);
+  await page.getByRole('button', { name: 'Add to pantry', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.locator('.amount').innerText(), /5 items/);
-  pass(
-    'one Save changes action applies pending restock and preserves custom category edits through tab switches'
-  );
+  pass('food settings save independently; direct restock previews and adds purchased stock once');
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
@@ -345,9 +339,9 @@ try {
   await page.getByRole('button', { name: 'Restock several', exact: true }).click();
   const rice = page
     .locator('.bulk-item')
-    .filter({ has: page.getByRole('checkbox', { name: 'Rice Other', exact: true }) });
+    .filter({ has: page.getByRole('checkbox', { name: /Rice.*on hand/ }) });
   await rice.getByRole('checkbox').check();
-  await rice.locator('select[name^="quantity-"]').selectOption('1');
+  await rice.getByRole('radio', { name: 'Full', exact: true }).check();
   const avocado = page.locator('.bulk-item').filter({ hasText: 'Avocados' });
   await avocado.getByRole('checkbox').check();
   await avocado.locator('input[name^="quantity-"]').fill('2');
@@ -400,17 +394,17 @@ try {
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) });
   await staleCard.getByRole('button', { name: 'Update stock for Rice' }).click();
-  await page.locator('select[name^="quantity-"]').selectOption('0.25');
+  await page.getByRole('radio', { name: 'Low', exact: true }).check();
   const second = await page.context().newPage();
   await second.goto(baseUrl);
   const secondCard = second
     .locator('.card')
     .filter({ has: second.getByRole('heading', { name: 'Rice', exact: true }) });
   await secondCard.getByRole('button', { name: 'Update stock for Rice' }).click();
-  await second.locator('select[name^="quantity-"]').selectOption('0.5');
-  await second.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await second.getByRole('radio', { name: 'Half', exact: true }).check();
+  await second.getByRole('button', { name: 'Save stock', exact: true }).click();
   await second.locator('#editor').waitFor({ state: 'hidden' });
-  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await page.getByRole('button', { name: 'Save stock', exact: true }).click();
   assert.match(await page.locator('dialog .error').innerText(), /Stock changed/);
   const savedLevel = await page.evaluate(() => {
     const s = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state;
@@ -542,7 +536,7 @@ try {
   const flour = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Bread flour', exact: true }) });
-  assert.equal(await flour.locator('.amount').innerText(), '1 lb');
+  assert.equal(await flour.locator('.amount > span').first().innerText(), '1 lb');
   assert.match(await flour.innerText(), /Grains & pulses/);
   assert.match(await flour.innerText(), /Pantry/);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -622,7 +616,7 @@ try {
   const multiBatchCard = batchPage
     .locator('.shelf-card')
     .filter({ has: batchPage.getByRole('heading', { name: 'Blueberries', exact: true }) });
-  assert.equal(await multiBatchCard.locator('.amount-update').count(), 0);
+  assert.equal(await multiBatchCard.locator('.amount-update').count(), 1);
   assert.match(await multiBatchCard.locator('.amount').innerText(), /4 packs/);
   const batchDisclosure = multiBatchCard.locator('.batch-details');
   assert.equal(await batchDisclosure.evaluate((details) => details.open), false);
@@ -643,10 +637,8 @@ try {
     await batchPage.locator(`input[name="quantity-${fixture.batchId}"]`).inputValue(),
     '3'
   );
-  await batchPage
-    .locator(`#manage-batch-${fixture.batchId} input[name="quantity-${fixture.batchId}"]`)
-    .fill('2');
-  await batchPage.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await batchPage.locator(`input[name="quantity-${fixture.batchId}"]`).fill('2');
+  await batchPage.getByRole('button', { name: 'Save stock', exact: true }).click();
   await batchPage.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await multiBatchCard.locator('.amount').innerText(), /3 packs/);
   pass(

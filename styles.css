@@ -1579,10 +1579,6 @@ dialog:has(.manage-shell) {
   font-size: 12px;
   line-height: 1.45;
 }
-.manage-add-stock {
-  margin-top: 0;
-}
-.manage-add-stock > summary,
 .manage-settings > summary,
 .manage-batch-meta > summary {
   min-height: 44px;
@@ -1634,26 +1630,7 @@ dialog:has(.manage-shell) {
   background: var(--raised);
   font-size: 12px;
 }
-.manage-pending-stock {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding: 6px 9px;
-  border-radius: var(--radius-control);
-  color: var(--muted);
-  background: var(--raised);
-  font-size: 12px;
-  line-height: 1.35;
-}
-.manage-add-submit {
-  min-height: 44px;
-  margin-top: 6px;
-  padding: 0 14px;
-  border: 1px solid var(--primary);
-  border-radius: var(--radius-control);
-  color: white;
-  background: var(--primary);
-  font-weight: 700;
-}
+
 .manage-delete-row {
   display: flex;
   justify-content: flex-end;
@@ -1924,4 +1901,477 @@ dialog:has(.add-shell) {
   .add-footer {
     padding-inline: 16px;
   }
+}
+
+/* Stock checks and purchases share one small, task-focused sheet. */
+dialog:has(.stock-shell) {
+  width: 480px;
+  max-width: calc(100vw - 20px);
+  max-height: min(90dvh, 760px);
+  padding: 0;
+  overflow: hidden;
+}
+.stock-shell,
+.stock-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0;
+}
+.stock-shell {
+  max-height: inherit;
+}
+.stock-heading {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+}
+.stock-heading > div:not(.food-art) {
+  flex: 1;
+  min-width: 0;
+}
+.stock-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  overflow-wrap: anywhere;
+}
+.stock-heading p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.stock-close {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 24px;
+}
+.stock-intents {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: 1fr 1fr;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+.stock-intents button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+}
+.stock-intents button[aria-pressed='true'] {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+.stock-intents svg,
+.restock-action svg,
+.stock-list-note svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.stock-body {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.stock-body .stock-instruction {
+  margin: 0;
+}
+.stock-batch,
+.stock-purchase {
+  padding: 0;
+  gap: 12px;
+  min-width: 0;
+}
+.stock-batch + .stock-batch {
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+.stock-batch legend,
+.stock-purchase legend,
+.trip-fields legend {
+  float: left;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.stock-body .stock-date {
+  margin: -4px 0 0;
+  font-size: 12px;
+}
+.stock-date.warn {
+  color: var(--warning);
+}
+.level-picker {
+  display: flex;
+  gap: 8px;
+}
+.level-picker label {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 86px;
+  gap: 7px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.level-picker label:hover {
+  background: var(--ground);
+}
+.level-picker label.is-selected {
+  border-color: var(--primary);
+  background: #f0f4f8;
+  color: var(--primary);
+  font-weight: 600;
+}
+.level-picker label:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+.level-picker input {
+  position: absolute;
+  width: 1px;
+  min-height: 0;
+  height: 1px;
+  opacity: 0;
+}
+.level-picker svg {
+  width: 23px;
+  height: 27px;
+  color: var(--illustration-blue-ink);
+  fill: var(--illustration-blue);
+}
+.level-vessel {
+  stroke: currentColor;
+  stroke-width: 1.3;
+  fill: none;
+}
+.quantity-stepper {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+}
+.quantity-stepper button {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  font-size: 22px;
+}
+.quantity-stepper input {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  min-height: 56px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 4px;
+  text-align: right;
+  font-size: 25px;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.quantity-stepper input::-webkit-inner-spin-button,
+.quantity-stepper input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.quantity-stepper > span {
+  flex: 1;
+  padding: 0 12px 0 4px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.stock-options summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.stock-options summary::before {
+  content: '+';
+  color: var(--primary);
+  font-size: 18px;
+}
+.stock-options[open] summary::before {
+  content: '−';
+}
+.stock-options summary::-webkit-details-marker {
+  display: none;
+}
+.stock-options[open] > label,
+.stock-options[open] > .two {
+  margin-top: 8px;
+}
+.stock-body .stock-help {
+  margin: -8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.stock-body .stock-list-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 0;
+  color: var(--primary);
+  font-size: 12px;
+}
+.stock-footer {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+  background: var(--ground);
+}
+.stock-footer .stock-preview {
+  min-height: 18px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.stock-footer > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+.stock-footer button {
+  min-height: 46px;
+}
+.restock-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-right: 8px;
+  padding: 0 10px;
+  color: var(--primary);
+  background: transparent;
+  border-color: var(--control);
+  font-size: 12px;
+}
+.shelf-card {
+  grid-template-columns: minmax(160px, 1fr) minmax(120px, 180px) 90px 100px 196px;
+}
+.trip-search {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.trip-search input {
+  min-width: 0;
+  flex: 1;
+}
+.trip-search > span {
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+.trip-body {
+  display: block;
+  padding-block: 0;
+}
+.restock-trip .bulk-item {
+  padding: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.restock-trip .bulk-item:last-of-type {
+  border-bottom: 0;
+}
+.restock-trip .bulk-pick {
+  min-height: 72px;
+  gap: 12px;
+  cursor: pointer;
+}
+.bulk-pick > span {
+  display: grid;
+  gap: 4px;
+}
+.bulk-pick strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.bulk-pick small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.trip-fields {
+  padding: 0 0 14px 34px;
+  gap: 4px;
+}
+.trip-fields legend {
+  font-size: 12px;
+  color: var(--muted);
+}
+.trip-fields .level-picker label {
+  min-height: 68px;
+}
+.trip-fields .level-picker svg {
+  height: 23px;
+}
+.trip-empty {
+  padding-block: 20px;
+}
+@media (max-width: 1100px) and (min-width: 851px) {
+  .shelf-card {
+    grid-template-columns: minmax(150px, 1fr) 120px 80px 80px 196px;
+  }
+}
+@media (max-width: 850px) and (min-width: 601px) {
+  .shelf-card {
+    grid-template-columns: minmax(0, 1fr) 110px 196px;
+  }
+}
+@media (max-width: 600px) {
+  .shelf-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .card-foot {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    margin: 10px 0 0 42px;
+  }
+  .card-foot .restock-action {
+    margin-right: auto;
+  }
+  .card-foot .icon-action {
+    flex-direction: row;
+    gap: 5px;
+    width: auto;
+    padding-inline: 8px;
+  }
+  .stock-heading {
+    padding: 16px 16px 12px;
+    gap: 8px;
+  }
+  .stock-heading h2 {
+    font-size: 20px;
+  }
+  .stock-intents {
+    padding-inline: 16px;
+    gap: 12px;
+  }
+  .stock-intents button {
+    font-size: 13px;
+  }
+  .stock-body {
+    padding: 16px;
+    gap: 16px;
+  }
+  .stock-footer {
+    padding-inline: 16px;
+  }
+  .trip-search {
+    padding-inline: 16px;
+  }
+  .trip-body {
+    padding-block: 0;
+  }
+  .restock-trip .bulk-pick {
+    gap: 8px;
+  }
+  .trip-fields {
+    padding-left: 0;
+  }
+}
+.level-picker input {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+.stock-mode {
+  min-width: 0;
+  padding: 0;
+  gap: 20px;
+}
+@media (max-width: 600px) {
+  .stock-mode {
+    gap: 16px;
+  }
+}
+.amount-update {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.amount-edit-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.card-foot .icon-action span,
+.restock-action {
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.stock-empty-button {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 8px;
+  margin: -8px 0 -12px -8px;
+  border: 0;
+  color: var(--primary);
+  background: transparent;
+  font-size: 13px;
+}
+.quantity-stepper:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.quantity-stepper input:focus-visible {
+  outline: 0;
 }

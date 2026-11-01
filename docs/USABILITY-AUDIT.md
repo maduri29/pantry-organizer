@@ -33,3 +33,16 @@ Dialogs now have accessible titles. Focus returns to the food name after a conse
 - Production taste inspection at 1440, 768 and 390: 0 failures and 0 warnings. Form screenshots additionally reviewed at 320×500 and 390×500.
 
 Tests use isolated browser demo data and mocked shared-account/category responses. They do not write to the live household pantry or establish real two-device synchronization. Local before/after screenshots are kept in `.taste-skill/ux-before`, `.taste-skill/ux-after` and `.taste-skill/ux-inspect` and are excluded from Git.
+
+## Stock and restock redesign
+
+The everyday stock editor now separates two tasks: **What’s left** sets the remaining stock, and **I bought more** records a purchase. Both are accessible directly from each inventory row, including out-of-stock foods. Settings open on Details, and the old combined “save changes + add purchased stock” form has been removed.
+
+- Rough tracking uses illustrated Full / Half / Low / Out choices. Restock excludes Out and explains that it sets the level at the selected location.
+- Exact tracking uses a large quantity field with decrement/increment buttons. “All used up” sets an existing batch to zero. The footer previews the resulting total before saving.
+- Existing stock retains its batches, locations and dates. Exact purchases create a separate batch; rough purchases update the selected location. Restocking an item on the shopping list checks it off in the same revisioned save.
+- Quantity and package-date drafts survive switching tasks. Inactive fields are disabled, so a blank stock-check field does not block a purchase.
+- Restock several becomes a searchable grocery-trip sheet, with shopping-list foods first. Extra fields appear only for selected foods. Selections survive searches; invalid selected amounts reveal themselves before correction. Unselected foods remain unchanged.
+- Both sheets keep save actions visible while their content scrolls, including at 320×480. Save errors retain drafts for retry.
+
+`tests/stock-flows.mjs` covers batch corrections, unchanged metadata, canceled depletion, rough replacement across locations, atomic stock/list updates, retained purchase drafts, out-of-stock restock, trip selection across searches, hidden validation recovery, storage-failure retry and short-screen actions. Existing stale-tab, category, import/export, authentication-fixture and offline-upgrade regressions remain in the full UI suite. Tests use isolated demo data and do not modify a live household.

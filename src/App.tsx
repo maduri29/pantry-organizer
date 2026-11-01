@@ -430,7 +430,7 @@ export const App: React.FC = () => {
   const handleModalSubmit = useCallback(
     async (values: Record<string, any>) => {
       if (!modal) return;
-      const { type, product: p, batch: b, shoppingItem: i } = modal;
+      const { type, product: p, batch: b } = modal;
 
       if (type === 'add') {
         const keepAdding = values['add-action'] === 'another';
@@ -481,8 +481,6 @@ export const App: React.FC = () => {
         const category = String(values.category || '').trim();
         const unit = String(values.unit || '');
         const minimum = unit === 'level' ? 0.25 : Number(values.minimum);
-        const restockAmount = String(values['restock-quantity'] || '').trim();
-        const addStock = action === 'restock' || restockAmount.length > 0;
         if (!name || name.length > 80) throw new Error('Enter a food name (up to 80 characters).');
         if (!D.units.includes(unit as (typeof D.units)[number]))
           throw new Error('Choose a valid tracking unit.');
@@ -491,87 +489,46 @@ export const App: React.FC = () => {
         if (!Number.isFinite(minimum) || minimum < 0)
           throw new Error('Minimum stock cannot be negative.');
 
-        await mutate(
-          (s) => {
-            const product = s.products.find((item) => item.id === p.id);
-            if (!product) throw new Error('This item no longer exists.');
-            const duplicate = s.products.find(
-              (item) =>
-                item.id !== product.id &&
-                item.unit === unit &&
-                item.name.toLowerCase() === name.toLowerCase()
-            );
-            if (duplicate)
-              throw new Error('Another item already uses that name and tracking unit.');
+        await mutate((s) => {
+          const product = s.products.find((item) => item.id === p.id);
+          if (!product) throw new Error('This item no longer exists.');
+          const duplicate = s.products.find(
+            (item) =>
+              item.id !== product.id &&
+              item.unit === unit &&
+              item.name.toLowerCase() === name.toLowerCase()
+          );
+          if (duplicate) throw new Error('Another item already uses that name and tracking unit.');
 
-            product.name = name;
-            product.category = category;
-            product.unit = unit as (typeof D.units)[number];
-            product.minimum = minimum;
+          product.name = name;
+          product.category = category;
+          product.unit = unit as (typeof D.units)[number];
+          product.minimum = minimum;
 
-            const productBatches = s.batches.filter((batch) => batch.productId === p.id);
-            for (const batch of productBatches) {
-              const amount = Number(values[`quantity-${batch.id}`]);
-              if (!Number.isFinite(amount) || amount < 0)
-                throw new Error(`Enter a valid amount for ${batch.location}.`);
-              if (unit === 'level' && ![0, 0.25, 0.5, 1].includes(amount))
-                throw new Error(`Choose a valid rough level for ${batch.location}.`);
-              const location = String(values[`location-${batch.id}`] || '');
-              if (!D.locations.includes(location as (typeof D.locations)[number]))
-                throw new Error('Choose a valid stock location.');
-              const expiry = String(values[`expiry-${batch.id}`] || '') || null;
-              if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry))
-                throw new Error('Choose a valid package date.');
-              if (
-                amount !== batch.quantity ||
-                (modal.section === 'stock' && modal.batch?.id === batch.id)
-              ) {
-                D.move(s, batch.id, 'correct', amount);
-              }
-              const savedBatch = s.batches.find((item) => item.id === batch.id)!;
-              savedBatch.location = location as (typeof D.locations)[number];
-              savedBatch.expiry = expiry;
+          const productBatches = s.batches.filter((batch) => batch.productId === p.id);
+          for (const batch of productBatches) {
+            const amount = Number(values[`quantity-${batch.id}`]);
+            if (!Number.isFinite(amount) || amount < 0)
+              throw new Error(`Enter a valid amount for ${batch.location}.`);
+            if (unit === 'level' && ![0, 0.25, 0.5, 1].includes(amount))
+              throw new Error(`Choose a valid rough level for ${batch.location}.`);
+            const location = String(values[`location-${batch.id}`] || '');
+            if (!D.locations.includes(location as (typeof D.locations)[number]))
+              throw new Error('Choose a valid stock location.');
+            const expiry = String(values[`expiry-${batch.id}`] || '') || null;
+            if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry))
+              throw new Error('Choose a valid package date.');
+            if (
+              amount !== batch.quantity ||
+              (modal.section === 'stock' && modal.batch?.id === batch.id)
+            ) {
+              D.move(s, batch.id, 'correct', amount);
             }
-
-            if (addStock) {
-              if (!restockAmount) throw new Error('Enter an amount to add.');
-              const quantity = Number(restockAmount);
-              const location = String(values['restock-location'] || '');
-              const expiry = String(values['restock-expiry'] || '') || null;
-              if (
-                !Number.isFinite(quantity) ||
-                (unit === 'level' ? ![0, 0.25, 0.5, 1].includes(quantity) : quantity <= 0)
-              ) {
-                throw new Error(
-                  unit === 'level'
-                    ? 'Choose a rough level to add.'
-                    : 'Enter an amount greater than zero to add.'
-                );
-              }
-              if (!D.locations.includes(location as (typeof D.locations)[number]))
-                throw new Error('Choose a valid stock location.');
-              if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry))
-                throw new Error('Choose a valid package date.');
-              const shoppingItem = s.shopping.find(
-                (item) => item.productId === p.id && item.status === 'open'
-              );
-              if (shoppingItem)
-                D.purchase(s, shoppingItem.id, {
-                  quantity,
-                  location: location as (typeof D.locations)[number],
-                  expiry
-                });
-              else
-                D.add(s, {
-                  ...product,
-                  quantity,
-                  location: location as (typeof D.locations)[number],
-                  expiry
-                } as FoodInput);
-            }
-          },
-          addStock ? 'Item updated and stock added' : 'Item updated'
-        );
+            const savedBatch = s.batches.find((item) => item.id === batch.id)!;
+            savedBatch.location = location as (typeof D.locations)[number];
+            savedBatch.expiry = expiry;
+          }
+        }, 'Item updated');
         return;
       }
 
@@ -595,33 +552,55 @@ export const App: React.FC = () => {
         return;
       }
 
-      if (type === 'restock' && p) {
-        await mutate((s) => {
-          const item = s.shopping.find((it) => it.productId === p.id && it.status === 'open');
-          if (item) {
-            D.purchase(s, item.id, {
-              ...values,
-              quantity: Number(values.quantity)
-            } as any);
-          } else {
-            D.add(s, {
-              ...p,
-              ...values,
-              location: (values.location || 'Pantry') as any,
-              quantity: Number(values.quantity)
-            } as FoodInput);
-          }
-        }, 'Stock added');
-        return;
-      }
-
-      if (type === 'buy' && i && p) {
-        await mutate((s) => {
-          D.purchase(s, i.id, {
-            ...values,
-            quantity: Number(values.quantity)
-          } as any);
-        }, 'Restocked and checked off');
+      if ((type === 'stock' || type === 'restock' || type === 'buy') && p) {
+        const action = String(values['stock-action']);
+        await mutate(
+          (s) => {
+            const product = s.products.find((item) => item.id === p.id);
+            if (!product) throw new Error('This food no longer exists.');
+            if (action === 'update') {
+              const batches = s.batches.filter(
+                (batch) => batch.productId === p.id && values[`quantity-${batch.id}`] !== undefined
+              );
+              if (!batches.length) throw new Error('Choose a stock batch to update.');
+              for (const batch of batches) {
+                const raw = String(values[`quantity-${batch.id}`]).trim();
+                const quantity = Number(raw);
+                if (
+                  !raw ||
+                  !Number.isFinite(quantity) ||
+                  quantity < 0 ||
+                  (product.unit === 'level' && ![0, 0.25, 0.5, 1].includes(quantity))
+                )
+                  throw new Error('Enter a valid amount left.');
+                const location = String(values[`location-${batch.id}`]);
+                const expiry = String(values[`expiry-${batch.id}`] || '') || null;
+                if (!D.locations.includes(location as (typeof D.locations)[number]))
+                  throw new Error('Choose a valid location.');
+                if (expiry && !/^\d{4}-\d{2}-\d{2}$/.test(expiry))
+                  throw new Error('Choose a valid package date.');
+                D.move(s, batch.id, 'correct', quantity);
+                batch.location = location as (typeof D.locations)[number];
+                batch.expiry = expiry;
+              }
+            } else if (action === 'restock') {
+              const quantity = Number(values.quantity);
+              if (
+                !Number.isFinite(quantity) ||
+                quantity <= 0 ||
+                (product.unit === 'level' && ![0.25, 0.5, 1].includes(quantity))
+              )
+                throw new Error('Enter an amount greater than zero.');
+              const input = { quantity, location: values.location, expiry: values.expiry || null };
+              const item = s.shopping.find(
+                (entry) => entry.productId === p.id && entry.status === 'open'
+              );
+              if (item) D.purchase(s, item.id, input);
+              else D.add(s, { ...product, ...input } as FoodInput);
+            } else throw new Error('Choose a stock action.');
+          },
+          action === 'update' ? 'Stock updated' : 'Restocked and saved'
+        );
         return;
       }
 
@@ -771,6 +750,12 @@ export const App: React.FC = () => {
                   Object.assign(st, D.demo());
                 }, 'Sample pantry ready');
               }}
+              onUpdate={(product, batch) =>
+                setModal({ type: 'stock', revision: data.revision, product, batch })
+              }
+              onRestock={(product) =>
+                setModal({ type: 'restock', revision: data.revision, product })
+              }
               onManage={(product, section, batch) =>
                 setModal({
                   type: 'manage',
@@ -833,12 +818,7 @@ export const App: React.FC = () => {
         onClose={() => setModal(null)}
         onSubmit={handleModalSubmit}
         onManageExisting={(product) =>
-          setModal({
-            type: 'manage',
-            revision: dataRef.current?.revision ?? data.revision,
-            product,
-            section: 'stock'
-          })
+          setModal({ type: 'stock', revision: dataRef.current?.revision ?? data.revision, product })
         }
         onSuggestCategory={online ? suggestNewItemCategory : undefined}
       />

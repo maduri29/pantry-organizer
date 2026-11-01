@@ -126,7 +126,10 @@ try {
   await editor.getByText('Frozen edamame is already in your pantry', { exact: true }).waitFor();
   assert.match(await editor.locator('.existing-food').innerText(), /different tracking method/);
   await editor.getByRole('button', { name: 'Update existing food', exact: true }).click();
-  await page.getByRole('heading', { name: 'Manage Frozen edamame', exact: true }).waitFor();
+  await page
+    .locator('#editor')
+    .getByRole('heading', { name: 'Frozen edamame', exact: true })
+    .waitFor();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   assert.deepEqual((await record()).state, saved.state);
   pass(
@@ -164,7 +167,10 @@ try {
   await page.getByRole('button', { name: /Running low/ }).click();
   assert.equal(await page.getByLabel('Search food').inputValue(), '');
   assert.equal(await page.locator('.shelf-card').count(), 1);
-  await page.getByRole('heading', { name: 'Frozen edamame', exact: true }).waitFor();
+  await page
+    .locator('.shelf-card')
+    .getByRole('heading', { name: 'Frozen edamame', exact: true })
+    .waitFor();
   pass(
     'search ignores accidental outer spaces; clear and summary filters restore a predictable scope'
   );
