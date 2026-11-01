@@ -334,14 +334,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    className="amount amount-update"
-                    data-action="use"
-                    data-id={batches[0]?.id}
-                    aria-label={`Update stock for ${p.name}`}
-                    title={`Update stock for ${p.name}`}
-                    onClick={() => onUpdate(p, batches[0])}
-                  >
+                  <div className="amount">
                     <span>
                       {p.unit === 'level' ? (
                         D.level(totalQty)
@@ -351,13 +344,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </>
                       )}
                     </span>
-                    <span className="amount-edit-label">
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
-                      </svg>
-                      Update
-                    </span>
-                  </button>
+                  </div>
 
                   <span className={`badge stock-status ${itemIsLow ? 'warn' : ''}`}>
                     {totalQty === 0 ? 'Out' : itemIsLow ? 'Low' : 'Stocked'}
@@ -423,7 +410,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                                 onClick={() => onUpdate(p, batch)}
                               >
                                 <svg aria-hidden="true" viewBox="0 0 24 24">
-                                  <path d="M12 5v14M5 12h14" />
+                                  <path d="m5 12 4 4L19 6" />
                                 </svg>
                                 <span>Update</span>
                               </button>
@@ -435,6 +422,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   )}
 
                   <div className="card-foot">
+                    <button
+                      className="amount-update row-action"
+                      data-action="use"
+                      data-id={batches[0]?.id}
+                      aria-label={`Update stock for ${p.name}`}
+                      title={`Update stock for ${p.name}`}
+                      onClick={() => onUpdate(p, batches[0])}
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="m5 12 4 4L19 6" />
+                      </svg>
+                      <span>Update</span>
+                    </button>
                     <button
                       className="restock-action"
                       aria-label={`Restock ${p.name}`}
@@ -455,7 +455,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       onClick={() => onManage(p, 'details')}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M4 5h16v14H4zM8 9h8m-8 4h5M18 3v4M6 17v4" />
+                        <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
                       </svg>
                       <span>Details</span>
                     </button>
@@ -477,7 +477,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       onClick={() => onAddToList(p)}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M3 4h2l2.5 12h11L21 8H6m3 12h.01M17 20h.01M12 6v6m-3-3h6" />
+                        <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />
                       </svg>
                       <span>{isOnShopping ? 'On list' : 'List'}</span>
                     </button>

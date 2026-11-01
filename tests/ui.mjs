@@ -131,16 +131,21 @@ try {
       .locator('.card')
       .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) }),
     cardActions = avocadoCard.locator('.card-foot button');
-  assert.equal(await cardActions.count(), 3);
+  assert.equal(await cardActions.count(), 4);
   assert.deepEqual(
     await cardActions.evaluateAll((es) => es.map((e) => e.getAttribute('aria-label'))),
-    ['Restock Avocados', 'Manage Avocados', 'Add Avocados to shopping list']
+    [
+      'Update stock for Avocados',
+      'Restock Avocados',
+      'Manage Avocados',
+      'Add Avocados to shopping list'
+    ]
   );
   assert.deepEqual(
     await cardActions.evaluateAll((es) =>
       es.map((e) => e.querySelector('svg')?.getAttribute('aria-hidden'))
     ),
-    ['true', 'true', 'true']
+    ['true', 'true', 'true', 'true']
   );
   assert.equal(
     await cardActions.evaluateAll((es) =>

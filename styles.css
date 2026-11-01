@@ -2534,3 +2534,95 @@ dialog:has(.manage-shell) {
 .manage-body .category-suggestion > button {
   min-height: 44px;
 }
+/* Shelf actions share one baseline; quantities remain quiet, readable data. */
+.card-foot {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+}
+.card-foot button,
+.card-foot .icon-action,
+.card-foot .amount-update,
+.card-foot .restock-action {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-height: 44px;
+  padding: 0 10px;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--text);
+  background: transparent;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.card-foot .amount-update,
+.card-foot .restock-action {
+  border-color: var(--control);
+}
+.card-foot button:hover {
+  background: var(--raised);
+  border-color: var(--control);
+}
+.card-foot button:disabled {
+  color: var(--muted);
+}
+.card-foot button svg,
+.stock-update svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.shelf-card {
+  grid-template-columns: minmax(160px, 1fr) minmax(120px, 180px) 100px 120px;
+  row-gap: 4px;
+}
+@media (max-width: 850px) {
+  .shelf-card {
+    grid-template-columns: minmax(0, 1fr) 120px;
+  }
+  .stock-status {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+  }
+  .card-foot {
+    margin-top: 8px;
+    justify-content: flex-start;
+  }
+  .batch-details[open] {
+    grid-row: 4;
+  }
+}
+@media (max-width: 600px) {
+  .card-foot {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .card-foot button,
+  .card-foot .icon-action,
+  .card-foot .amount-update,
+  .card-foot .restock-action {
+    padding: 0 4px;
+    gap: 4px;
+  }
+}
+@media (max-width: 360px) {
+  .card-foot {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
