@@ -489,7 +489,10 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     return (
       <div className="manage-shell">
         <header className="manage-heading">
-          <h2>Manage {p.name}</h2>
+          <div>
+            <h2>Edit food</h2>
+            <p className="edit-food-caption">{p.name}</p>
+          </div>
           <button
             type="button"
             className="manage-close"
@@ -526,8 +529,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                   itemName={foodName}
                   onSuggestCategory={onSuggestCategory}
                 />
-                <details className="manage-settings">
-                  <summary>Stock settings</summary>
+                <div className="manage-settings edit-tracking">
                   <label>
                     Tracking and unit
                     <select
@@ -574,57 +576,17 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                       />
                     </label>
                   )}
-                </details>
-                {!confirmDelete ? (
-                  <div className="manage-delete-row">
-                    <button
-                      type="button"
-                      className="manage-delete-icon"
-                      aria-label={`Delete ${p.name}`}
-                      title={`Delete ${p.name}`}
-                      onClick={() => setConfirmDelete(true)}
-                      disabled={busy}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5" />
-                      </svg>
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    className="delete-confirm"
-                    role="group"
-                    aria-label={`Confirm deleting ${p.name}`}
-                  >
-                    <div>
-                      <strong>Delete {p.name}?</strong>
-                      <p>
-                        This removes its batches, activity, and shopping entries. This cannot be
-                        undone.
-                      </p>
-                    </div>
-                    <div className="manage-actions">
-                      <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy}>
-                        Keep item
-                      </button>
-                      <button
-                        type="button"
-                        className="danger-confirm"
-                        onClick={() => void submitDelete()}
-                        disabled={busy}
-                      >
-                        {busy ? 'Deleting…' : 'Delete item'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                </div>
               </section>
             </div>
             <details className="manage-panel batch-settings" id="manage-panel-stock">
-              <summary>Locations, dates &amp; batch amounts</summary>
-              <p className="manage-note">
-                Edit individual packages here. For everyday checks, use Update on your shelf.
-              </p>
+              <summary>
+                Packages <span className="package-count">{batches.length}</span>
+                <span aria-hidden="true" className="package-chevron">
+                  ⌄
+                </span>
+              </summary>
+              <p className="manage-note">Change a package’s location, date or remaining amount.</p>
               <section className="manage-section" id="manage-stock">
                 {batches.length === 0 && <p className="manage-note">No stock batches yet.</p>}
                 {batches.map((batch, index) => {
@@ -726,6 +688,49 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                 })}
               </section>
             </details>
+            {!confirmDelete ? (
+              <div className="manage-delete-row">
+                <button
+                  type="button"
+                  className="manage-delete-icon"
+                  aria-label={`Delete ${p.name}`}
+                  title={`Delete ${p.name}`}
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={busy}
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5" />
+                  </svg>
+                  <span>Delete food</span>
+                </button>
+              </div>
+            ) : (
+              <div
+                className="delete-confirm"
+                role="group"
+                aria-label={`Confirm deleting ${p.name}`}
+              >
+                <div>
+                  <strong>Delete {p.name}?</strong>
+                  <p>
+                    This removes its batches, activity, and shopping entries. This cannot be undone.
+                  </p>
+                </div>
+                <div className="manage-actions">
+                  <button type="button" onClick={() => setConfirmDelete(false)} disabled={busy}>
+                    Keep item
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-confirm"
+                    onClick={() => void submitDelete()}
+                    disabled={busy}
+                  >
+                    {busy ? 'Deleting…' : 'Delete item'}
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="error" role="alert">
               {error}
             </div>

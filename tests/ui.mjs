@@ -153,7 +153,7 @@ try {
   );
   pass('food card actions use labeled SVG icons with tooltips and 44px touch targets');
   await avocadoCard.getByRole('button', { name: 'Manage Avocados' }).click();
-  await page.getByRole('heading', { name: 'Manage Avocados' }).waitFor();
+  await page.getByRole('heading', { name: 'Edit food' }).waitFor();
   await page.locator('.batch-settings > summary').click();
   assert.equal(await page.locator('#manage-details').count(), 1);
   assert.equal(await page.locator('#manage-stock').count(), 1);
@@ -544,7 +544,6 @@ try {
     'Grains & pulses'
   );
   await flour.getByRole('button', { name: 'Manage Bread flour' }).click();
-  await page.locator('.manage-settings > summary').click();
   await page.locator('select[name="unit"]').selectOption('level');
   await page.getByRole('button', { name: 'Save changes' }).click();
   assert.equal(await page.locator('.batch-settings').evaluate((e) => e.open), true);

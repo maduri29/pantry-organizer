@@ -2412,3 +2412,93 @@ dialog:has(.stock-shell) {
   padding: 12px 20px 16px;
   background: var(--ground);
 }
+/* Compact food editor: visible essentials, one package disclosure. */
+dialog:has(.manage-shell) {
+  width: 460px;
+  max-width: calc(100vw - 24px);
+  max-height: min(90dvh, 740px);
+  margin: auto;
+  border-radius: 6px;
+}
+.manage-shell {
+  flex: 0 1 auto;
+}
+.manage-form {
+  flex: 0 1 auto;
+}
+.manage-heading {
+  padding: 20px 20px 12px;
+}
+.manage-heading h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.edit-food-caption {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+.manage-close {
+  background: transparent;
+}
+.manage-body {
+  padding: 8px 20px 16px;
+  flex: 0 1 auto;
+}
+.manage-section {
+  gap: 16px;
+}
+.edit-tracking {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 0;
+  margin: 0;
+  border: 0;
+}
+.edit-tracking .manage-note {
+  grid-column: 1 / -1;
+}
+.manage-body .category-suggestion {
+  margin-top: -10px;
+}
+.manage-body .category-suggestion > button {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  padding: 0;
+  min-height: 36px;
+  font-size: 12px;
+}
+.batch-settings {
+  border-bottom: 1px solid var(--border);
+}
+.batch-settings > summary {
+  gap: 8px;
+  min-height: 50px;
+  color: var(--text);
+}
+.package-count {
+  color: var(--muted);
+  font-weight: 400;
+}
+.package-chevron {
+  margin-left: auto;
+  font-size: 18px;
+}
+.batch-settings[open] .package-chevron {
+  transform: rotate(180deg);
+}
+.manage-delete-row {
+  justify-content: flex-start;
+  margin: 8px 0 0;
+}
+.manage-delete-icon {
+  display: flex;
+  gap: 8px;
+  width: auto;
+  padding: 0 4px;
+  font-size: 13px;
+}
+.manage-footer {
+  padding: 12px 20px 16px;
+}
