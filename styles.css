@@ -2502,3 +2502,35 @@ dialog:has(.manage-shell) {
 .manage-footer {
   padding: 12px 20px 16px;
 }
+/* Taste app-screen pass: equal field rhythm, readable values, no empty error band. */
+.manage-heading > div:not(.food-art) {
+  flex: 1;
+  min-width: 0;
+}
+.manage-heading {
+  gap: 12px;
+}
+.manage-body label {
+  font-size: 14px;
+  font-weight: 500;
+  gap: 8px;
+}
+.manage-body .edit-tracking {
+  align-items: end;
+}
+.manage-body .edit-tracking > label {
+  color: var(--text);
+  font-weight: 500;
+}
+.manage-body .edit-tracking input,
+.manage-body .edit-tracking select {
+  color: var(--text);
+  font-weight: 400;
+  border-color: var(--control);
+}
+.manage-body .error:empty {
+  display: none;
+}
+.manage-body .category-suggestion > button {
+  min-height: 44px;
+}

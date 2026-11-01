@@ -1,3 +1,4 @@
+import { FoodIllustration } from './FoodIllustration.tsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as D from '../domain.ts';
@@ -489,6 +490,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     return (
       <div className="manage-shell">
         <header className="manage-heading">
+          <FoodIllustration product={p} />
           <div>
             <h2>Edit food</h2>
             <p className="edit-food-caption">{p.name}</p>
