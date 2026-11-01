@@ -54,20 +54,44 @@ try {
   assert.equal(await page.locator('.card .food-art').count(), 5);
   assert.equal(await page.locator('.card .food-art svg').count(), 5);
   assert.equal(await page.locator('.hero-art svg').count(), 1);
-  assert.match(await page.locator('.hero h1').evaluate((node) => getComputedStyle(node).fontFamily), /Fraunces/);
-  assert.match(await page.locator('body').evaluate((node) => getComputedStyle(node).fontFamily), /Manrope/);
-  assert.equal(await page.evaluate(() => document.fonts.check('600 38px Fraunces')), true);
-  assert.equal(await page.evaluate(() => document.fonts.check('400 14px Manrope')), true);
-  pass('glance derives 0 out and 2 low; five inline SVG foods, editorial hero art, and both self-hosted fonts render');
-  const initialAvocados = page.locator('.shelf-card').filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
+  await page.evaluate(() => document.fonts.ready);
+  const bodyFont = await page.locator('body').evaluate((node) => getComputedStyle(node).fontFamily);
+  const headingType = await page.locator('.hero h1').evaluate((node) => ({
+    family: getComputedStyle(node).fontFamily,
+    size: parseFloat(getComputedStyle(node).fontSize)
+  }));
+  assert.match(bodyFont, /IBM Plex Sans/);
+  assert.equal(
+    await page.evaluate(() =>
+      [...document.fonts].some(
+        (face) => face.family.replaceAll('"', '') === 'IBM Plex Sans' && face.status === 'loaded'
+      )
+    ),
+    true
+  );
+  assert.equal(headingType.family, bodyFont);
+  assert.ok(headingType.size <= 32);
+  pass(
+    'glance counts and food illustrations render; IBM Plex Sans loads and is shared by headings and interface text'
+  );
+  const initialAvocados = page
+    .locator('.shelf-card')
+    .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });
   assert.equal(await initialAvocados.locator('.amount-update').count(), 1);
   assert.equal(await initialAvocados.locator('.batch, .batch-details').count(), 0);
-  assert.equal(await initialAvocados.getByRole('button', { name: 'Update stock for Avocados' }).count(), 1);
+  assert.equal(
+    await initialAvocados.getByRole('button', { name: 'Update stock for Avocados' }).count(),
+    1
+  );
   assert.match(await initialAvocados.locator('.stock-line').innerText(), /Pantry/);
   assert.doesNotMatch(await initialAvocados.innerText(), /Checked/);
-  const blueberriesCard = page.locator('.shelf-card').filter({ has: page.getByRole('heading', { name: 'Blueberries', exact: true }) });
+  const blueberriesCard = page
+    .locator('.shelf-card')
+    .filter({ has: page.getByRole('heading', { name: 'Blueberries', exact: true }) });
   assert.match(await blueberriesCard.locator('.expiry-status').innerText(), /Due/);
-  pass('single-batch cards show quantity once as the stock-update button, compact location, and expiry without check dates');
+  pass(
+    'single-batch cards show quantity once as the stock-update button, compact location, and expiry without check dates'
+  );
   await page.getByLabel('Storage location').selectOption('Fridge');
   await page.getByLabel('Food category').selectOption('Fruit');
   await page.getByLabel('Search food').fill('blue');
@@ -110,10 +134,7 @@ try {
   assert.equal(await cardActions.count(), 2);
   assert.deepEqual(
     await cardActions.evaluateAll((es) => es.map((e) => e.getAttribute('aria-label'))),
-    [
-      'Manage Avocados',
-      'Add Avocados to shopping list'
-    ]
+    ['Manage Avocados', 'Add Avocados to shopping list']
   );
   assert.deepEqual(
     await cardActions.evaluateAll((es) =>
@@ -136,23 +157,36 @@ try {
   assert.equal(await page.locator('#manage-details').count(), 1);
   assert.equal(await page.locator('#manage-stock').count(), 1);
   assert.equal(await page.getByRole('tab').count(), 2);
-  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
+  assert.equal(
+    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
+    'true'
+  );
   assert.equal(await page.getByText('Add purchased stock', { exact: true }).count(), 1);
   assert.equal(await page.locator('.manage-batch-meta[open]').count(), 0);
   assert.equal(await page.getByText(/^Current amount \(/).count(), 1);
-  assert.match(await page.locator('.manage-batch:not(.add-batch) legend').innerText(), /^Current stock · (Pantry|Fridge|Freezer)$/);
-  const currentAmountText = await page.locator('.manage-batch input[name^="quantity-"]').evaluate((input) => getComputedStyle(input).fontSize);
+  assert.match(
+    await page.locator('.manage-batch:not(.add-batch) legend').innerText(),
+    /^Current stock · (Pantry|Fridge|Freezer)$/
+  );
+  const currentAmountText = await page
+    .locator('.manage-batch input[name^="quantity-"]')
+    .evaluate((input) => getComputedStyle(input).fontSize);
   assert.ok(parseFloat(currentAmountText) >= 16);
   const manageMobile = await page.locator('dialog[open]').evaluate((dialog) => ({
     width: dialog.getBoundingClientRect().width,
     scrollWidth: dialog.scrollWidth,
     clientWidth: dialog.clientWidth,
-    footerTargets: [...dialog.querySelectorAll('.manage-footer button')].map((button) => button.getBoundingClientRect().height)
+    footerTargets: [...dialog.querySelectorAll('.manage-footer button')].map(
+      (button) => button.getBoundingClientRect().height
+    )
   }));
   assert.ok(manageMobile.width <= 382 && manageMobile.scrollWidth <= manageMobile.clientWidth);
   assert.equal(manageMobile.footerTargets.length, 2);
   assert.ok(manageMobile.footerTargets.every((height) => height >= 44));
-  for (const [width, height] of [[320, 640], [430, 760]]) {
+  for (const [width, height] of [
+    [320, 640],
+    [430, 760]
+  ]) {
     await page.setViewportSize({ width, height });
     const layout = await page.locator('dialog[open]').evaluate((dialog) => ({
       width: dialog.getBoundingClientRect().width,
@@ -167,18 +201,31 @@ try {
     const body = dialog.querySelector('.manage-body');
     const footer = dialog.querySelector('.manage-footer').getBoundingClientRect();
     const bounds = dialog.getBoundingClientRect();
-    return { overflow: body.scrollHeight > body.clientHeight, footerBottom: footer.bottom, dialogBottom: bounds.bottom, width: dialog.scrollWidth <= dialog.clientWidth };
+    return {
+      overflow: body.scrollHeight > body.clientHeight,
+      footerBottom: footer.bottom,
+      dialogBottom: bounds.bottom,
+      width: dialog.scrollWidth <= dialog.clientWidth
+    };
   });
   assert.equal(shortSheet.overflow, true);
   assert.ok(shortSheet.footerBottom <= shortSheet.dialogBottom && shortSheet.width);
   await page.locator('.manage-add-stock > summary').click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('tab', { name: 'Stock' }).press('ArrowRight');
-  assert.equal(await page.getByRole('tab', { name: 'Details' }).getAttribute('aria-selected'), 'true');
+  assert.equal(
+    await page.getByRole('tab', { name: 'Details' }).getAttribute('aria-selected'),
+    'true'
+  );
   await page.getByRole('tab', { name: 'Details' }).press('ArrowLeft');
-  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
+  assert.equal(
+    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
+    'true'
+  );
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  pass('Manage tabs and compact footer fit at 320/390/430px and keep actions visible while the short sheet body scrolls');
+  pass(
+    'Manage tabs and compact footer fit at 320/390/430px and keep actions visible while the short sheet body scrolls'
+  );
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   pass('390px layout has no horizontal overflow');
   await page.getByLabel('Food category').selectOption('Fruit');
@@ -244,11 +291,16 @@ try {
   await page.getByRole('tab', { name: 'Details' }).click();
   assert.equal(await page.locator('[name="category-custom"]').inputValue(), 'Breakfast');
   assert.equal(await page.locator('input[name="restock-quantity"]').inputValue(), '1');
-  assert.match(await page.locator('.manage-pending-stock').innerText(), /Will add 1 item to Pantry/);
+  assert.match(
+    await page.locator('.manage-pending-stock').innerText(),
+    /Will add 1 item to Pantry/
+  );
   await page.getByRole('button', { name: 'Save + add stock', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.locator('.amount').innerText(), /5 items/);
-  pass('one Save changes action applies pending restock and preserves custom category edits through tab switches');
+  pass(
+    'one Save changes action applies pending restock and preserves custom category edits through tab switches'
+  );
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
@@ -392,7 +444,11 @@ try {
   const deleteRice = page.getByRole('button', { name: 'Delete Rice', exact: true });
   const deleteTarget = await deleteRice.evaluate((button) => {
     const rect = button.getBoundingClientRect();
-    return { width: rect.width, height: rect.height, svgCount: button.querySelectorAll('svg').length };
+    return {
+      width: rect.width,
+      height: rect.height,
+      svgCount: button.querySelectorAll('svg').length
+    };
   });
   assert.ok(deleteTarget.width >= 44 && deleteTarget.height >= 44);
   assert.equal(deleteTarget.svgCount, 1);
@@ -515,17 +571,25 @@ try {
   await page.locator('.manage-settings > summary').click();
   await page.locator('select[name="unit"]').selectOption('level');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  assert.equal(await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'), 'true');
+  assert.equal(
+    await page.getByRole('tab', { name: 'Stock' }).getAttribute('aria-selected'),
+    'true'
+  );
   assert.match(await page.evaluate(() => document.activeElement.id), /^manage-quantity-/);
   assert.equal(await page.locator('select[name^="quantity-"]').inputValue(), '');
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
   const unchangedFlour = await page.evaluate(() => {
     const state = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state;
     const product = state.products.find((item) => item.name === 'Bread flour');
-    return { unit: product.unit, quantity: state.batches.find((batch) => batch.productId === product.id).quantity };
+    return {
+      unit: product.unit,
+      quantity: state.batches.find((batch) => batch.productId === product.id).quantity
+    };
   });
   assert.deepEqual(unchangedFlour, { unit: 'lb', quantity: 1 });
-  pass('hidden invalid batch reveals its Stock tab, focuses correction, and Cancel preserves exact lb stock');
+  pass(
+    'hidden invalid batch reveals its Stock tab, focuses correction, and Cancel preserves exact lb stock'
+  );
   pass('pound tracking saves and displays one lb with category and location');
   await profileButton.click();
   await page.getByRole('menuitem', { name: 'Connect', exact: true }).click();
@@ -543,7 +607,13 @@ try {
     const product = data.state.products.find((food) => food.name === 'Blueberries');
     const firstBatch = data.state.batches.find((batch) => batch.productId === product.id);
     const extraLocation = firstBatch.location === 'Fridge' ? 'Pantry' : 'Fridge';
-    data.state.batches.push({ ...firstBatch, id: 'fixture-blueberries-second', quantity: 3, location: extraLocation, expiry: '2026-10-20' });
+    data.state.batches.push({
+      ...firstBatch,
+      id: 'fixture-blueberries-second',
+      quantity: 3,
+      location: extraLocation,
+      expiry: '2026-10-20'
+    });
     localStorage.setItem('pantry-organizer.demo.v1', JSON.stringify(data));
     return { extraLocation, batchId: 'fixture-blueberries-second' };
   });
@@ -556,17 +626,31 @@ try {
   const batchDisclosure = multiBatchCard.locator('.batch-details');
   assert.equal(await batchDisclosure.evaluate((details) => details.open), false);
   assert.match(await batchDisclosure.locator('summary').innerText(), /2 batches/);
-  assert.match(await batchDisclosure.locator('summary').innerText(), new RegExp(fixture.extraLocation));
+  assert.match(
+    await batchDisclosure.locator('summary').innerText(),
+    new RegExp(fixture.extraLocation)
+  );
   await batchDisclosure.locator('summary').click();
-  const batchUpdateButtons = batchDisclosure.getByRole('button', { name: /Update stock for Blueberries in/ });
+  const batchUpdateButtons = batchDisclosure.getByRole('button', {
+    name: /Update stock for Blueberries in/
+  });
   assert.equal(await batchUpdateButtons.count(), 2);
-  await batchDisclosure.getByRole('button', { name: `Update stock for Blueberries in ${fixture.extraLocation}` }).click();
-  assert.equal(await batchPage.locator(`input[name="quantity-${fixture.batchId}"]`).inputValue(), '3');
-  await batchPage.locator(`#manage-batch-${fixture.batchId} input[name="quantity-${fixture.batchId}"]`).fill('2');
+  await batchDisclosure
+    .getByRole('button', { name: `Update stock for Blueberries in ${fixture.extraLocation}` })
+    .click();
+  assert.equal(
+    await batchPage.locator(`input[name="quantity-${fixture.batchId}"]`).inputValue(),
+    '3'
+  );
+  await batchPage
+    .locator(`#manage-batch-${fixture.batchId} input[name="quantity-${fixture.batchId}"]`)
+    .fill('2');
   await batchPage.getByRole('button', { name: 'Save changes', exact: true }).click();
   await batchPage.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await multiBatchCard.locator('.amount').innerText(), /3 packs/);
-  pass('multi-batch quantity aggregates once; collapsed location details expose batch-specific updates and save the selected batch');
+  pass(
+    'multi-batch quantity aggregates once; collapsed location details expose batch-specific updates and save the selected batch'
+  );
   await batchContext.close();
   const authContext = await browser.newContext({ viewport: { width: 390, height: 844 } }),
     authPage = await authContext.newPage(),
@@ -592,7 +676,8 @@ try {
         body: JSON.stringify({
           suggestions: request.items.map((entry) => ({
             id: entry.id,
-            category: entry.name === 'Lentils' || entry.name === 'Black beans' ? 'Dals & beans' : 'Fruit',
+            category:
+              entry.name === 'Lentils' || entry.name === 'Black beans' ? 'Dals & beans' : 'Fruit',
             confidence: entry.name === 'Black beans' ? 0.55 : 0.94
           }))
         })
@@ -690,14 +775,19 @@ try {
     clientWidth: dialog.clientWidth
   }));
   assert.ok(reviewBounds.width <= 370 && reviewBounds.scrollWidth <= reviewBounds.clientWidth);
-  const lowConfidence = reviewDialog.getByRole('checkbox', { name: 'Apply suggestion for Black beans' });
+  const lowConfidence = reviewDialog.getByRole('checkbox', {
+    name: 'Apply suggestion for Black beans'
+  });
   assert.equal(await lowConfidence.evaluate((checkbox) => checkbox.checked), false);
   await reviewDialog.getByText('Review carefully · lower confidence').waitFor();
   await reviewDialog.getByRole('checkbox', { name: 'Apply suggestion for Black beans' }).uncheck();
   await reviewDialog
     .getByRole('combobox', { name: 'Category for Lentils' })
     .selectOption({ label: 'Rice & grains' });
-  assert.equal(await reviewDialog.getByText(/changes selected/).innerText(), '1 of 2 changes selected');
+  assert.equal(
+    await reviewDialog.getByText(/changes selected/).innerText(),
+    '1 of 2 changes selected'
+  );
   await reviewDialog.getByRole('button', { name: 'Apply 1 selected' }).click();
   await reviewDialog.waitFor({ state: 'hidden' });
   assert.deepEqual(

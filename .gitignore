@@ -7,3 +7,6 @@ public/
 .env*
 .tgrep/
 
+
+# Local design inspection screenshots and reports
+.taste-skill/

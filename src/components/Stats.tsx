@@ -20,9 +20,9 @@ export const Stats: React.FC<StatsProps> = ({
       <button
         className={`stat ${currentFilter === 'all' ? 'active' : ''}`}
         data-filter="all"
+        aria-pressed={currentFilter === 'all'}
         onClick={() => onSelectFilter('all')}
       >
-        <span className="stat-icon">▦</span>
         <span>
           <strong>{totalProducts}</strong>Foods at home
           <small>Across all your spaces</small>
@@ -31,22 +31,22 @@ export const Stats: React.FC<StatsProps> = ({
       <button
         className={`stat ${currentFilter === 'soon' ? 'active' : ''}`}
         data-filter="soon"
+        aria-pressed={currentFilter === 'soon'}
         onClick={() => onSelectFilter('soon')}
       >
-        <span className="stat-icon">◷</span>
         <span>
-          <strong>{soonCount}</strong>Use soon
+          <strong className={soonCount > 0 ? 'signal-soon' : undefined}>{soonCount}</strong>Use soon
           <small>Due within 3 days or overdue</small>
         </span>
       </button>
       <button
         className={`stat ${currentFilter === 'low' ? 'active' : ''}`}
         data-filter="low"
+        aria-pressed={currentFilter === 'low'}
         onClick={() => onSelectFilter('low')}
       >
-        <span className="stat-icon">↘</span>
         <span>
-          <strong>{lowCount}</strong>Running low
+          <strong className={lowCount > 0 ? 'signal-low' : undefined}>{lowCount}</strong>Running low
           <small>Based on your last stock check</small>
         </span>
       </button>

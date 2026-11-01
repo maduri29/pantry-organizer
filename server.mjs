@@ -42,7 +42,11 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (!allowedStatic.has(url.pathname) && !allowedSource && !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)) {
+      if (
+        !allowedStatic.has(url.pathname) &&
+        !allowedSource &&
+        !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)
+      ) {
         return new Response('Not found', { status: 404 });
       }
       const file = Bun.file(path);
@@ -81,7 +85,11 @@ if (typeof Bun !== 'undefined') {
       const allowedSource =
         (path.startsWith(sourcePath + '\\') || path.startsWith(sourcePath + '/')) &&
         extname(path) === '.js';
-      if (!allowedStatic.has(url.pathname) && !allowedSource && !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)) {
+      if (
+        !allowedStatic.has(url.pathname) &&
+        !allowedSource &&
+        !/^\/assets\/[a-z0-9.-]+\.woff2$/.test(url.pathname)
+      ) {
         res.writeHead(404).end();
         return;
       }

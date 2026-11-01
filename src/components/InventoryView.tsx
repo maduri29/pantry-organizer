@@ -110,7 +110,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         }),
     [s.products, productIsLow, productTotals]
   );
-  const outCount = needsAttention.filter((product) => (productTotals.get(product.id) ?? 0) === 0).length;
+  const outCount = needsAttention.filter(
+    (product) => (productTotals.get(product.id) ?? 0) === 0
+  ).length;
   const runningLowCount = needsAttention.length - outCount;
 
   const items = useMemo(() => {
@@ -158,22 +160,22 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   ]);
 
   return (
-    <>
+    <div className="inventory-view">
       {s.products.length > 0 && (
         <section className="shopping-glance" aria-labelledby="shopping-glance-title">
           <div className="glance-heading">
-            <span className="glance-mark" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 8h14v11H5zM8 8V5h8v3m-8 5h.01M12 13h.01M16 13h.01" /></svg>
-            </span>
-            <div>
-              <span className="glance-eyebrow">A QUICK LOOK BEFORE YOU SHOP</span>
-              <h2 id="shopping-glance-title">Shopping glance</h2>
-            </div>
+            <h2 id="shopping-glance-title">Before you shop</h2>
+            <p>From your latest stock checks</p>
           </div>
           <div className="glance-counts" aria-live="polite">
-            <span><i className="glance-dot out" /><strong>{outCount}</strong> out</span>
-            <span><i className="glance-dot low" /><strong>{runningLowCount}</strong> running low</span>
-            <span className="glance-context">From your latest stock checks</span>
+            <span>
+              <i className="glance-dot out" />
+              <strong>{outCount}</strong> out
+            </span>
+            <span>
+              <i className="glance-dot low" />
+              <strong>{runningLowCount}</strong> running low
+            </span>
           </div>
           {needsAttention.length ? (
             <div className="glance-items">
@@ -181,7 +183,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 const isOut = (productTotals.get(product.id) ?? 0) === 0;
                 return (
                   <div className="glance-item" key={product.id}>
-                    <FoodIllustration product={product} />
                     <div className="glance-item-copy">
                       <strong>{product.name}</strong>
                       <span className={`glance-status ${isOut ? 'is-out' : 'is-low'}`}>
@@ -196,13 +197,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             <p className="glance-clear">Everything looks stocked for now.</p>
           )}
           <div className="glance-footer">
-            <span>
-              {needsAttention.length > 4
-                ? `${needsAttention.length - 4} more need attention`
-                : needsAttention.length
-                  ? 'Your list of items to check'
-                  : 'You’re up to date'}
-            </span>
+            {needsAttention.length > 4 && (
+              <span>{needsAttention.length - 4} more need attention</span>
+            )}
             <button
               type="button"
               className="glance-link"
@@ -215,7 +212,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               }}
             >
               {needsAttention.length ? `See all ${needsAttention.length} items` : 'See your pantry'}
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 12h15m-6-6 6 6-6 6" />
+              </svg>
             </button>
           </div>
         </section>
@@ -223,10 +222,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       <div className="inventory-heading">
         <div>
-          <span className="inventory-eyebrow">YOUR KITCHEN</span>
-          <h2>Take a look around</h2>
+          <h2>On your shelves</h2>
         </div>
-        <span className="inventory-note">Grouped by shelf</span>
+        <span className="inventory-note">
+          {items.length} {items.length === 1 ? 'food' : 'foods'}
+          {sort === 'category' ? ' · By category' : ''}
+        </span>
       </div>
       <div className="toolbar">
         <input
@@ -290,12 +291,13 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               sort === 'category' && (index === 0 || items[index - 1].category !== p.category) ? (
                 <div key={`cat-${p.category}`} className="category-heading">
                   <div>
-                    <span className="shelf-kicker">SHELF</span>
                     <h2>{p.category}</h2>
                   </div>
                   <span className="category-count">
                     {items.filter((item) => item.category === p.category).length}{' '}
-                    {items.filter((item) => item.category === p.category).length === 1 ? 'food' : 'foods'}
+                    {items.filter((item) => item.category === p.category).length === 1
+                      ? 'food'
+                      : 'foods'}
                   </span>
                 </div>
               ) : null;
@@ -308,9 +310,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             return (
               <React.Fragment key={p.id}>
                 {heading}
-                <article className={`card shelf-card ${totalQty === 0 ? 'is-out' : itemIsLow ? 'is-low' : 'is-ready'}`}>
+                <article
+                  className={`card shelf-card ${totalQty === 0 ? 'is-out' : itemIsLow ? 'is-low' : 'is-ready'}`}
+                >
                   <div className="card-top">
-                  <FoodIllustration product={p} />
+                    <FoodIllustration product={p} />
                     <div>
                       <h2>{p.name}</h2>
                       <span className="meta">{p.category}</span>
@@ -326,48 +330,83 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       title={`Update stock for ${p.name}`}
                       onClick={() => onManage(p, 'stock', batches[0])}
                     >
-                      <span>{p.unit === 'level' ? D.level(totalQty) : <>{fmt(totalQty)} <small>{p.unit}</small></>}</span>
-                      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" /></svg>
+                      <span>
+                        {p.unit === 'level' ? (
+                          D.level(totalQty)
+                        ) : (
+                          <>
+                            {fmt(totalQty)} <small>{p.unit}</small>
+                          </>
+                        )}
+                      </span>
+                      <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
+                      </svg>
                     </button>
                   ) : (
                     <div className="amount" aria-label={`Quantity: ${formatAmount(totalQty, p)}`}>
-                      {p.unit === 'level' ? D.level(totalQty) : <>{fmt(totalQty)} <small>{p.unit}</small></>}
+                      {p.unit === 'level' ? (
+                        D.level(totalQty)
+                      ) : (
+                        <>
+                          {fmt(totalQty)} <small>{p.unit}</small>
+                        </>
+                      )}
                     </div>
                   )}
 
                   <span className={`badge stock-status ${itemIsLow ? 'warn' : ''}`}>
                     {totalQty === 0 ? 'Out' : itemIsLow ? 'Low' : 'Stocked'}
-                    {totalQty > 0 && itemIsLow && p.unit !== 'level' ? ` · min ${fmt(p.minimum)} ${p.unit}` : ''}
+                    {totalQty > 0 && itemIsLow && p.unit !== 'level'
+                      ? ` · min ${fmt(p.minimum)} ${p.unit}`
+                      : ''}
                   </span>
 
-                  {batches.length === 1 && (() => {
-                    const batch = batches[0];
-                    const days = D.expiryDays(batch.expiry);
-                    return (
-                      <div className="stock-line single-batch">
-                        <span className="stock-location">{batch.location}</span>
-                        {batch.expiry && (
-                          <span className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}>
-                            {days < 0 ? `Passed ${-days}d ago` : days === 0 ? 'Due today' : `Due ${batch.expiry}`}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })()}
+                  {batches.length === 1 &&
+                    (() => {
+                      const batch = batches[0];
+                      const days = D.expiryDays(batch.expiry);
+                      return (
+                        <div className="stock-line single-batch">
+                          <span className="stock-location">{batch.location}</span>
+                          {batch.expiry && (
+                            <span
+                              className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}
+                            >
+                              {days < 0
+                                ? `Passed ${-days}d ago`
+                                : days === 0
+                                  ? 'Due today'
+                                  : `Due ${batch.expiry}`}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                   {batches.length > 1 && (
                     <details className="batch-details">
-                      <summary>{batches.length} batches · {Array.from(new Set(batches.map((batch) => batch.location))).join(', ')}</summary>
+                      <summary>
+                        {batches.length} batches ·{' '}
+                        {Array.from(new Set(batches.map((batch) => batch.location))).join(', ')}
+                      </summary>
                       <div className="batch-list">
                         {batches.map((batch) => {
                           const days = D.expiryDays(batch.expiry);
                           return (
                             <div key={batch.id} className="batch-line">
                               <span className="batch-location">
-                                <strong>{formatAmount(batch.quantity, p)}</strong> · {batch.location}
+                                <strong>{formatAmount(batch.quantity, p)}</strong> ·{' '}
+                                {batch.location}
                                 {batch.expiry && (
-                                  <span className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}>
-                                    {days < 0 ? `Passed ${-days}d ago` : days === 0 ? 'Due today' : `Due ${batch.expiry}`}
+                                  <span
+                                    className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}
+                                  >
+                                    {days < 0
+                                      ? `Passed ${-days}d ago`
+                                      : days === 0
+                                        ? 'Due today'
+                                        : `Due ${batch.expiry}`}
                                   </span>
                                 )}
                               </span>
@@ -379,7 +418,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                                 title={`Update stock for ${p.name} in ${batch.location}`}
                                 onClick={() => onManage(p, 'stock', batch)}
                               >
-                                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></svg>
+                                <svg aria-hidden="true" viewBox="0 0 24 24">
+                                  <path d="M12 5v14M5 12h14" />
+                                </svg>
                                 <span>Update</span>
                               </button>
                             </div>
@@ -430,17 +471,27 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           })
         ) : (
           <div className="empty">
-            <div className="food" style={{ margin: 'auto' }}>
-              🫙
-            </div>
-            <h2>{s.products.length ? 'No matching foods' : 'Make room for a calmer kitchen'}</h2>
+            <h2>{s.products.length ? 'No matching foods' : 'What’s in your kitchen?'}</h2>
             <p>
               {s.products.length
                 ? 'Try another search or clear your filters.'
                 : 'Start with a few things you already have. You can add the rest as you go.'}
             </p>
-            <button className="primary" data-action="add" onClick={onAddFood}>
-              Add your first food
+            <button
+              className="primary"
+              data-action={s.products.length ? 'clear' : 'add'}
+              onClick={() => {
+                if (s.products.length) {
+                  onSearchChange('');
+                  onLocationChange('all');
+                  onCategoryChange('all');
+                  onClearFilter();
+                } else {
+                  onAddFood();
+                }
+              }}
+            >
+              {s.products.length ? 'Clear filters' : 'Add your first food'}
             </button>{' '}
             {!online && !s.products.length && (
               <button data-action="demo" onClick={onTrySample}>
@@ -450,6 +501,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };

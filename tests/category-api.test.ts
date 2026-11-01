@@ -128,7 +128,11 @@ describe('Jev category API', () => {
     expect(providerState.categories).toHaveLength(29);
     expect(providerState.categories[2].label).toBe('Rice & grains');
     expect(providerState.categories[2].guidance).toContain('poha');
-    expect(providerState.categories.some((category: { label: string }) => category.label === 'Grains & pulses')).toBe(false);
+    expect(
+      providerState.categories.some(
+        (category: { label: string }) => category.label === 'Grains & pulses'
+      )
+    ).toBe(false);
     expect(body.questions.food_0.instructions).toContain('Long grain rice');
     expect(body.questions.food_0.criteria.category_2).toContain('Rice & grains:');
     expect(body.questions.food_0.criteria.category_4).toContain('Dals & beans:');

@@ -9,8 +9,7 @@ const workerTemplate = await readFile(new URL('../sw.js', import.meta.url), 'utf
 const releaseId = 'test-current';
 const currentWorker = workerTemplate
   .replaceAll('__PANTRY_RELEASE_ID__', releaseId)
-  .replaceAll('__PANTRY_MANROPE_HASH__', 'test-manrope')
-  .replaceAll('__PANTRY_FRAUNCES_HASH__', 'test-fraunces');
+  .replaceAll('__PANTRY_PLEX_HASH__', 'test-plex');
 const currentCacheName = `pantry-cache-${releaseId}`;
 const previousWorker = await readFile(new URL('./fixtures/sw-v1.js', import.meta.url), 'utf8');
 assert.notEqual(previousWorker, currentWorker, 'cache version and cache keys must change');
@@ -36,7 +35,9 @@ const server = createServer((request, response) => {
     response.writeHead(200, { 'Content-Type': 'text/javascript' });
     response.end(`window.firebaseBuild = '${release}';`);
   } else if (pathname === '/styles.css') {
-    response.writeHead(200, { 'Content-Type': 'text/css' }).end(`body { color: ${release === 'previous' ? '#111' : '#222'}; }`);
+    response
+      .writeHead(200, { 'Content-Type': 'text/css' })
+      .end(`body { color: ${release === 'previous' ? '#111' : '#222'}; }`);
   } else if (pathname === '/favicon.svg') {
     response.writeHead(200, { 'Content-Type': 'image/svg+xml' }).end('<svg></svg>');
   } else if (pathname === '/manifest.webmanifest') {
@@ -77,7 +78,9 @@ try {
   await page.waitForFunction(async () => {
     const cache = await caches.open(`pantry-cache-${'test-current'}`);
     const keys = await cache.keys();
-    return keys.length === 9 && keys.some((request) => new URL(request.url).pathname === '/src/app.js');
+    return (
+      keys.length === 8 && keys.some((request) => new URL(request.url).pathname === '/src/app.js')
+    );
   });
   await page.waitForTimeout(100);
   const cacheContents = await page.evaluate(async () => {
@@ -90,9 +93,14 @@ try {
     const response = await findByPath('/src/app.js');
     const firebase = await findByPath('/src/firebase.js');
     const css = await findByPath('/styles.css');
-    const manrope = keys.some((key) => key.includes('/assets/manrope.test-manrope.woff2?'));
-    const fraunces = keys.some((key) => key.includes('/assets/fraunces.test-fraunces.woff2?'));
-    return { keys, app: await response?.text(), firebase: await firebase?.text(), css: await css?.text(), manrope, fraunces };
+    const plex = keys.some((key) => key.includes('/assets/ibm-plex-sans.test-plex.woff2?'));
+    return {
+      keys,
+      app: await response?.text(),
+      firebase: await firebase?.text(),
+      css: await css?.text(),
+      plex
+    };
   });
   const cachedApp = cacheContents.app;
   assert.match(await cachedApp, /current/, 'new worker precaches the current app bundle');
@@ -101,13 +109,19 @@ try {
     /firebaseBuild = 'current'/,
     'new worker precaches the current Firebase module'
   );
-  assert.equal(cacheContents.manrope, true, 'new worker precaches the versioned self-hosted UI font');
-  assert.equal(cacheContents.fraunces, true, 'new worker precaches the versioned self-hosted display font');
+  assert.equal(
+    cacheContents.plex,
+    true,
+    'new worker precaches the versioned self-hosted IBM Plex Sans font'
+  );
   assert.match(cacheContents.css, /#222/, 'new worker precaches the current stylesheet');
 
   await page.reload();
   assert.equal(await page.locator('#version').innerText(), 'current');
-  assert.equal(await page.locator('body').evaluate((body) => getComputedStyle(body).color), 'rgb(34, 34, 34)');
+  assert.equal(
+    await page.locator('body').evaluate((body) => getComputedStyle(body).color),
+    'rgb(34, 34, 34)'
+  );
   assert.equal(
     await page.evaluate(() => localStorage.getItem('pantry-organizer.demo.v1')),
     pantryData

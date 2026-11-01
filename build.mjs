@@ -66,31 +66,27 @@ for (const name of ['index.html', 'styles.css', 'favicon.svg', 'manifest.webmani
 await cp('src', 'public/src', { recursive: true });
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
-const manropeBytes = await readFile('assets/manrope-variable-latin.woff2');
-const frauncesBytes = await readFile('assets/fraunces-variable-latin.woff2');
-const manropeHash = sha256(manropeBytes).slice(0, 12);
-const frauncesHash = sha256(frauncesBytes).slice(0, 12);
+const plexBytes = await readFile('assets/ibm-plex-sans-variable-latin.woff2');
+const plexHash = sha256(plexBytes).slice(0, 12);
 const fingerprint = createHash('sha256');
 for (const name of ['index.html', 'styles.css', 'src/app.js', 'src/firebase.js']) {
   fingerprint.update(name);
   fingerprint.update(await readFile(name));
 }
-fingerprint.update(manropeHash);
-fingerprint.update(frauncesHash);
+fingerprint.update(plexHash);
 const releaseId = fingerprint.digest('hex').slice(0, 12);
 
 await rm('public/assets', { recursive: true, force: true });
 await mkdir('public/assets', { recursive: true });
-await writeFile(`public/assets/manrope.${manropeHash}.woff2`, manropeBytes);
-await writeFile(`public/assets/fraunces.${frauncesHash}.woff2`, frauncesBytes);
-const builtCss = (await readFile('styles.css', 'utf8'))
-  .replaceAll('__PANTRY_MANROPE_HASH__', manropeHash)
-  .replaceAll('__PANTRY_FRAUNCES_HASH__', frauncesHash);
+await writeFile(`public/assets/ibm-plex-sans.${plexHash}.woff2`, plexBytes);
+const builtCss = (await readFile('styles.css', 'utf8')).replaceAll(
+  '__PANTRY_PLEX_HASH__',
+  plexHash
+);
 await writeFile('public/styles.css', builtCss);
 const worker = (await readFile('sw.js', 'utf8'))
   .replaceAll('__PANTRY_RELEASE_ID__', releaseId)
-  .replaceAll('__PANTRY_MANROPE_HASH__', manropeHash)
-  .replaceAll('__PANTRY_FRAUNCES_HASH__', frauncesHash);
+  .replaceAll('__PANTRY_PLEX_HASH__', plexHash);
 await writeFile('public/sw.js', worker);
 
 const env = {

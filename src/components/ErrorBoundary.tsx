@@ -28,9 +28,6 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <main style={{ padding: '60px 20px', textAlign: 'center' }}>
           <div className="empty" style={{ margin: '0 auto', maxWidth: '440px' }}>
-            <div className="food" style={{ margin: '0 auto 16px' }} aria-hidden="true">
-              🫙
-            </div>
             <h2>Something went wrong opening your pantry</h2>
             <p>
               {this.state.error?.message ||

@@ -1,8 +1,7 @@
 const RELEASE_ID = '__PANTRY_RELEASE_ID__';
 const CACHE_NAME = `pantry-cache-${RELEASE_ID}`;
 const CACHE_KEY_PARAMETER = `__${CACHE_NAME.replace(/-/g, '_')}`;
-const MANROPE_FONT_PATH = '/assets/manrope.__PANTRY_MANROPE_HASH__.woff2';
-const FRAUNCES_FONT_PATH = '/assets/fraunces.__PANTRY_FRAUNCES_HASH__.woff2';
+const PLEX_FONT_PATH = '/assets/ibm-plex-sans.__PANTRY_PLEX_HASH__.woff2';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -11,8 +10,7 @@ const PRECACHE = [
   '/src/firebase.js',
   '/favicon.svg',
   '/manifest.webmanifest',
-  MANROPE_FONT_PATH,
-  FRAUNCES_FONT_PATH
+  PLEX_FONT_PATH
 ];
 const versionedRequest = (request) => {
   const url = new URL(request.url);

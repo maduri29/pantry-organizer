@@ -10,6 +10,7 @@
     "public/**",
     "src/app.js",
     "src/domain.js",
-    "src/storage.js"
+    "src/storage.js",
+    "src/firebase.js"
   ]
 }
