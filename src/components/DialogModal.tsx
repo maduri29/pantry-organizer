@@ -2,7 +2,14 @@ import { flushSync } from 'react-dom';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as D from '../domain.ts';
-import type { Batch, CategorySuggestion, PantryState, Product, ShoppingItem } from '../types.ts';
+import type {
+  Batch,
+  CategorySuggestion,
+  Location,
+  PantryState,
+  Product,
+  ShoppingItem
+} from '../types.ts';
 import { formatAmount } from './InventoryView.tsx';
 
 export type ModalType =
@@ -24,6 +31,10 @@ export interface ModalState {
   product?: Product;
   batch?: Batch;
   shoppingItem?: ShoppingItem;
+  initialName?: string;
+  initialCategory?: string;
+  initialLocation?: Location;
+  lastAdded?: string;
 }
 
 interface DialogModalProps {
@@ -31,6 +42,7 @@ interface DialogModalProps {
   state: PantryState;
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
+  onManageExisting?: (product: Product) => void;
   onSuggestCategory?: (
     name: string,
     categories: string[],
@@ -43,6 +55,7 @@ interface ModalFormContentProps {
   state: PantryState;
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
+  onManageExisting?: (product: Product) => void;
   onSuggestCategory?: (
     name: string,
     categories: string[],
@@ -187,13 +200,14 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   state: s,
   onClose,
   onSubmit,
+  onManageExisting,
   onSuggestCategory
 }) => {
   const [error, setError] = useState<string>('');
   const [busy, setBusy] = useState<boolean>(false);
   const [trackingUnit, setTrackingUnit] = useState<string>(modal.product?.unit ?? 'level');
   const [pickedIds, setPickedIds] = useState<Record<string, boolean>>({});
-  const [foodName, setFoodName] = useState(modal.product?.name ?? '');
+  const [foodName, setFoodName] = useState(modal.initialName ?? modal.product?.name ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [manageSection, setManageSection] = useState<'details' | 'stock'>(modal.section ?? 'stock');
   const [restockQuantity, setRestockQuantity] = useState('');
@@ -250,107 +264,187 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   const { type, product: p, batch: b, shoppingItem: i } = modal;
 
   if (type === 'add') {
+    const matchingFoods = s.products.filter(
+      (product) => product.name.toLocaleLowerCase() === foodName.trim().toLocaleLowerCase()
+    );
+    const existing =
+      matchingFoods.find((product) => product.unit === trackingUnit) ?? matchingFoods[0];
     return (
-      <>
-        <h2>Add something good</h2>
-        <p>Use a rough level, or choose exact quantities when useful.</p>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Food name
-            <input
-              name="name"
-              value={foodName}
-              onChange={(event) => setFoodName(event.target.value)}
-              required
-              maxLength={80}
-              placeholder="e.g. Eggs"
-            />
-          </label>
-          <label>
-            Tracking
-            <select
-              name="unit"
-              id="tracking"
-              value={trackingUnit}
-              onChange={(e) => setTrackingUnit(e.target.value)}
-            >
-              {D.units.map((u) => (
-                <option key={u} value={u}>
-                  {u === 'level' ? 'Rough level (recommended)' : u}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div id="quantity-field">
-            {trackingUnit === 'level' ? (
+      <div className="add-shell">
+        <div className="add-heading">
+          <div>
+            <h2 id="add-food-title">Add food</h2>
+            <p>A name is enough to start. Adjust the rest when you need to.</p>
+          </div>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Close add food"
+            onClick={onClose}
+            disabled={busy}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+        <form
+          className="add-form"
+          onSubmit={handleSubmit}
+          onInvalidCapture={(event) => {
+            let details = (event.target as HTMLElement).closest<HTMLDetailsElement>(
+              'details:not([open])'
+            );
+            while (details) {
+              details.open = true;
+              details =
+                details.parentElement?.closest<HTMLDetailsElement>('details:not([open])') ?? null;
+            }
+          }}
+        >
+          <div className="add-body">
+            {modal.lastAdded && (
+              <p className="add-success" role="status">
+                {modal.lastAdded} added. Ready for the next food.
+              </p>
+            )}
+            <label>
+              Food name
+              <input
+                name="name"
+                value={foodName}
+                onChange={(event) => setFoodName(event.target.value)}
+                required
+                maxLength={80}
+                autoComplete="off"
+                autoCapitalize="words"
+                placeholder="e.g. Eggs, milk or rice"
+              />
+            </label>
+            {existing && (
+              <div className="existing-food" role="status">
+                <div>
+                  <strong>{existing.name} is already in your pantry</strong>
+                  <p>
+                    {existing.unit !== trackingUnit
+                      ? 'Adding with a different tracking method creates a separate pantry entry.'
+                      : trackingUnit === 'level'
+                        ? 'Adding it again replaces the stock level in the selected location.'
+                        : 'Adding it again creates a separate stock batch.'}
+                  </p>
+                </div>
+                {onManageExisting && (
+                  <button type="button" onClick={() => onManageExisting(existing)} disabled={busy}>
+                    Update existing food
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="two add-basics">
+              <div id="quantity-field">
+                {trackingUnit === 'level' ? (
+                  <label>
+                    What’s left?
+                    <select name="quantity" defaultValue="1">
+                      <option value="1">Full</option>
+                      <option value="0.5">Half</option>
+                      <option value="0.25">Low</option>
+                      <option value="0">Out</option>
+                    </select>
+                  </label>
+                ) : (
+                  <label>
+                    Amount ({trackingUnit})
+                    <input
+                      name="quantity"
+                      type="number"
+                      inputMode="decimal"
+                      min="0.000001"
+                      step="any"
+                      required
+                      defaultValue="1"
+                    />
+                  </label>
+                )}
+              </div>
               <label>
-                What’s left?
-                <select name="quantity" defaultValue="1">
-                  <option value="1">Full</option>
-                  <option value="0.5">Half</option>
-                  <option value="0.25">Low</option>
-                  <option value="0">Out</option>
+                Store in
+                <select name="location" defaultValue={modal.initialLocation ?? 'Pantry'}>
+                  {D.locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
                 </select>
               </label>
-            ) : (
-              <label>
-                Amount
-                <input
-                  name="quantity"
-                  type="number"
-                  min="0.000001"
-                  step="any"
-                  required
-                  defaultValue="1"
-                />
-              </label>
-            )}
-          </div>
-
-          <div className="two">
+            </div>
             <CategoryField
               categories={allCategories}
-              initialCategory="Other"
+              initialCategory={modal.initialCategory ?? 'Other'}
               itemName={foodName}
               onSuggestCategory={onSuggestCategory}
             />
-            <label id="minimum-field" hidden={trackingUnit === 'level'}>
-              Low-stock minimum
-              <input name="minimum" type="number" min="0" step="any" defaultValue="0" />
-            </label>
+            <details className="add-options">
+              <summary>Exact quantities & dates</summary>
+              <div className="add-option-fields">
+                <label>
+                  Tracking
+                  <select
+                    name="unit"
+                    id="tracking"
+                    value={trackingUnit}
+                    onChange={(event) => setTrackingUnit(event.target.value)}
+                  >
+                    {D.units.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit === 'level' ? 'Rough level (recommended)' : unit}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label id="minimum-field" hidden={trackingUnit === 'level'}>
+                  Low-stock minimum
+                  <input
+                    name="minimum"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    step="any"
+                    defaultValue="0"
+                    disabled={trackingUnit === 'level'}
+                  />
+                </label>
+                <label>
+                  Date on package (optional)
+                  <input name="expiry" type="date" />
+                </label>
+              </div>
+            </details>
+            <div className="error" role="alert">
+              {error}
+            </div>
           </div>
-
-          <div className="two">
-            <label>
-              Store in
-              <select name="location" defaultValue="Pantry">
-                {D.locations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Date on package (optional)
-              <input name="expiry" type="date" />
-            </label>
-          </div>
-
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Add food
+          <div className="add-footer">
+            <div className="actions">
+              <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
+                Cancel
+              </button>
+              <button className="primary" type="submit" disabled={busy}>
+                {busy ? 'Adding…' : 'Add food'}
+              </button>
+            </div>
+            <button
+              className="quiet add-another"
+              type="submit"
+              name="add-action"
+              value="another"
+              disabled={busy}
+            >
+              Add & add another
             </button>
           </div>
         </form>
-      </>
+      </div>
     );
   }
 
@@ -1186,6 +1280,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   state: s,
   onClose,
   onSubmit,
+  onManageExisting,
   onSuggestCategory
 }) => {
   useEffect(() => {
@@ -1196,6 +1291,17 @@ export const DialogModal: React.FC<DialogModalProps> = ({
       dialog.dataset.revision = String(modal.revision);
       if (!dialog.open) {
         dialog.showModal();
+      }
+      const heading = dialog.querySelector('h2');
+      if (heading) {
+        if (!heading.id) heading.id = 'editor-title';
+        dialog.setAttribute('aria-labelledby', heading.id);
+      }
+      if (modal.type === 'add') {
+        const frame = requestAnimationFrame(() =>
+          dialog.querySelector<HTMLInputElement>('[name="name"]')?.focus({ preventScroll: true })
+        );
+        return () => cancelAnimationFrame(frame);
       }
     } else {
       if (dialog.open) {
@@ -1240,6 +1346,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
       state={s}
       onClose={onClose}
       onSubmit={onSubmit}
+      onManageExisting={onManageExisting}
       onSuggestCategory={onSuggestCategory}
     />,
     dialogElement

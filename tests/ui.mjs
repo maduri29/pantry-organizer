@@ -532,6 +532,7 @@ try {
   assert.ok(desktopModal.scrollWidth <= desktopModal.clientWidth);
   pass('Add modal category picker fits the desktop dialog');
   await page.locator('[name="name"]').fill('Bread flour');
+  await page.locator('.add-options > summary').click();
   await page.getByLabel('Tracking').selectOption('lb');
   await page.locator('[name="quantity"]').fill('1');
   await page.locator('select[name="category-choice"]').selectOption('new');

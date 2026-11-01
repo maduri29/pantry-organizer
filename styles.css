@@ -45,6 +45,9 @@
 * {
   box-sizing: border-box;
 }
+[hidden] {
+  display: none !important;
+}
 body {
   margin: 0;
 }
@@ -1766,5 +1769,159 @@ dialog:has(.manage-shell) {
   }
   .manage-footer {
     padding: 8px 14px max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Adding stays compact; optional settings scroll above a persistent save footer. */
+dialog:has(.add-shell) {
+  width: 480px;
+  max-width: calc(100% - 20px);
+  max-height: min(90dvh, 740px);
+  padding: 0;
+  overflow: hidden;
+}
+.add-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: inherit;
+}
+.add-heading {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 20px 12px;
+}
+.add-heading h2 {
+  margin: 0 0 6px;
+}
+.add-heading p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.add-heading .icon-button {
+  margin-top: -8px;
+  margin-right: -8px;
+}
+.add-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0;
+  overflow: hidden;
+}
+.add-body {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 16px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 20px 16px;
+}
+.add-shell .add-basics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.add-body input,
+.add-body select {
+  width: 100%;
+}
+.add-body .error:empty {
+  display: none;
+}
+.add-options {
+  border-top: 1px solid var(--border);
+}
+.add-options > summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--primary);
+  font-size: 13px;
+  list-style: none;
+}
+.add-options > summary::after {
+  content: '+';
+  margin-left: auto;
+  font-size: 18px;
+}
+.add-options[open] > summary::after {
+  content: '−';
+}
+.add-option-fields {
+  display: grid;
+  gap: 16px;
+  padding-top: 8px;
+}
+.add-footer {
+  flex: 0 0 auto;
+  padding: 12px 20px max(8px, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.add-footer .actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  margin: 0;
+}
+.add-another {
+  width: 100%;
+  font-size: 13px;
+  margin-top: 4px;
+  color: var(--primary);
+}
+.add-success {
+  margin: 0;
+  color: var(--primary);
+  font-size: 13px;
+}
+.existing-food {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--raised);
+}
+.existing-food strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.existing-food p {
+  margin: 4px 0 8px;
+  font-size: 12px;
+}
+.existing-food button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.card-foot .icon-action {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px;
+}
+.card-foot .icon-action svg {
+  width: 17px;
+  height: 17px;
+}
+.card-foot .icon-action span {
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .add-heading {
+    padding: 18px 16px 10px;
+  }
+  .add-body {
+    padding: 8px 16px 14px;
+    gap: 14px;
+  }
+  .add-footer {
+    padding-inline: 16px;
   }
 }

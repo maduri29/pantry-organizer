@@ -17,7 +17,7 @@ interface InventoryViewProps {
   onSortChange: (sort: string) => void;
   onClearFilter: () => void;
   onShowNeeds: () => void;
-  onAddFood: () => void;
+  onAddFood: (initialName?: string) => void;
   onTrySample: () => void;
   onManage: (product: Product, section: 'details' | 'stock', batch?: Batch) => void;
   onAddToList: (product: Product) => void;
@@ -116,10 +116,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const runningLowCount = needsAttention.length - outCount;
 
   const items = useMemo(() => {
-    const term = search.toLowerCase();
+    const term = search.trim().toLocaleLowerCase();
     return s.products
       .filter((p) => {
-        if (term && !p.name.toLowerCase().includes(term)) return false;
+        if (term && !p.name.toLocaleLowerCase().includes(term)) return false;
         if (category !== 'all' && p.category !== category) return false;
         if (
           location !== 'all' &&
@@ -158,6 +158,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     productIsLow,
     minExpiryDays
   ]);
+
+  const clearFilters = () => {
+    onSearchChange('');
+    onLocationChange('all');
+    onCategoryChange('all');
+    onClearFilter();
+  };
+  const hasActiveFilters =
+    Boolean(search.trim()) || location !== 'all' || category !== 'all' || filter !== 'all';
 
   return (
     <div className="inventory-view">
@@ -277,8 +286,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           <option value="low">Low stock first</option>
           <option value="expiry">Soonest date</option>
         </select>
-        {filter !== 'all' && (
-          <button data-filter="all" onClick={onClearFilter}>
+        {hasActiveFilters && (
+          <button data-filter="all" onClick={clearFilters}>
             Clear filter
           </button>
         )}
@@ -442,6 +451,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M4 5h16v14H4zM8 9h8m-8 4h5M18 3v4M6 17v4" />
                       </svg>
+                      <span>Manage</span>
                     </button>
                     <button
                       className="icon-action"
@@ -463,6 +473,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M3 4h2l2.5 12h11L21 8H6m3 12h.01M17 20h.01M12 6v6m-3-3h6" />
                       </svg>
+                      <span>{isOnShopping ? 'On list' : 'List'}</span>
                     </button>
                   </div>
                 </article>
@@ -482,10 +493,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
               data-action={s.products.length ? 'clear' : 'add'}
               onClick={() => {
                 if (s.products.length) {
-                  onSearchChange('');
-                  onLocationChange('all');
-                  onCategoryChange('all');
-                  onClearFilter();
+                  clearFilters();
                 } else {
                   onAddFood();
                 }
@@ -493,6 +501,11 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             >
               {s.products.length ? 'Clear filters' : 'Add your first food'}
             </button>{' '}
+            {s.products.length > 0 && search.trim() && (
+              <button type="button" onClick={() => onAddFood(search.trim())}>
+                Add “{search.trim()}”
+              </button>
+            )}
             {!online && !s.products.length && (
               <button data-action="demo" onClick={onTrySample}>
                 Try sample pantry

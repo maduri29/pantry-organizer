@@ -5,6 +5,7 @@ import { requestCategorySuggestions } from './category-suggestions.ts';
 import { LocalDemoRepository } from './storage.ts';
 import type {
   FoodInput,
+  Location,
   PantryRecord,
   PantryRepository,
   PantryState,
@@ -188,9 +189,11 @@ export const App: React.FC = () => {
     async (
       fn: (s: PantryState) => void,
       message: string,
-      expectedRevision?: number
-    ): Promise<void> => {
+      expectedRevision?: number,
+      keepEditorOpen = false
+    ): Promise<PantryRecord | undefined> => {
       if (busyRef.current) return;
+      busyRef.current = true;
       setBusy(true);
 
       const currentData = dataRef.current;
@@ -221,21 +224,25 @@ export const App: React.FC = () => {
         });
 
         const saved = await Effect.runPromise(program);
+        dataRef.current = saved;
         setData(saved);
-        setModal(null);
+        if (!keepEditorOpen) setModal(null);
         showToast(message);
+        return saved;
       } catch (err: any) {
         if (!currentModal && expectedRevision === undefined) {
           showToast(err.message || 'An error occurred.');
         }
         throw err;
       } finally {
+        busyRef.current = false;
         setBusy(false);
         if (
           pendingRemoteRef.current &&
           dataRef.current &&
           pendingRemoteRef.current.revision > dataRef.current.revision
         ) {
+          dataRef.current = pendingRemoteRef.current;
           setData(pendingRemoteRef.current);
         }
         pendingRemoteRef.current = null;
@@ -403,23 +410,61 @@ export const App: React.FC = () => {
     });
   }, [online]);
 
+  const openAddFood = useCallback(
+    (initialName = '') => {
+      const snapshot = dataRef.current;
+      if (!snapshot) return;
+      setModal({
+        type: 'add',
+        revision: snapshot.revision,
+        initialName,
+        initialCategory: category === 'all' ? 'Other' : category,
+        initialLocation: D.locations.includes(location as Location)
+          ? (location as Location)
+          : 'Pantry'
+      });
+    },
+    [category, location]
+  );
+
   const handleModalSubmit = useCallback(
     async (values: Record<string, any>) => {
       if (!modal) return;
       const { type, product: p, batch: b, shoppingItem: i } = modal;
 
       if (type === 'add') {
-        await mutate((s) => {
-          D.add(s, {
-            name: values.name,
-            unit: values.unit,
-            category: values.category,
-            location: values.location,
-            quantity: Number(values.quantity),
-            minimum: values.minimum !== undefined ? Number(values.minimum) : undefined,
-            expiry: values.expiry || null
-          } as FoodInput);
-        }, 'Food added');
+        const keepAdding = values['add-action'] === 'another';
+        const saved = await mutate(
+          (s) => {
+            D.add(s, {
+              name: values.name,
+              unit: values.unit,
+              category: values.category,
+              location: values.location,
+              quantity: Number(values.quantity),
+              minimum: values.minimum !== undefined ? Number(values.minimum) : undefined,
+              expiry: values.expiry || null
+            } as FoodInput);
+          },
+          `${String(values.name).trim()} added`,
+          undefined,
+          keepAdding
+        );
+        if (!saved) return;
+        setTab('inventory');
+        setSearch('');
+        setCategory('all');
+        setLocation('all');
+        setFilter('all');
+        if (keepAdding && modalRef.current === modal) {
+          setModal({
+            type: 'add',
+            revision: dataRef.current?.revision ?? saved.revision,
+            initialCategory: String(values.category),
+            initialLocation: values.location as Location,
+            lastAdded: String(values.name).trim()
+          });
+        }
         return;
       }
 
@@ -622,7 +667,12 @@ export const App: React.FC = () => {
 
   const soon = useMemo(() => {
     if (!data) return [];
-    return data.state.batches.filter((b) => b.quantity > 0 && D.expiryDays(b.expiry) <= 3);
+    const ids = new Set(
+      data.state.batches
+        .filter((batch) => batch.quantity > 0 && D.expiryDays(batch.expiry) <= 3)
+        .map((batch) => batch.productId)
+    );
+    return data.state.products.filter((product) => ids.has(product.id));
   }, [data]);
 
   const low = useMemo(() => {
@@ -670,12 +720,7 @@ export const App: React.FC = () => {
           canSuggestCategories={online}
           suggestingCategories={suggestingCategories}
           onSuggestCategories={handleSuggestPantryCategories}
-          onAdd={() =>
-            setModal({
-              type: 'add',
-              revision: data.revision
-            })
-          }
+          onAdd={() => openAddFood()}
           onBulk={() =>
             setModal({
               type: 'bulk',
@@ -691,6 +736,9 @@ export const App: React.FC = () => {
           currentFilter={filter}
           onSelectFilter={(newFilter) => {
             setFilter(newFilter);
+            setSearch('');
+            setCategory('all');
+            setLocation('all');
             setTab('inventory');
           }}
         />
@@ -717,12 +765,7 @@ export const App: React.FC = () => {
               onSortChange={setSort}
               onClearFilter={() => setFilter('all')}
               onShowNeeds={() => setFilter('low')}
-              onAddFood={() =>
-                setModal({
-                  type: 'add',
-                  revision: data.revision
-                })
-              }
+              onAddFood={openAddFood}
               onTrySample={async () => {
                 await mutate((st) => {
                   Object.assign(st, D.demo());
@@ -789,6 +832,14 @@ export const App: React.FC = () => {
         state={s}
         onClose={() => setModal(null)}
         onSubmit={handleModalSubmit}
+        onManageExisting={(product) =>
+          setModal({
+            type: 'manage',
+            revision: dataRef.current?.revision ?? data.revision,
+            product,
+            section: 'stock'
+          })
+        }
         onSuggestCategory={online ? suggestNewItemCategory : undefined}
       />
 
