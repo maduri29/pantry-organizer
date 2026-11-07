@@ -20,7 +20,6 @@ interface InventoryViewProps {
   onAddFood: (initialName?: string) => void;
   onTrySample: () => void;
   onUpdate: (product: Product, batch?: Batch) => void;
-  onRestock: (product: Product) => void;
   onManage: (product: Product, section: 'details' | 'stock', batch?: Batch) => void;
   onAddToList: (product: Product) => void;
 }
@@ -47,7 +46,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onAddFood,
   onTrySample,
   onUpdate,
-  onRestock,
   onManage,
   onAddToList
 }) => {
@@ -423,41 +421,17 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                   <div className="card-foot">
                     <button
-                      className="amount-update row-action"
-                      data-action="use"
-                      data-id={batches[0]?.id}
-                      aria-label={`Update stock for ${p.name}`}
-                      title={`Update stock for ${p.name}`}
-                      onClick={() => onUpdate(p, batches[0])}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="m5 12 4 4L19 6" />
-                      </svg>
-                      <span>Update</span>
-                    </button>
-                    <button
-                      className="restock-action"
-                      aria-label={`Restock ${p.name}`}
-                      title={`Restock ${p.name}`}
-                      onClick={() => onRestock(p)}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M5 8h14l2 12H3L5 8Zm3 0V6a4 4 0 0 1 8 0v2M12 11v6m-3-3h6" />
-                      </svg>
-                      Restock
-                    </button>
-                    <button
                       className="icon-action"
                       data-action="manage"
                       data-id={p.id}
                       aria-label={`Manage ${p.name}`}
                       title={`Manage ${p.name}`}
-                      onClick={() => onManage(p, 'details')}
+                      onClick={() => onManage(p, 'stock')}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
                       </svg>
-                      <span>Details</span>
+                      <span>Manage food</span>
                     </button>
                     <button
                       className="icon-action"

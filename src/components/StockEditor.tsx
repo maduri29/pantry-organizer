@@ -83,7 +83,19 @@ export const StockEditor: React.FC<{
   initialAction: 'update' | 'restock';
   onSubmit: (values: Record<string, any>) => Promise<void>;
   onClose: () => void;
-}> = ({ state, product, batch, shoppingItem, initialAction, onSubmit, onClose }) => {
+  onDetails?: () => void;
+  onDelete?: () => void;
+}> = ({
+  state,
+  product,
+  batch,
+  shoppingItem,
+  initialAction,
+  onSubmit,
+  onClose,
+  onDetails,
+  onDelete
+}) => {
   const allBatches = state.batches.filter((item) => item.productId === product.id);
   const activeBatches = allBatches.filter((item) => item.quantity > 0 || item.id === batch?.id);
   const batches = activeBatches.length ? activeBatches : allBatches.slice(-1);
@@ -171,7 +183,11 @@ export const StockEditor: React.FC<{
           ×
         </button>
       </header>
-      <div className="stock-intents" role="group" aria-label="Stock action">
+      <div
+        className={`stock-intents ${onDetails ? 'unified-intents' : ''}`}
+        role="group"
+        aria-label="Stock action"
+      >
         <button
           type="button"
           aria-pressed={action === 'update'}
@@ -200,6 +216,11 @@ export const StockEditor: React.FC<{
           </svg>
           I bought more
         </button>
+        {onDetails && (
+          <button type="button" disabled={busy} onClick={onDetails}>
+            Details
+          </button>
+        )}
       </div>
       <form
         className="stock-form"
@@ -349,6 +370,21 @@ export const StockEditor: React.FC<{
           )}
         </div>
         <footer className="stock-footer">
+          {onDelete && (
+            <button
+              className="food-delete-action"
+              type="button"
+              aria-label={`Delete ${product.name}`}
+              title={`Delete ${product.name}`}
+              onClick={onDelete}
+              disabled={busy}
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5" />
+              </svg>
+              Delete food
+            </button>
+          )}
           <p className="stock-preview" role="status">
             {validPreview &&
               (action === 'update'

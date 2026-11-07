@@ -62,12 +62,10 @@ try {
   const saved = () => editor.waitFor({ state: 'hidden' });
   const exactBatches = fixture.batches.filter((batch) => batch.productId === exact.id);
 
-  await card('Chickpeas')
-    .getByRole('button', { name: 'Update stock for Chickpeas', exact: true })
-    .click();
+  await card('Chickpeas').getByRole('button', { name: 'Manage Chickpeas', exact: true }).click();
   await editor.locator('.stock-batch').first().waitFor();
   assert.equal(await editor.locator('.stock-batch').count(), 2);
-  await editor.locator(`[name="quantity-${exactBatches[0].id}"]`).fill('1');
+  await editor.locator(`[name="quantity-${exactBatches[0].id}"]:visible`).fill('1');
   assert.match(await editor.locator('.stock-preview').innerText(), /5 items → 4 items/);
   await editor.getByRole('button', { name: 'Save stock', exact: true }).click();
   await saved();
@@ -87,28 +85,47 @@ try {
     'stock check sets remaining amounts per batch and preserves dates, locations and the open shopping entry'
   );
 
-  await card('Chickpeas')
-    .getByRole('button', { name: 'Update stock for Chickpeas', exact: true })
-    .click();
+  await card('Chickpeas').getByRole('button', { name: 'Manage Chickpeas', exact: true }).click();
   await editor
     .locator('.stock-batch')
     .first()
     .getByRole('button', { name: 'All used up', exact: true })
     .click();
-  assert.equal(await editor.locator(`[name="quantity-${exactBatches[0].id}"]`).inputValue(), '0');
+  assert.equal(
+    await editor.locator(`[name="quantity-${exactBatches[0].id}"]:visible`).inputValue(),
+    '0'
+  );
   await cancel();
   assert.equal((await record()).revision, 11);
 
-  await card('Chickpeas').getByRole('button', { name: 'Restock Chickpeas', exact: true }).click();
+  await card('Chickpeas').getByRole('button', { name: 'Manage Chickpeas', exact: true }).click();
+  await page.locator('#editor').getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.equal(await editor.locator('[name="location"]').inputValue(), 'Freezer');
   await editor.locator('[name="quantity"]').fill('1.5');
   await editor.locator('.stock-mode:not([hidden]) .stock-options > summary').click();
   await editor.locator('[name="expiry"]').fill('2032-03-03');
   await editor.getByRole('button', { name: 'What’s left', exact: true }).click();
-  await editor.locator(`[name="quantity-${exactBatches[0].id}"]`).fill('');
+  await editor.locator(`[name="quantity-${exactBatches[0].id}"]:visible`).fill('');
   await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.equal(await editor.locator('[name="expiry"]').inputValue(), '2032-03-03');
   assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
+  await editor.getByRole('button', { name: 'Details', exact: true }).click();
+  await editor.getByLabel('Food name', { exact: true }).fill('Draft chickpeas');
+  await editor.getByRole('button', { name: 'Stock & restock' }).click();
+  assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
+  await editor.getByRole('button', { name: 'Delete Chickpeas', exact: true }).click();
+  assert.equal(
+    await editor
+      .getByRole('button', { name: 'Keep item' })
+      .evaluate((el) => el === document.activeElement),
+    true
+  );
+  await editor.getByRole('button', { name: 'Keep item' }).click();
+  assert.equal(
+    await editor.getByLabel('Food name', { exact: true }).inputValue(),
+    'Draft chickpeas'
+  );
+  await editor.getByRole('button', { name: 'Stock & restock' }).click();
   assert.match(await editor.locator('.stock-preview').innerText(), /4 \+ 1.5 = 5.5 items/);
   assert.match(await editor.locator('.stock-list-note').innerText(), /checks this off/);
   await editor.getByRole('button', { name: 'Add to pantry', exact: true }).click();
@@ -123,9 +140,7 @@ try {
     'switching tasks retains purchase drafts; inactive blank fields do not block restock; exact stock and list completion save atomically'
   );
 
-  await card('Olive oil')
-    .getByRole('button', { name: 'Update stock for Olive oil', exact: true })
-    .click();
+  await card('Olive oil').getByRole('button', { name: 'Manage Olive oil', exact: true }).click();
   await editor
     .locator('.stock-batch')
     .first()
@@ -140,7 +155,8 @@ try {
       .map((batch) => batch.quantity),
     [0, 0.5]
   );
-  await card('Olive oil').getByRole('button', { name: 'Restock Olive oil', exact: true }).click();
+  await card('Olive oil').getByRole('button', { name: 'Manage Olive oil', exact: true }).click();
+  await page.locator('#editor').getByRole('button', { name: 'I bought more', exact: true }).click();
   await editor.locator('[name="location"]').selectOption('Pantry');
   assert.equal(await editor.getByRole('radio', { name: 'Out', exact: true }).count(), 0);
   await editor.getByRole('radio', { name: 'Full', exact: true }).check();
@@ -158,7 +174,8 @@ try {
     'rough restock replaces the selected location’s level and preserves stock in other locations'
   );
 
-  await card('Empty oats').getByRole('button', { name: 'Restock Empty oats', exact: true }).click();
+  await card('Empty oats').getByRole('button', { name: 'Manage Empty oats', exact: true }).click();
+  await page.locator('#editor').getByRole('button', { name: 'I bought more', exact: true }).click();
   await editor.getByRole('button', { name: 'Increase packs', exact: true }).click();
   await editor.getByRole('button', { name: 'Add to pantry', exact: true }).click();
   await saved();
@@ -200,7 +217,8 @@ try {
     'grocery trip reveals only selected fields, finds hidden invalid amounts and saves selected foods across searches once'
   );
 
-  await card('Chickpeas').getByRole('button', { name: 'Restock Chickpeas', exact: true }).click();
+  await card('Chickpeas').getByRole('button', { name: 'Manage Chickpeas', exact: true }).click();
+  await page.locator('#editor').getByRole('button', { name: 'I bought more', exact: true }).click();
   await editor.locator('[name="quantity"]').fill('3');
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
@@ -232,7 +250,11 @@ try {
     [1440, 900]
   ]) {
     await page.setViewportSize({ width, height });
-    await card('Olive oil').getByRole('button', { name: 'Restock Olive oil', exact: true }).click();
+    await card('Olive oil').getByRole('button', { name: 'Manage Olive oil', exact: true }).click();
+    await page
+      .locator('#editor')
+      .getByRole('button', { name: 'I bought more', exact: true })
+      .click();
     await editor.locator('.stock-mode:not([hidden]) .stock-options > summary').click();
     const layout = await editor.evaluate((dialog) => ({
       bottom: dialog.querySelector('.stock-footer').getBoundingClientRect().bottom,

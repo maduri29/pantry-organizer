@@ -468,7 +468,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      if (type === 'manage' && p) {
+      if (type === 'manage' && p && !values['stock-action']) {
         const action = String(values['manage-action'] || 'save');
         if (action === 'delete') {
           await mutate((s) => {
@@ -552,7 +552,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      if ((type === 'stock' || type === 'restock' || type === 'buy') && p) {
+      if ((type === 'stock' || type === 'restock' || type === 'buy' || type === 'manage') && p) {
         const action = String(values['stock-action']);
         await mutate(
           (s) => {
@@ -752,9 +752,6 @@ export const App: React.FC = () => {
               }}
               onUpdate={(product, batch) =>
                 setModal({ type: 'stock', revision: data.revision, product, batch })
-              }
-              onRestock={(product) =>
-                setModal({ type: 'restock', revision: data.revision, product })
               }
               onManage={(product, section, batch) =>
                 setModal({

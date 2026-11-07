@@ -2626,3 +2626,74 @@ dialog:has(.manage-shell) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.unified-intents {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.food-delete-action {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--negative);
+  border: 0;
+  background: transparent;
+  min-height: 44px;
+  padding: 0 8px;
+}
+.food-back {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  margin: 0 12px;
+  min-height: 44px;
+}
+.card-foot {
+  display: flex;
+  justify-content: flex-start;
+  grid-column: 1 / -1;
+  gap: 12px;
+}
+.card-foot [data-action='manage'] {
+  border-color: var(--control);
+  padding-inline: 14px;
+}
+.shelf-card {
+  padding: 16px 0;
+}
+dialog:has(.unified-intents) {
+  max-height: 90dvh;
+}
+dialog:has(.unified-intents) > div:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: inherit;
+}
+
+.stock-footer:has(.food-delete-action) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+}
+.stock-footer:has(.food-delete-action) .stock-preview {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+}
+.stock-footer:has(.food-delete-action) > div {
+  grid-column: 1 / -1;
+}
+
+.food-delete-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.food-delete-action svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
