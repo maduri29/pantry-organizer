@@ -159,9 +159,9 @@ try {
     size: parseFloat(getComputedStyle(node).fontSize)
   }));
   assert.match(bodyFont, /system-ui/);
-  assert.equal(headingType.family, bodyFont);
+  assert.match(headingType.family, /IBM Plex Sans/);
   assert.ok(headingType.size <= 32);
-  pass('stock counts and food illustrations render with compact system typography');
+  pass('stock counts and food illustrations render with compact IBM Plex Sans headings');
   const initialAvocados = page
     .locator('.shelf-card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });

@@ -5045,6 +5045,8 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
 .pantry-overview .hero h1 {
   margin: 0;
   font-size: 23px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
   letter-spacing: -0.025em;
 }
 .pantry-overview .hero-actions {
