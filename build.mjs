@@ -3,7 +3,6 @@ import { mkdir, copyFile, cp, writeFile, stat, readFile, rm } from 'node:fs/prom
 
 const t0 = performance.now();
 
-// 1. Parallel bundling using Bun when available
 if (typeof Bun !== 'undefined') {
   const [appBuild, domainBuild, storageBuild, firebaseBuild] = await Promise.all([
     Bun.build({
@@ -58,7 +57,6 @@ if (process.argv.includes('--bundle-only')) {
   process.exit(0);
 }
 
-// 2. Prepare static hosting in public/
 await mkdir('public', { recursive: true });
 for (const name of ['index.html', 'styles.css', 'favicon.svg', 'manifest.webmanifest']) {
   await copyFile(name, `public/${name}`);

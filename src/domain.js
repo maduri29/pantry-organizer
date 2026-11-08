@@ -12280,6 +12280,9 @@ var PantryRecordSchema = Struct({
 });
 
 // src/domain.ts
+var restockLevels = [1, 0.5, 0.25];
+var stockLevels = [...restockLevels, 0];
+
 class DomainValidationError extends TaggedError("DomainValidationError") {
 }
 
@@ -12336,7 +12339,7 @@ function addEffect(s, input) {
     }
     let min = input.minimum;
     if (input.unit === "level") {
-      if (![0, 0.25, 0.5, 1].includes(input.quantity)) {
+      if (!stockLevels.includes(input.quantity)) {
         return yield* fail3(new DomainValidationError({ message: "Choose a stock level." }));
       }
       min = 0.25;
@@ -12428,7 +12431,7 @@ function moveEffect(s, batchId, type, quantity) {
     if (!product) {
       return yield* fail3(new DomainNotFoundError({ message: "This food no longer exists." }));
     }
-    if (product.unit === "level" && (type !== "correct" || ![0, 0.25, 0.5, 1].includes(quantity))) {
+    if (product.unit === "level" && (type !== "correct" || !stockLevels.includes(quantity))) {
       return yield* fail3(new DomainValidationError({ message: "Choose a remaining stock level." }));
     }
     if (type === "correct") {
@@ -12583,6 +12586,8 @@ export {
   moveEffect,
   purchase,
   purchaseEffect,
+  restockLevels,
+  stockLevels,
   suggest,
   today,
   total,

@@ -16,6 +16,9 @@ import {
 
 export { units, locations, categories };
 
+export const restockLevels: readonly number[] = [1, 0.5, 0.25];
+export const stockLevels: readonly number[] = [...restockLevels, 0];
+
 export class DomainValidationError extends Data.TaggedError('DomainValidationError')<{
   readonly message: string;
 }> {}
@@ -115,7 +118,7 @@ export function addEffect(
 
     let min = input.minimum;
     if (input.unit === 'level') {
-      if (![0, 0.25, 0.5, 1].includes(input.quantity)) {
+      if (!stockLevels.includes(input.quantity)) {
         return yield* Effect.fail(new DomainValidationError({ message: 'Choose a stock level.' }));
       }
       min = 0.25;
@@ -233,7 +236,7 @@ export function moveEffect(
       );
     }
 
-    if (product.unit === 'level' && (type !== 'correct' || ![0, 0.25, 0.5, 1].includes(quantity))) {
+    if (product.unit === 'level' && (type !== 'correct' || !stockLevels.includes(quantity))) {
       return yield* Effect.fail(
         new DomainValidationError({ message: 'Choose a remaining stock level.' })
       );

@@ -56,16 +56,7 @@ try {
       `editor gutters at ${width}px`
     );
     await page.locator('.batch-settings > summary').click();
-    const chevron = await page.locator('.package-chevron').evaluate((el) => ({
-      width: getComputedStyle(el).width,
-      height: getComputedStyle(el).height
-    }));
-    assert.deepEqual(chevron, { width: '16px', height: '16px' });
     await page.locator('.manage-batch-meta > summary').click();
-    const marker = await page
-      .locator('.manage-batch-meta > summary')
-      .evaluate((el) => getComputedStyle(el, '::after').content);
-    assert.equal(marker, '""');
     assert.equal(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
       true

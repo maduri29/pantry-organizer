@@ -19,6 +19,10 @@ describe('Bun + Effect Domain Suite', () => {
     const s = D.empty();
     const result = Effect.runSyncExit(D.addEffect(s, food({ name: '' })));
     expect(result._tag).toBe('Failure');
+    if (result._tag !== 'Failure' || result.cause._tag !== 'Fail') {
+      throw new Error('Expected a domain validation failure');
+    }
+    expect(result.cause.error._tag).toBe('DomainValidationError');
   });
 
   test('addEffect adds product and returns it successfully', () => {
@@ -45,17 +49,28 @@ describe('Bun + Effect Domain Suite', () => {
   });
 
   test('LocalDemoRepository persists and decodes durably', async () => {
+    const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
     const values = new Map<string, string>();
-    (globalThis as any).localStorage = {
-      getItem: (k: string) => values.get(k) || null,
-      setItem: (k: string, v: string) => values.set(k, v)
-    };
-    const repo = new LocalDemoRepository();
-    const initial = await repo.load();
-    expect(initial.revision).toBe(0);
-    D.add(initial.state, food());
-    const saved = await repo.save(initial.state, 0);
-    expect(saved.revision).toBe(1);
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (k: string) => values.get(k) || null,
+        setItem: (k: string, v: string) => values.set(k, v)
+      }
+    });
+    try {
+      const repo = new LocalDemoRepository();
+      const initial = await repo.load();
+      expect(initial.revision).toBe(0);
+      D.add(initial.state, food());
+      await repo.save(initial.state, 0);
+      const reloaded = await new LocalDemoRepository().load();
+      expect(reloaded.revision).toBe(1);
+      expect(reloaded.state.products[0].name).toBe('Rice');
+    } finally {
+      if (originalStorage) Object.defineProperty(globalThis, 'localStorage', originalStorage);
+      else Reflect.deleteProperty(globalThis, 'localStorage');
+    }
   });
 
   test('validateState succeeds on valid pantry state and fails on corrupted data', () => {

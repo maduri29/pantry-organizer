@@ -12346,6 +12346,9 @@ var PantryRecordSchema = Struct({
 });
 
 // src/domain.ts
+var restockLevels = [1, 0.5, 0.25];
+var stockLevels = [...restockLevels, 0];
+
 class DomainValidationError extends TaggedError("DomainValidationError") {
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { level as levelLabel } from '../domain.ts';
+import { level as levelLabel, restockLevels, stockLevels } from '../domain.ts';
 import { formatUnit } from '../format.ts';
 
 export const LevelPicker: React.FC<{
@@ -9,7 +9,7 @@ export const LevelPicker: React.FC<{
   restock?: boolean;
 }> = ({ name, value, onChange, restock = false }) => (
   <div className="level-picker">
-    {(restock ? [1, 0.5, 0.25] : [1, 0.5, 0.25, 0]).map((level) => (
+    {(restock ? restockLevels : stockLevels).map((level) => (
       <label className={Number(value) === level && value !== '' ? 'is-selected' : ''} key={level}>
         <input
           type="radio"

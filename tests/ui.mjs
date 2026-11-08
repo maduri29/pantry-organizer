@@ -112,6 +112,7 @@ try {
         };
       })
     );
+    assert.ok(cards.length > 0);
     assert.ok(cards.every((card) => !card.overflow && card.aligned && card.actionsFit));
   }
   await page.setViewportSize({ width: 390, height: 844 });

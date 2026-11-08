@@ -14,3 +14,10 @@ This log records coupling found during the codebase audit and the intended bound
 - **Keep intentional external-boundary special cases.** API authorization, rate limits, timeouts, storage conflict checks, offline fallback, dialog focus restoration and service-worker upgrade behavior represent real requirements. Replacing them with general machinery would obscure those requirements.
 - **Follow up on stock form decoding.** The manage and stock forms share field-name conventions and duplicate some parsing in `App.tsx`. A typed stock command is the right boundary, but movement semantics and draft preservation need dedicated behavioral coverage before changing it.
 - **Follow up on generated JavaScript.** Domain and storage tests include tracked generated files, so source and tests can drift. A freshness check needs a deterministic build independent of installed Bun version before enforcing it in CI.
+
+## Follow-up pass
+
+- **Define rough stock levels once.** Domain validation, editor validation and stock pickers each maintain the same allowed values. Use a common domain definition while preserving the existing display order and the different options for updating and restocking.
+- **Share grocery-trip search matching.** The count and visibility independently normalize and match the query; use one predicate and keep hidden selections mounted so validation and drafts still work.
+- **Remove comments that merely label nearby implementation.** Preserve explanations of browser behavior, data recovery, design constraints and compiler directives.
+- **Strengthen behavior checks and remove brittle presentation assertions.** Native TypeScript persistence must reload the saved data; validation tests must inspect the actual failure; layout checks should cover visible behavior rather than a particular chevron size or pseudo-element implementation. Keep the concurrency, stock and offline regression coverage.

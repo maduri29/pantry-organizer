@@ -175,7 +175,6 @@ export const App: React.FC = () => {
     }
   }, [activateShared, showToast]);
 
-  // Initial load
   useEffect(() => {
     const init = async () => {
       try {
@@ -191,7 +190,6 @@ export const App: React.FC = () => {
     init();
   }, [resumeShared]);
 
-  // Storage synchronization between tabs
   useEffect(() => {
     const handleStorage = async () => {
       if (!onlineRef.current && busyRef.current) pendingLocalRef.current = true;
@@ -210,9 +208,7 @@ export const App: React.FC = () => {
           } else if (busyRef.current && activeRepository === repositoryRef.current) {
             pendingLocalRef.current = true;
           }
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
     };
     window.addEventListener('storage', handleStorage);
@@ -565,7 +561,7 @@ export const App: React.FC = () => {
             const amount = Number(values[`quantity-${batch.id}`]);
             if (!Number.isFinite(amount) || amount < 0)
               throw new Error(`Enter a valid amount for ${batch.location}.`);
-            if (unit === 'level' && ![0, 0.25, 0.5, 1].includes(amount))
+            if (unit === 'level' && !D.stockLevels.includes(amount))
               throw new Error(`Choose a valid rough level for ${batch.location}.`);
             const location = String(values[`location-${batch.id}`] || '');
             if (!D.locations.includes(location as (typeof D.locations)[number]))
@@ -605,7 +601,7 @@ export const App: React.FC = () => {
                   !raw ||
                   !Number.isFinite(quantity) ||
                   quantity < 0 ||
-                  (product.unit === 'level' && ![0, 0.25, 0.5, 1].includes(quantity))
+                  (product.unit === 'level' && !D.stockLevels.includes(quantity))
                 )
                   throw new Error('Enter a valid amount left.');
                 const location = String(values[`location-${batch.id}`]);
@@ -623,7 +619,7 @@ export const App: React.FC = () => {
               if (
                 !Number.isFinite(quantity) ||
                 quantity <= 0 ||
-                (product.unit === 'level' && ![0.25, 0.5, 1].includes(quantity))
+                (product.unit === 'level' && !D.restockLevels.includes(quantity))
               )
                 throw new Error('Enter an amount greater than zero.');
               const input = { quantity, location: values.location, expiry: values.expiry || null };

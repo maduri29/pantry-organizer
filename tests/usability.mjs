@@ -60,6 +60,7 @@ try {
     }));
     assert.ok(bounds.top >= 0 && bounds.bottom <= height + 1);
     assert.equal(bounds.overflow, false);
+    assert.ok(bounds.buttons.length > 0);
     assert.ok(bounds.buttons.every((button) => button.height >= 44 && button.bottom <= height + 1));
     await page.screenshot({ path: new URL(`add-${width}-${height}.png`, screenshots).pathname });
   }

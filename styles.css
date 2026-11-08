@@ -6,7 +6,6 @@
   font-display: swap;
 }
 :root {
-  /* Taste app typography: IBM Plex Sans, one family for the complete workspace. */
   --ground: #f8f8f6;
   --surface: #ffffff;
   --raised: #f0f1f2;
@@ -134,7 +133,6 @@ h3 {
   color: var(--surface);
   background: var(--text);
 }
-/* One 1120px frame: 1440 - 2 × 160 = 1120. All sections share its edges. */
 body > #app > header,
 main {
   width: min(1120px, calc(100% - 64px));
@@ -259,7 +257,6 @@ main {
   flex-wrap: wrap;
   justify-content: flex-end;
 }
-/* The three live counts are filters: one divided strip, no decorative metric cards. */
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -397,7 +394,6 @@ input::placeholder {
 .toolbar button {
   white-space: nowrap;
 }
-/* Shelf arithmetic: identity + storage + amount + state + 88px actions = full width. */
 .shelf-grid {
   display: grid;
   gap: 0;
@@ -1208,7 +1204,6 @@ dialog#category-review {
     break-inside: avoid;
   }
 }
-/* Compact item-management sheet: only the panel body scrolls. */
 dialog:has(.manage-shell) {
   display: flex;
   flex-direction: column;
@@ -1482,7 +1477,6 @@ dialog:has(.manage-shell) {
   }
 }
 
-/* Adding stays compact; optional settings scroll above a persistent save footer. */
 dialog:has(.add-shell) {
   width: 480px;
   max-width: calc(100% - 20px);
@@ -1636,7 +1630,6 @@ dialog:has(.add-shell) {
   }
 }
 
-/* Stock checks and purchases share one small, task-focused sheet. */
 dialog:has(.stock-shell) {
   width: 480px;
   max-width: calc(100vw - 20px);
@@ -2077,7 +2070,6 @@ dialog:has(.stock-shell) {
 .quantity-stepper input:focus-visible {
   outline: 0;
 }
-/* Food details use the same compact sheet as stock tasks. */
 .manage-heading {
   padding: 20px 20px 12px;
 }
@@ -2114,7 +2106,6 @@ dialog:has(.stock-shell) {
   padding: 12px 20px 16px;
   background: var(--ground);
 }
-/* Compact food editor: visible essentials, one package disclosure. */
 dialog:has(.manage-shell) {
   width: 460px;
   max-width: calc(100vw - 24px);
@@ -2204,7 +2195,6 @@ dialog:has(.manage-shell) {
 .manage-footer {
   padding: 12px 20px 16px;
 }
-/* Taste app-screen pass: equal field rhythm, readable values, no empty error band. */
 .manage-heading > div:not(.food-art) {
   flex: 1;
   min-width: 0;
@@ -2236,7 +2226,6 @@ dialog:has(.manage-shell) {
 .manage-body .category-suggestion > button {
   min-height: 44px;
 }
-/* Shelf actions share one baseline; quantities remain quiet, readable data. */
 .card-foot {
   grid-column: 1 / -1;
   grid-row: 3;
@@ -2379,7 +2368,6 @@ dialog:has(.unified-intents) > div:not([hidden]) {
   stroke-width: 1.6;
 }
 
-/* Dedicated food workspace: a quiet side panel with a stable action rail. */
 .card-foot {
   justify-content: space-between;
 }
@@ -2503,7 +2491,6 @@ dialog:has(.food-workspace) .manage-footer {
   align-content: start;
 }
 
-/* Pantry workspace — Taste + Impeccable Operate system. */
 :root {
   --ground: #f5f2ec;
   --raised: #eeebe5;
@@ -2883,7 +2870,6 @@ body > #app > header {
   gap: 12px;
   font-size: 12px;
 }
-/* Every editor uses the same header, scrollable body and pinned footer. */
 dialog {
   color: var(--text);
 }
@@ -3283,7 +3269,6 @@ dialog:has(.manage-editor) {
   }
 }
 
-/* Kitchen workspace: a quieter shell and a clearer rhythm for daily tasks. */
 :root {
   --ground: #f6f3ed;
   --surface: #fffefa;
@@ -3511,7 +3496,6 @@ body > #app > header {
   }
 }
 
-/* Recompose the workspace around the task, with navigation above the food. */
 body > #app > header {
   padding-inline: max(24px, calc((100vw - 1160px) / 2));
   background: var(--surface);
@@ -3691,7 +3675,6 @@ body > #app > header {
   min-height: 44px;
 }
 
-/* Food-first visual replacement: illustrated cards instead of ledger rows. */
 :root {
   --ground: #edf2f4;
   --surface: #ffffff;
@@ -3958,7 +3941,6 @@ body > #app > header {
     grid-row: 5;
   }
 }
-/* Food card alignment: identity, stock, storage, actions. */
 .shelf-card {
   grid-template-rows: auto auto auto 1fr auto;
   gap: 12px;
@@ -4012,7 +3994,6 @@ body > #app > header {
   margin: 0;
   line-height: 1.2;
 }
-/* One task at a time; food details remain secondary to daily stock changes. */
 .edit-details-link {
   display: inline-flex;
   align-items: center;
@@ -4074,7 +4055,6 @@ body > #app > header {
     font-size: 15px;
   }
 }
-/* Shared rows keep long names and optional dates from shifting card alignment. */
 .shelf-card {
   grid-row: span 5;
   grid-template-rows: subgrid;
@@ -4197,7 +4177,6 @@ body > #app > header {
   }
 }
 
-/* Phone cards use one text column; the illustration has its own gutter. */
 @media (max-width: 850px) {
   .shelf-card {
     display: grid;
@@ -4318,7 +4297,6 @@ select,
     background-image: none;
   }
 }
-/* Quantity and location form one compact, right-aligned stock summary. */
 .shelf-card {
   grid-template-columns: minmax(0, 1fr) auto;
   grid-template-rows: auto auto auto;
@@ -4442,7 +4420,6 @@ select,
     padding-inline: 12px;
   }
 }
-/* Stock needs attention at the food identity; shopping feedback stays actionable. */
 .food-attention {
   display: flex;
   align-items: center;
@@ -4502,7 +4479,6 @@ select,
   }
 }
 
-/* Compact system typography and quiet editor disclosures. */
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   font-size: 14px;
@@ -4831,7 +4807,6 @@ dialog:has(.food-workspace) .manage-heading {
   transform-origin: 50% 50%;
   overflow: visible;
 }
-/* Compact field text, including the explicit mobile control rules. */
 dialog input,
 dialog select,
 .manage-body input,
@@ -4879,7 +4854,6 @@ dialog select,
   flex: 0 0 16px;
 }
 
-/* Shared editor gutters and disclosure indicators. */
 dialog {
   --sheet-gutter: 20px;
 }

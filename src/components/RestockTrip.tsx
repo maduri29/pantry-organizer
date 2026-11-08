@@ -27,9 +27,10 @@ export const RestockTrip: React.FC<{
   const checkedOffCount = products.filter(
     (product) => selected[product.id] && onList.has(product.id)
   ).length;
-  const matches = products.filter((product) =>
-    product.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
-  ).length;
+  const query = search.trim().toLocaleLowerCase();
+  const matchesSearch = (product: (typeof products)[number]) =>
+    product.name.toLocaleLowerCase().includes(query);
+  const matches = products.filter(matchesSearch).length;
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (busy || count === 0) return;
@@ -96,9 +97,7 @@ export const RestockTrip: React.FC<{
               <section
                 className={`bulk-item ${checked ? 'is-selected' : ''}`}
                 key={product.id}
-                hidden={
-                  !product.name.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())
-                }
+                hidden={!matchesSearch(product)}
               >
                 <label className="bulk-pick">
                   <input

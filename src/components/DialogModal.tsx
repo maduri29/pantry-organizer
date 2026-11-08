@@ -353,10 +353,11 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                   <label>
                     What’s left?
                     <select name="quantity" defaultValue="1">
-                      <option value="1">Full</option>
-                      <option value="0.5">Half</option>
-                      <option value="0.25">Low</option>
-                      <option value="0">Out</option>
+                      {D.stockLevels.map((level) => (
+                        <option key={level} value={String(level)}>
+                          {D.level(level)}
+                        </option>
+                      ))}
                     </select>
                   </label>
                 ) : (
@@ -703,10 +704,11 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                               required
                             >
                               <option value="">Choose a level…</option>
-                              <option value="1">Full</option>
-                              <option value="0.5">Half</option>
-                              <option value="0.25">Low</option>
-                              <option value="0">Out</option>
+                              {D.stockLevels.map((level) => (
+                                <option key={level} value={String(level)}>
+                                  {D.level(level)}
+                                </option>
+                              ))}
                             </select>
                           </label>
                         ) : (

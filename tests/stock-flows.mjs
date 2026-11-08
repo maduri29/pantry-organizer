@@ -272,6 +272,7 @@ try {
     }));
     assert.ok(layout.bottom <= height + 1);
     assert.equal(layout.overflow, false);
+    assert.ok(layout.buttons.length > 0);
     assert.ok(layout.buttons.every((height) => height >= 44));
     await cancel();
   }
