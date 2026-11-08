@@ -12,13 +12,14 @@
     "search": "tgrep --no-index",
     "ci": "bun run check && bun run test",
     "test": "node --test tests/domain.test.mjs && bun test tests/domain.test.mjs tests/category-api.test.ts",
-    "test:ui": "node tests/ui.mjs && node tests/usability.mjs && node tests/stock-flows.mjs && node tests/sw-upgrade.mjs",
+    "test:ui": "node tests/ui.mjs && node tests/usability.mjs && node tests/stock-flows.mjs && node tests/sw-upgrade.mjs && node tests/design-layout.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --write",
     "format:check": "oxfmt --check",
-    "check": "oxlint && oxfmt --check && tsc --noEmit && node --check server.mjs && node --check build.mjs && node --check src/app.js && node --check src/domain.js && node --check src/storage.js && node --check src/firebase.js"
+    "check": "oxlint && oxfmt --check && tsc --noEmit && node --check server.mjs && node --check build.mjs && node --check src/app.js && node --check src/domain.js && node --check src/storage.js && node --check src/firebase.js",
+    "test:design": "node tests/design-layout.mjs"
   },
   "dependencies": {
     "effect": "^3.22.2",

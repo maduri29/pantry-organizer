@@ -253,53 +253,6 @@ main {
   color: var(--muted);
   margin: 0;
 }
-.hero-art {
-  flex: 0 0 156px;
-  width: 156px;
-  height: 84px;
-  margin-inline: 12px;
-  color: var(--illustration-ink);
-}
-.hero-art svg {
-  width: 100%;
-  height: 100%;
-  stroke-width: 1.4;
-}
-.shelf-line {
-  stroke: var(--control);
-}
-.shelf-cloth {
-  fill: var(--raised);
-  stroke: var(--control);
-}
-.shelf-jar {
-  fill: var(--illustration-paper);
-}
-.shelf-grain {
-  fill: var(--illustration-oat);
-  stroke: none;
-}
-.shelf-lid,
-.shelf-cap {
-  fill: var(--primary);
-}
-.shelf-label {
-  fill: var(--surface);
-  stroke: none;
-}
-.shelf-bottle {
-  fill: var(--illustration-olive);
-}
-.shelf-oil {
-  fill: var(--illustration-sage);
-  stroke: none;
-}
-.shelf-pear {
-  fill: var(--illustration-oat);
-}
-.shelf-leaf {
-  fill: var(--illustration-leaf);
-}
 .hero-actions {
   display: flex;
   gap: 8px;
@@ -400,99 +353,6 @@ main {
 .nav button:hover {
   color: var(--text);
 }
-/* The shopping check is a compact answer above the shelves, not a second inventory. */
-.shopping-glance {
-  display: grid;
-  grid-template-columns: 190px 1fr auto;
-  gap: 4px 24px;
-  align-items: center;
-  padding: 18px 20px;
-  margin-bottom: 28px;
-  border-radius: var(--radius-card);
-  background: var(--raised);
-}
-.glance-heading {
-  grid-column: 1;
-  grid-row: 1 / 3;
-}
-.glance-heading h2 {
-  color: var(--text);
-  font-size: 14px;
-  margin: 0 0 4px;
-}
-.glance-heading p {
-  font-size: 12px;
-  margin: 0;
-  color: var(--muted);
-}
-.glance-counts {
-  display: flex;
-  gap: 16px;
-  font-size: 13px;
-}
-.glance-counts > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.glance-counts strong {
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
-}
-.glance-dot {
-  width: 5px;
-  height: 5px;
-  background: var(--muted);
-  border-radius: 50%;
-  margin-right: 2px;
-}
-.glance-items {
-  grid-column: 2;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-}
-.glance-item-copy {
-  display: inline-flex;
-  gap: 6px;
-}
-.glance-item-copy strong {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-}
-.glance-status {
-  display: none;
-}
-.glance-footer {
-  grid-column: 3;
-  grid-row: 1 / 3;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.glance-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border-color: transparent;
-  padding-inline: 4px;
-  color: var(--text);
-  font-size: 13px;
-}
-.glance-link svg {
-  width: 16px;
-  height: 16px;
-}
-.glance-clear {
-  grid-column: 2;
-  font-size: 13px;
-  color: var(--muted);
-  margin: 0;
-}
 .inventory-heading {
   display: flex;
   justify-content: space-between;
@@ -545,22 +405,6 @@ input::placeholder {
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   padding: 0 20px 8px;
-}
-.category-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0 8px;
-}
-.category-heading h2 {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0;
-}
-.category-count {
-  color: var(--muted);
-  font-size: 12px;
 }
 .shelf-card {
   display: grid;
@@ -669,21 +513,6 @@ input::placeholder {
 .amount small {
   font-size: 12px;
   font-weight: 400;
-  color: var(--muted);
-}
-.amount-update {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 7px;
-  border-color: transparent;
-  background: transparent;
-  padding: 0 4px;
-  font-weight: 400;
-}
-.amount-update svg {
-  width: 13px;
-  height: 13px;
   color: var(--muted);
 }
 .stock-status {
@@ -1053,28 +882,6 @@ dialog#category-review {
     grid-template-columns: minmax(160px, 1fr) minmax(130px, 170px) 90px 120px 88px;
     gap: 8px;
   }
-  .hero-art {
-    display: none;
-  }
-  .glance-heading {
-    grid-row: 1;
-  }
-  .glance-heading p {
-    display: none;
-  }
-  .shopping-glance {
-    grid-template-columns: 160px 1fr auto;
-    gap: 4px 12px;
-  }
-  .glance-counts {
-    grid-column: 2;
-  }
-  .glance-items {
-    grid-column: 1 / 3;
-  }
-  .glance-footer {
-    grid-row: 1 / 3;
-  }
 }
 @media (max-width: 850px) {
   body > #app > header,
@@ -1241,29 +1048,6 @@ dialog#category-review {
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 8px;
   }
-  .shopping-glance {
-    grid-column: 2;
-    grid-row: 1;
-    display: flex;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-  }
-  .glance-heading,
-  .glance-counts,
-  .glance-items,
-  .glance-clear {
-    display: none;
-  }
-  .glance-footer {
-    display: block;
-  }
-  .glance-footer > span {
-    display: none;
-  }
-  .glance-link {
-    font-size: 12px;
-  }
   .inventory-heading {
     grid-column: 1;
     grid-row: 1;
@@ -1302,12 +1086,6 @@ dialog#category-review {
   }
   .shelf-grid {
     padding: 0 12px 4px;
-  }
-  .category-heading {
-    padding-top: 16px;
-  }
-  .category-count {
-    font-size: 11px;
   }
   .shelf-card {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1432,7 +1210,6 @@ dialog#category-review {
   .nav,
   .toolbar,
   .stats,
-  .shopping-glance,
   .card-foot,
   button,
   dialog,
@@ -1485,31 +1262,6 @@ dialog:has(.manage-shell) {
   background: var(--raised);
   font-size: 24px;
   cursor: pointer;
-}
-.manage-tabs {
-  display: grid;
-  flex: 0 0 auto;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  padding: 0 18px;
-  border-bottom: 1px solid var(--border);
-}
-.manage-tabs [role='tab'] {
-  min-height: 44px;
-  padding: 0 10px;
-  border: 0;
-  border-bottom: 3px solid transparent;
-  border-radius: 0;
-  color: var(--muted);
-  background: transparent;
-  font-weight: 700;
-}
-.manage-tabs [role='tab'][aria-selected='true'] {
-  border-bottom-color: var(--primary);
-  color: var(--text);
-}
-.manage-tabs [role='tab']:focus-visible {
-  outline-offset: -3px;
 }
 .manage-form {
   display: flex;
@@ -1733,9 +1485,6 @@ dialog:has(.manage-shell) {
   }
   .manage-heading h2 {
     font-size: 17px;
-  }
-  .manage-tabs {
-    padding: 0 14px;
   }
   .manage-body {
     padding: 12px 14px 16px;
@@ -1979,7 +1728,6 @@ dialog:has(.stock-shell) {
   font-weight: 600;
 }
 .stock-intents svg,
-.restock-action svg,
 .stock-list-note svg {
   width: 18px;
   height: 18px;
@@ -2179,18 +1927,6 @@ dialog:has(.stock-shell) {
 .stock-footer button {
   min-height: 46px;
 }
-.restock-action {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  margin-right: 8px;
-  padding: 0 10px;
-  color: var(--primary);
-  background: transparent;
-  border-color: var(--control);
-  font-size: 12px;
-}
 .shelf-card {
   grid-template-columns: minmax(160px, 1fr) minmax(120px, 180px) 90px 100px 196px;
 }
@@ -2277,9 +2013,6 @@ dialog:has(.stock-shell) {
     justify-content: flex-start;
     margin: 10px 0 0 42px;
   }
-  .card-foot .restock-action {
-    margin-right: auto;
-  }
   .card-foot .icon-action {
     flex-direction: row;
     gap: 5px;
@@ -2338,11 +2071,6 @@ dialog:has(.stock-shell) {
     gap: 16px;
   }
 }
-.amount-update {
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-}
 .amount-edit-label {
   display: flex;
   align-items: center;
@@ -2351,9 +2079,7 @@ dialog:has(.stock-shell) {
   font-size: 13px;
   line-height: 16px;
 }
-
-.card-foot .icon-action span,
-.restock-action {
+.card-foot .icon-action span {
   font-size: 13px;
   line-height: 16px;
 }
@@ -2544,9 +2270,7 @@ dialog:has(.manage-shell) {
   margin: 0;
 }
 .card-foot button,
-.card-foot .icon-action,
-.card-foot .amount-update,
-.card-foot .restock-action {
+.card-foot .icon-action {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
@@ -2563,10 +2287,6 @@ dialog:has(.manage-shell) {
   font-size: 13px;
   line-height: 18px;
   font-weight: 400;
-}
-.card-foot .amount-update,
-.card-foot .restock-action {
-  border-color: var(--control);
 }
 .card-foot button:hover {
   background: var(--raised);
@@ -2614,9 +2334,7 @@ dialog:has(.manage-shell) {
     gap: 4px;
   }
   .card-foot button,
-  .card-foot .icon-action,
-  .card-foot .amount-update,
-  .card-foot .restock-action {
+  .card-foot .icon-action {
     padding: 0 4px;
     gap: 4px;
   }
@@ -2638,14 +2356,6 @@ dialog:has(.manage-shell) {
   background: transparent;
   min-height: 44px;
   padding: 0 8px;
-}
-.food-back {
-  align-self: flex-start;
-  border: 0;
-  background: transparent;
-  color: var(--primary);
-  margin: 0 12px;
-  min-height: 44px;
 }
 .card-foot {
   display: flex;
@@ -2798,9 +2508,6 @@ dialog:has(.food-workspace) .manage-body {
 }
 dialog:has(.food-workspace) .manage-footer {
   padding: 16px 24px 24px;
-}
-dialog:has(.food-workspace) .food-back {
-  margin: 0 16px;
 }
 @media (max-width: 540px) {
   dialog:has(.food-workspace) {
@@ -3017,33 +2724,6 @@ body > #app > header {
 #content {
   margin: 0;
 }
-.shopping-glance {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #eee9e0;
-  margin: 0 0 24px;
-}
-.shopping-glance .glance-heading h2 {
-  font-size: 14px;
-}
-.shopping-glance .glance-heading p,
-.shopping-glance .glance-items {
-  display: none;
-}
-.shopping-glance .glance-counts {
-  gap: 16px;
-}
-.shopping-glance .glance-footer {
-  margin-left: auto;
-}
-.shopping-glance .glance-link {
-  min-height: 44px;
-}
 .inventory-heading {
   margin: 0 0 12px;
 }
@@ -3067,17 +2747,6 @@ body > #app > header {
   border: 0;
   border-radius: 0;
   padding: 0;
-}
-.category-heading {
-  grid-column: 1 / -1;
-  padding: 8px 0 0;
-  border: 0;
-}
-.category-heading h2 {
-  font-size: 14px;
-}
-.category-count {
-  font-size: 12px;
 }
 .shelf-card {
   grid-template-columns: minmax(0, 1fr) auto;
@@ -3444,9 +3113,6 @@ select {
   .stats .stat strong {
     font-size: 13px;
   }
-  .shopping-glance {
-    display: none;
-  }
   .inventory-heading {
     margin-bottom: 12px;
   }
@@ -3564,22 +3230,6 @@ select {
 .manage-editor > .manage-heading {
   flex: 0 0 auto;
 }
-.editor-navigation {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--border);
-}
-.editor-navigation button {
-  background: transparent;
-  border-color: transparent;
-  padding-inline: 6px;
-}
-.editor-navigation button[aria-pressed='true'] {
-  background: var(--active);
-  color: var(--primary);
-}
 .manage-editor .editor-pane {
   display: flex;
   flex: 1;
@@ -3598,14 +3248,6 @@ dialog:has(.manage-editor) .manage-shell {
 .manage-editor .stock-body,
 .manage-editor .manage-body {
   flex: 1;
-}
-@media (max-width: 600px) {
-  .editor-navigation {
-    padding: 12px 16px;
-  }
-  .editor-navigation button {
-    font-size: 13px;
-  }
 }
 .inventory-view {
   display: block;
@@ -3801,14 +3443,6 @@ body > #app > header {
 .shelf-grid {
   gap: 10px;
 }
-.category-heading {
-  padding-top: 16px;
-}
-.category-heading h2 {
-  color: #575b5a;
-  font-size: 13px;
-  font-weight: 600;
-}
 .shelf-card {
   padding: 16px 20px;
   border-radius: 8px;
@@ -3868,14 +3502,6 @@ body > #app > header {
 .manage-editor .manage-heading,
 .add-heading {
   background: var(--surface);
-}
-.editor-navigation {
-  background: var(--surface);
-  padding-block: 10px;
-}
-.editor-navigation button[aria-pressed='true'] {
-  color: var(--primary);
-  background: var(--active);
 }
 .stock-footer,
 .manage-footer,
@@ -4330,10 +3956,6 @@ body > #app > header {
 .add-heading {
   background: #edf2f4;
 }
-.editor-navigation button[aria-pressed='true'] {
-  background: #223440;
-  color: white;
-}
 .stock-footer,
 .manage-footer,
 .add-footer {
@@ -4763,22 +4385,6 @@ body > #app > header {
     margin: 0;
   }
 }
-/* Compact storage metadata and one consistent native-select chevron. */
-.card-meta {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 6px;
-}
-.shelf-card .card-meta .stock-location {
-  display: inline;
-  font-size: 12px;
-  line-height: inherit;
-}
-.meta-separator {
-  color: var(--muted);
-  font-size: 12px;
-}
 select,
 .toolbar select,
 .add-body select,
@@ -4796,9 +4402,6 @@ select,
     padding-right: 24px;
     background-position: right 6px center;
     background-size: 14px;
-  }
-  .shelf-card .card-top .card-meta .meta {
-    display: inline;
   }
   .shelf-card .card-foot {
     grid-row: 4;
@@ -5376,4 +4979,68 @@ dialog select,
   width: 16px;
   height: 16px;
   flex: 0 0 16px;
+}
+
+/* Shared editor gutters and disclosure indicators. */
+dialog {
+  --sheet-gutter: 20px;
+}
+dialog:has(.food-workspace)
+  :is(
+    .manage-heading,
+    .manage-body,
+    .manage-footer,
+    .editor-task-switch,
+    .stock-body,
+    .stock-footer
+  ),
+dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
+  padding-inline: var(--sheet-gutter);
+}
+:is(.stock-options, .add-options, .batch-details, .manage-batch-meta) > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  list-style: none;
+}
+:is(.stock-options, .add-options, .batch-details, .manage-batch-meta)
+  > summary::-webkit-details-marker {
+  display: none;
+}
+.stock-options > summary::before {
+  content: none;
+  display: none;
+}
+:is(.stock-options, .add-options, .batch-details, .manage-batch-meta) > summary::after,
+:is(.stock-options, .add-options, .batch-details, .manage-batch-meta)[open] > summary::after {
+  content: '';
+  display: block;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23626467' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6 L8 10 L12 6'/%3E%3C/svg%3E")
+    center/16px no-repeat;
+  transform: rotate(0deg);
+}
+:is(.stock-options, .add-options, .batch-details, .manage-batch-meta)[open] > summary::after {
+  transform: rotate(180deg);
+}
+.batch-settings > summary .package-chevron {
+  width: 16px;
+  height: 16px;
+  flex-basis: 16px;
+  stroke-width: 1.5;
+}
+@media (max-width: 850px) {
+  .shelf-card {
+    grid-row: auto;
+  }
+}
+@media (max-width: 600px) {
+  dialog {
+    --sheet-gutter: 16px;
+  }
 }

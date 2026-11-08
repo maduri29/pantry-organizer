@@ -660,6 +660,7 @@ try {
   const batchPage = await batchContext.newPage();
   await batchPage.goto(baseUrl);
   await batchPage.getByRole('button', { name: 'Try sample pantry' }).click();
+  await batchPage.getByRole('heading', { name: 'Blueberries', exact: true }).waitFor();
   const fixture = await batchPage.evaluate(() => {
     const data = JSON.parse(localStorage.getItem('pantry-organizer.demo.v1'));
     const product = data.state.products.find((food) => food.name === 'Blueberries');
