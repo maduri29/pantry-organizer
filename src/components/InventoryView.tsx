@@ -26,7 +26,9 @@ interface InventoryViewProps {
 export const fmt = (n: number): string => Number(n.toFixed(3)).toLocaleString();
 
 export const formatAmount = (n: number, p: Product): string =>
-  p.unit === 'level' ? D.level(n) : `${fmt(n)} ${p.unit}`;
+  p.unit === 'level'
+    ? D.level(n)
+    : `${fmt(n)} ${n === 1 && (p.unit === 'items' || p.unit === 'packs') ? p.unit.slice(0, -1) : p.unit}`;
 
 export const InventoryView: React.FC<InventoryViewProps> = ({
   state: s,
@@ -249,7 +251,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <div className="card-top">
                     <FoodIllustration product={p} />
                     <div>
-                      <h2>{p.name}</h2>
+                      <h2>
+                        <button
+                          type="button"
+                          className="food-name-action"
+                          onClick={() => onManage(p, 'stock')}
+                        >
+                          {p.name}
+                        </button>
+                      </h2>
                       <span className="meta">{p.category}</span>
                     </div>
                   </div>
@@ -260,7 +270,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         D.level(totalQty)
                       ) : (
                         <>
-                          {fmt(totalQty)} <small>{p.unit}</small>
+                          {fmt(totalQty)}{' '}
+                          <small>
+                            {totalQty === 1 && (p.unit === 'items' || p.unit === 'packs')
+                              ? p.unit.slice(0, -1)
+                              : p.unit}
+                          </small>
                         </>
                       )}
                     </span>
@@ -269,7 +284,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <span className={`badge stock-status ${itemIsLow ? 'warn' : ''}`}>
                     {totalQty === 0 ? 'Out' : itemIsLow ? 'Low' : 'Stocked'}
                     {totalQty > 0 && itemIsLow && p.unit !== 'level'
-                      ? ` · min ${fmt(p.minimum)} ${p.unit}`
+                      ? ` · min ${formatAmount(p.minimum, p)}`
                       : ''}
                   </span>
 

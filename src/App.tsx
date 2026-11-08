@@ -799,6 +799,14 @@ export const App: React.FC = () => {
                     shoppingItem: item
                   })
                 }
+                onAddSuggestions={async (productIds) => {
+                  await mutate((st) => {
+                    for (const id of productIds) {
+                      const product = st.products.find((item) => item.id === id);
+                      if (product && D.isLow(st, product)) D.suggest(st, product);
+                    }
+                  }, 'Added to your list');
+                }}
                 onAddSuggestion={async (product) => {
                   await mutate((st) => {
                     const prod = st.products.find((p) => p.id === product.id);

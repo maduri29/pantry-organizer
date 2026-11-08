@@ -26,3 +26,7 @@ Impeccable's context launcher initially could not create its default cache. Its 
 Impeccable's source detector returned one warning on a legacy `.manage-tabs` underline. That selector is not used by the current editor and explicitly has zero radius, so its rounded-border finding is not applicable.
 
 Taste v2.5's browser gate ran and reported `GATE: FAIL 30`. Its current checker treats this working app as a marketing website, requiring a full-screen hero, one section per screen, visual effects, a closing CTA and symmetric page margins without a navigation rail. These checks were not waived or altered to claim a pass. Its body contrast check requested 7:1; the reported secondary text is 5.78:1, above WCAG AA's 4.5:1. The app was validated with task-focused browser checks and independent responsive review instead. Retained food illustrations follow the user's explicit request.
+
+## Pantry workflow research
+
+KitchenPal’s [kitchen FAQ](https://kitchenpalapp.com/en/faqs/kitchen.html) describes optional dates, previous-location defaults and adding multiple items; [Pantry Check’s guide](https://pantrycheck.com/user-guide/) describes manual lookup and quantity adjustment. These informed keeping the add form light and making low-stock suggestions easier to act on. Suggestions are still explicitly chosen by the user; “Add all to list” performs one update and avoids duplicates.

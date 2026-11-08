@@ -9,13 +9,15 @@ interface ShoppingViewProps {
   onRemoveItem: (itemId: string) => void;
   onBuyItem: (item: ShoppingItem, product: Product) => void;
   onAddSuggestion: (product: Product) => void;
+  onAddSuggestions: (productIds: string[]) => void;
 }
 
 export const ShoppingView: React.FC<ShoppingViewProps> = ({
   state: s,
   onRemoveItem,
   onBuyItem,
-  onAddSuggestion
+  onAddSuggestion,
+  onAddSuggestions
 }) => {
   const items = useMemo(() => s.shopping.filter((i) => i.status === 'open'), [s.shopping]);
   const productMap = useMemo(() => new Map(s.products.map((p) => [p.id, p])), [s.products]);
@@ -46,7 +48,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 <span className="meta">
                   {p.unit === 'level'
                     ? 'Restock when you shop'
-                    : `Planned: ${fmt(i.quantity ?? 1)} ${p.unit}`}
+                    : `Planned: ${fmt(i.quantity ?? 1)} ${(i.quantity ?? 1) === 1 && (p.unit === 'items' || p.unit === 'packs') ? p.unit.slice(0, -1) : p.unit}`}
                 </span>
               </div>
               <button
@@ -78,9 +80,19 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
       {suggestions.length > 0 && (
         <div className="view-section-heading suggestions-heading">
           <h2>Worth checking before you shop</h2>
-          <span>
-            {suggestions.length} {suggestions.length === 1 ? 'suggestion' : 'suggestions'}
-          </span>
+          <div className="suggestion-controls">
+            <span>
+              {suggestions.length} {suggestions.length === 1 ? 'suggestion' : 'suggestions'}
+            </span>
+            {suggestions.length > 1 && (
+              <button
+                type="button"
+                onClick={() => onAddSuggestions(suggestions.map((product) => product.id))}
+              >
+                Add all to list
+              </button>
+            )}
+          </div>
         </div>
       )}
 

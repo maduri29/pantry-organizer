@@ -48,6 +48,37 @@ try {
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);
   pass('sample pantry and category groups render');
+  const bulkContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await bulkContext.route('**/config.js', (route) =>
+    route.fulfill({ contentType: 'application/javascript', body: 'window.PANTRY_CONFIG = {};' })
+  );
+  const bulkPage = await bulkContext.newPage();
+  await bulkPage.goto(baseUrl);
+  await bulkPage.getByRole('button', { name: 'Try sample pantry' }).click();
+  await bulkPage.getByRole('button', { name: 'Avocados', exact: true }).click();
+  await bulkPage
+    .locator('#editor')
+    .getByRole('heading', { name: 'Avocados', exact: true })
+    .waitFor();
+  await bulkPage.locator('#editor').getByRole('button', { name: 'Cancel', exact: true }).click();
+  await bulkPage.getByRole('button', { name: /Shopping list/ }).click();
+  const beforeBulk = await bulkPage.evaluate(() =>
+    JSON.parse(localStorage.getItem('pantry-organizer.demo.v1'))
+  );
+  await bulkPage.getByRole('button', { name: 'Add all to list', exact: true }).click();
+  await bulkPage
+    .getByRole('button', { name: 'Add all to list', exact: true })
+    .waitFor({ state: 'hidden' });
+  const afterBulk = await bulkPage.evaluate(() =>
+    JSON.parse(localStorage.getItem('pantry-organizer.demo.v1'))
+  );
+  const added = afterBulk.state.shopping.filter((item) => item.status === 'open');
+  assert.equal(afterBulk.revision, beforeBulk.revision + 1);
+  assert.equal(added.length, 2);
+  assert.equal(new Set(added.map((item) => item.productId)).size, 2);
+  await bulkContext.close();
+  pass('adding low-stock suggestions together saves once without duplicates');
+
   assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   assert.equal(await page.locator('.card .food-art').count(), 5);
   assert.equal(await page.locator('.card .food-art svg').count(), 5);

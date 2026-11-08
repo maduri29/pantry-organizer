@@ -2,17 +2,17 @@
 name: Pantry
 description: Everyday food inventory and shopping workspace
 colors:
-  primary: '#284c69'
-  primary-hover: '#18374e'
-  shell: '#243d50'
-  shell-active: '#3c5365'
-  ground: '#f5f2ec'
-  surface: '#ffffff'
-  active: '#e5eaf0'
-  text: '#252b31'
-  muted: '#62666b'
-  border: '#dedbd4'
-  control: '#c7c5bf'
+  primary: '#344c5b'
+  primary-hover: '#213846'
+  shell: '#eee9e0'
+  shell-active: '#fffefa'
+  ground: '#f6f3ed'
+  surface: '#fffefa'
+  active: '#ece3d8'
+  text: '#272d31'
+  muted: '#5e6264'
+  border: '#e2ddd4'
+  control: '#c9c2b7'
   warning: '#865317'
   danger: '#9c3833'
 typography:
@@ -58,7 +58,7 @@ components:
 
 **Creative North Star: "A place for everyday food"**
 
-A practical workspace with warm surfaces, ink-blue navigation and clearly aligned food information. The system serves repeat tasks: checking what remains, adding a purchase and preparing a shopping list.
+A practical workspace with warm surfaces, warm neutral navigation and clearly aligned food information. The system serves repeat tasks: checking what remains, adding a purchase and preparing a shopping list.
 
 The source of truth is the final workspace rules in `styles.css` and the components in `src/components`. Food illustrations identify objects; they do not compete with quantities or controls.
 
@@ -70,7 +70,7 @@ The source of truth is the final workspace rules in `styles.css` and the compone
 
 ## Colors
 
-Primary ink blue marks actions and selected filters. The darker shell separates navigation from work. White records sit on cream ground. Warning and danger colors carry stock or destructive-action meaning.
+Primary ink blue marks actions and selected filters. The warm navigation surface separates navigation from work. Off-white records sit on cream ground. Warning and danger colors carry stock or destructive-action meaning.
 
 **The State Rule.** Use color to reinforce a text label; never make color the only status cue.
 
@@ -82,13 +82,13 @@ IBM Plex Sans is self-hosted and shared by headings, labels and quantities. Page
 
 ## Layout
 
-Desktop uses a 208px navigation rail beside a flexible work area; the rail narrows to 180px below 1100px. At 850px navigation becomes a horizontal strip. At 600px the workspace uses 16px side padding and stacked food cards. Desktop records align identity, location, quantity and status. List stays left of Manage food.
+Navigation runs across the top at every width. The desktop workspace aligns food identity, storage, quantity and actions in compact rows. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Desktop records align identity, location, quantity and status. List stays left of Manage food.
 
 Editors maintain a header, section navigation, scrollable form body and reachable save footer. The Manage editor is a right-side panel on desktop and fills the phone viewport. Search and native select controls remain usable without hover.
 
 ## Elevation & Depth
 
-Work surfaces use borders and tonal separation. Shadows are reserved for existing overlays and menus, not ordinary food records. Focus uses a visible two-pixel outline with three-pixel offset; dark navigation uses a light outline.
+Work surfaces use borders and tonal separation. Shadows are reserved for existing overlays and menus, not ordinary food records. Focus uses a visible two-pixel outline with three-pixel offset; navigation uses the same dark outline.
 
 ## Shapes
 
