@@ -18,7 +18,6 @@ import type {
 } from './types.ts';
 import { Header } from './components/Header.tsx';
 import { Hero } from './components/Hero.tsx';
-import { Stats } from './components/Stats.tsx';
 import { Nav } from './components/Nav.tsx';
 import { InventoryView } from './components/InventoryView.tsx';
 import { ShoppingView } from './components/ShoppingView.tsx';
@@ -100,7 +99,6 @@ export const App: React.FC = () => {
   }, [data]);
 
   const [tab, setTab] = useState<'inventory' | 'shopping' | 'history'>('inventory');
-  const [filter, setFilter] = useState<'all' | 'soon' | 'low'>('all');
   const [search, setSearch] = useState<string>('');
   const [location, setLocation] = useState<string>('all');
   const [category, setCategory] = useState<string>('all');
@@ -562,7 +560,6 @@ export const App: React.FC = () => {
         setSearch('');
         setCategory('all');
         setLocation('all');
-        setFilter('all');
         if (keepAdding && modalRef.current === modal) {
           setModal({
             type: 'add',
@@ -724,21 +721,6 @@ export const App: React.FC = () => {
     [modal, mutate, activateShared, showToast]
   );
 
-  const soon = useMemo(() => {
-    if (!data) return [];
-    const ids = new Set(
-      data.state.batches
-        .filter((batch) => batch.quantity > 0 && D.expiryDays(batch.expiry) <= 3)
-        .map((batch) => batch.productId)
-    );
-    return data.state.products.filter((product) => ids.has(product.id));
-  }, [data]);
-
-  const low = useMemo(() => {
-    if (!data) return [];
-    return data.state.products.filter((p) => D.isLow(data.state, p));
-  }, [data]);
-
   const openShopping = useMemo(() => {
     if (!data) return [];
     return data.state.shopping.filter((i) => i.status === 'open');
@@ -815,22 +797,6 @@ export const App: React.FC = () => {
                 })
               }
             />
-
-            {tab === 'inventory' && (
-              <Stats
-                totalProducts={s.products.length}
-                soonCount={soon.length}
-                lowCount={low.length}
-                currentFilter={filter}
-                onSelectFilter={(newFilter) => {
-                  setFilter(newFilter);
-                  setSearch('');
-                  setCategory('all');
-                  setLocation('all');
-                  setTab('inventory');
-                }}
-              />
-            )}
           </div>
 
           <div id="content">
@@ -842,12 +808,10 @@ export const App: React.FC = () => {
                 location={location}
                 category={category}
                 sort={sort}
-                filter={filter}
                 onSearchChange={setSearch}
                 onLocationChange={setLocation}
                 onCategoryChange={setCategory}
                 onSortChange={setSort}
-                onClearFilter={() => setFilter('all')}
                 onAddFood={openAddFood}
                 onTrySample={async () => {
                   await mutate((st) => {

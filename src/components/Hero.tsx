@@ -31,12 +31,6 @@ export const Hero: React.FC<HeroProps> = ({
         </h1>
       </div>
       <div className="hero-actions">
-        <button className="primary" data-action="add" aria-label="＋ Add food" onClick={onAdd}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" />
-          </svg>{' '}
-          Add food
-        </button>
         {hasProducts && (
           <button data-action="bulk" onClick={onBulk}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -54,6 +48,17 @@ export const Hero: React.FC<HeroProps> = ({
             {suggestingCategories ? 'Suggesting…' : 'Suggest categories'}
           </button>
         )}
+        <button
+          className="primary hero-add"
+          data-action="add"
+          aria-label="＋ Add food"
+          onClick={onAdd}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>{' '}
+          Add food
+        </button>
       </div>
     </section>
   );

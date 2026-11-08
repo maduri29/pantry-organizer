@@ -164,33 +164,7 @@ try {
   assert.equal(await page.locator('.shelf-card').count(), 1);
   await page.locator('.toolbar').getByRole('button', { name: 'Clear filter', exact: true }).click();
   assert.equal(await page.locator('.shelf-card').count(), 3);
-  await page.getByLabel('Search food').fill('Couscous');
-  await page.getByRole('button', { name: /Running low/ }).click();
-  assert.equal(await page.getByLabel('Search food').inputValue(), '');
-  assert.equal(await page.locator('.shelf-card').count(), 1);
-  await page
-    .locator('.shelf-card')
-    .getByRole('heading', { name: 'Frozen edamame', exact: true })
-    .waitFor();
-  pass(
-    'search ignores accidental outer spaces; clear and summary filters restore a predictable scope'
-  );
-
-  await page.getByRole('button', { name: /Foods at home/ }).click();
-  await page.evaluate((key) => {
-    const data = JSON.parse(localStorage.getItem(key));
-    const first = data.state.batches[0];
-    first.expiry = new Date().toLocaleDateString('en-CA');
-    data.state.batches.push({ ...first, id: 'due-batch-fixture', quantity: 1, location: 'Pantry' });
-    data.revision += 1;
-    localStorage.setItem(key, JSON.stringify(data));
-  }, storageKey);
-  await page.reload();
-  await page.getByRole('button', { name: /Use soon/ }).waitFor();
-  assert.equal(await page.locator('.stat[data-filter="soon"] strong').innerText(), '1');
-  await page.getByRole('button', { name: /Use soon/ }).click();
-  assert.equal(await page.locator('.shelf-card').count(), 1);
-  pass('use-soon counts foods once even when two batches of the same food are due');
+  pass('search ignores outer spaces and clear restores the full pantry');
 
   await page.getByRole('button', { name: 'Add food', exact: false }).click();
   await editor.getByLabel('Food name', { exact: true }).fill('Oats');

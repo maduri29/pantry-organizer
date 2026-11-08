@@ -5054,26 +5054,6 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
 .pantry-overview .hero-actions button {
   min-height: 44px;
 }
-.pantry-overview .stats {
-  display: flex;
-  gap: 0;
-  width: fit-content;
-  margin: 20px 0 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--rule);
-}
-.pantry-overview .stats .stat {
-  flex: 0 0 auto;
-  padding: 8px 12px;
-  border: 0;
-  border-radius: 6px;
-}
-.pantry-overview .stats .stat > span {
-  justify-content: space-between;
-}
-.pantry-overview .stats .stat strong {
-  font-variant-numeric: tabular-nums;
-}
 @media (max-width: 600px) {
   .pantry-overview {
     padding: 18px 16px 12px;
@@ -5094,24 +5074,9 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
     min-width: 0;
     padding-inline: 8px;
   }
-  .pantry-overview .stats {
-    width: 100%;
-    margin-top: 16px;
-    padding-top: 12px;
-  }
-  .pantry-overview .stats .stat {
-    flex: 1 1 0;
-    padding: 8px 6px;
-  }
-  .pantry-overview .stats .stat > span {
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 3px;
-    font-size: 11px;
-    text-align: center;
-  }
-  .pantry-overview .stats .stat strong {
-    order: 0;
-    font-size: 16px;
-  }
+}
+
+.pantry-overview .hero-actions .hero-add:only-child {
+  flex: 0 0 auto;
+  margin-left: auto;
 }

@@ -149,7 +149,6 @@ try {
   await bulkContext.close();
   pass('adding low-stock suggestions together saves once without duplicates');
 
-  assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   assert.equal(await page.locator('.card .food-art').count(), 5);
   assert.equal(await page.locator('.card .food-art svg').count(), 5);
   assert.equal(await page.locator('.workspace-nav .nav button[data-tab]').count(), 3);
@@ -181,17 +180,6 @@ try {
   pass(
     'single-batch cards show quantity once as the stock-update button, compact location, and expiry without check dates'
   );
-  await page.getByLabel('Storage location').selectOption('Fridge');
-  await page.getByLabel('Food category').selectOption('Fruit');
-  await page.getByLabel('Search food').fill('blue');
-  await page.getByRole('button', { name: /Running low/ }).click();
-  assert.equal(await page.getByLabel('Storage location').inputValue(), 'all');
-  assert.equal(await page.getByLabel('Food category').inputValue(), 'all');
-  assert.equal(await page.getByLabel('Search food').inputValue(), '');
-  assert.equal(await page.locator('.stat[data-filter="low"]').getAttribute('class'), 'stat active');
-  assert.equal(await page.locator('.shelf-card').count(), 2);
-  await page.locator('.toolbar button[data-filter="all"]').click();
-  pass('stock filter reveals every low/out item after resetting location, category and search');
   const filters = await page.evaluate(() =>
     Object.fromEntries(
       ['#search', '#location', '#category', '#sort'].map((sel) => {
@@ -318,7 +306,6 @@ try {
   await page.getByRole('button', { name: 'Save stock', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.innerText(), /\bOut\b/);
-  assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   pass('check-in sets remaining quantity; out-of-stock food stays visible');
   await page.reload();
   card = page
@@ -453,13 +440,6 @@ try {
     checked
   );
   pass('opening inventory does not mark foods freshly checked');
-  await page.getByRole('button', { name: /Running low/ }).click();
-  assert.equal(await page.locator('.card').count(), 1);
-  pass('visible low-stock summary filters to remaining low food');
-  await page.getByRole('button', { name: /Use soon/ }).click();
-  assert.ok((await page.locator('.card').count()) > 0);
-  pass('optional expiry summary finds upcoming package dates');
-  await page.getByRole('button', { name: /Foods at home/ }).click();
   const staleCard = page
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) });

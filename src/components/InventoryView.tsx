@@ -12,12 +12,10 @@ interface InventoryViewProps {
   location: string;
   category: string;
   sort: string;
-  filter: 'all' | 'soon' | 'low';
   onSearchChange: (search: string) => void;
   onLocationChange: (location: string) => void;
   onCategoryChange: (category: string) => void;
   onSortChange: (sort: string) => void;
-  onClearFilter: () => void;
   onAddFood: (initialName?: string) => void;
   onTrySample: () => void;
   onUpdate: (product: Product, batch?: Batch) => void;
@@ -32,12 +30,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   location,
   category,
   sort,
-  filter,
   onSearchChange,
   onLocationChange,
   onCategoryChange,
   onSortChange,
-  onClearFilter,
   onAddFood,
   onTrySample,
   onUpdate,
@@ -107,8 +103,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         ) {
           return false;
         }
-        if (filter === 'low') return productIsLow.get(p.id) ?? false;
-        if (filter === 'soon') return (minExpiryDays.get(p.id) ?? Infinity) <= 3;
         return true;
       })
       .sort((a, b) => {
@@ -136,7 +130,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     search,
     category,
     location,
-    filter,
     sort,
     productBatches,
     productIsLow,
@@ -148,10 +141,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     onSearchChange('');
     onLocationChange('all');
     onCategoryChange('all');
-    onClearFilter();
   };
-  const hasActiveFilters =
-    Boolean(search.trim()) || location !== 'all' || category !== 'all' || filter !== 'all';
+  const hasActiveFilters = Boolean(search.trim()) || location !== 'all' || category !== 'all';
 
   return (
     <div className="inventory-view">
@@ -161,7 +152,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
         <span className="inventory-note">
           {items.length} {items.length === 1 ? 'food' : 'foods'}
-          {filter === 'all' ? ' · Low stock first' : ''}
+          {' · Low stock first'}
         </span>
       </div>
       <div className="toolbar">
