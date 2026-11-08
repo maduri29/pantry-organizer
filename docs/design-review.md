@@ -34,3 +34,5 @@ KitchenPal’s [kitchen FAQ](https://kitchenpalapp.com/en/faqs/kitchen.html) des
 ## Card and editor simplification
 
 Location and date now share a consistent left-aligned storage block beneath stock amounts. The Manage food tab bar is removed: the default flow edits remaining stock, a contextual link switches to adding a purchase, and a secondary header link opens food details. Drafts remain mounted when changing tasks; deletion still requires confirmation.
+
+Phone alignment cleanup: removed quantity equations from stock footers, aligned card rows across desktop columns, aligned phone storage text and action targets, and checked stock/purchase/details at 320, 390 and 430px.

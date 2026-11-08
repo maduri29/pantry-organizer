@@ -66,7 +66,6 @@ try {
   await editor.locator('.stock-batch').first().waitFor();
   assert.equal(await editor.locator('.stock-batch').count(), 2);
   await editor.locator(`[name="quantity-${exactBatches[0].id}"]:visible`).fill('1');
-  assert.match(await editor.locator('.stock-preview').innerText(), /5 items → 4 items/);
   await editor.getByRole('button', { name: 'Save stock', exact: true }).click();
   await saved();
   let data = await record();
@@ -126,7 +125,6 @@ try {
     'Draft chickpeas'
   );
   await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
-  assert.match(await editor.locator('.stock-preview').innerText(), /4 \+ 1.5 = 5.5 items/);
   assert.match(await editor.locator('.stock-list-note').innerText(), /checks this off/);
   await editor.getByRole('button', { name: 'Add to pantry', exact: true }).click();
   await saved();

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as D from '../domain.ts';
 import type { Batch, Location, PantryState, Product, ShoppingItem } from '../types.ts';
 import { FoodIllustration } from './FoodIllustration.tsx';
-import { fmt, formatAmount } from './InventoryView.tsx';
+import { formatAmount } from './InventoryView.tsx';
 
 export const LevelPicker: React.FC<{
   name: string;
@@ -141,24 +141,6 @@ export const StockEditor: React.FC<{
     onBusyChange?.(busy);
   }, [busy, onBusyChange]);
   const current = D.total(state, product);
-  const nextAmounts = allBatches.map((item) =>
-    amounts[item.id] === undefined ? item.quantity : Number(amounts[item.id])
-  );
-  const afterUpdate =
-    product.unit === 'level'
-      ? Math.max(0, ...nextAmounts)
-      : nextAmounts.reduce((sum, n) => sum + n, 0);
-  const validPreview =
-    action === 'update'
-      ? Object.values(amounts).every(
-          (value) => value.trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0
-        )
-      : quantity.trim() !== '' && Number.isFinite(Number(quantity)) && Number(quantity) > 0;
-  const locationBefore = Math.max(
-    0,
-    ...allBatches.filter((item) => item.location === location).map((item) => item.quantity)
-  );
-
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (busy) return;
@@ -403,14 +385,6 @@ export const StockEditor: React.FC<{
               Delete food
             </button>
           )}
-          <p className="stock-preview" role="status">
-            {validPreview &&
-              (action === 'update'
-                ? `${formatAmount(current, product)} → ${formatAmount(afterUpdate, product)}`
-                : product.unit === 'level'
-                  ? `${location}: ${D.level(locationBefore)} → ${D.level(Number(quantity))}`
-                  : `${fmt(current)} + ${fmt(Number(quantity))} = ${formatAmount(current + Number(quantity), product)}`)}
-          </p>
           <div>
             <button type="button" onClick={onClose} disabled={busy}>
               Cancel

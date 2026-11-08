@@ -298,11 +298,10 @@ try {
   await card.getByRole('button', { name: 'Manage Avocados', exact: true }).click();
   await page.locator('#editor').getByRole('button', { name: 'I bought more', exact: true }).click();
   await page.locator('input[name="quantity"]').fill('1');
-  assert.match(await page.locator('.stock-preview').innerText(), /4 \+ 1 = 5 items/);
   await page.getByRole('button', { name: 'Add to pantry', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.locator('.amount').innerText(), /5 items/);
-  pass('food settings save independently; direct restock previews and adds purchased stock once');
+  pass('food settings save independently; direct restock adds purchased stock once');
   await page.getByLabel('Food category').selectOption('Breakfast');
   assert.equal(await page.locator('.card').count(), 1);
   pass('custom category reassignment');
