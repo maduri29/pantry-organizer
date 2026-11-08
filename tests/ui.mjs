@@ -147,12 +147,10 @@ try {
     )
   );
   assert.equal(filters['#search'].display, 'grid');
-  assert.ok(filters['#location'].width > 120 && filters['#category'].width > 120);
+  assert.ok(filters['#location'].width > 90 && filters['#category'].width > 90);
   assert.ok(Math.abs(filters['#location'].width - filters['#category'].width) < 3);
-  assert.ok(filters['#sort'].width >= filters['#location'].width * 1.8);
-  pass(
-    '390px filters use clear full-width search and sort with balanced location/category controls'
-  );
+  assert.ok(Math.abs(filters['#sort'].width - filters['#location'].width) < 3);
+  pass('390px filters use full-width search and a compact balanced filter row');
   const avocadoCard = page
       .locator('.card')
       .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) }),

@@ -2,17 +2,17 @@
 name: Pantry
 description: Everyday food inventory and shopping workspace
 colors:
-  primary: '#344c5b'
-  primary-hover: '#213846'
+  primary: '#a53e28'
+  primary-hover: '#86301e'
   shell: '#eee9e0'
-  shell-active: '#fffefa'
-  ground: '#f6f3ed'
-  surface: '#fffefa'
-  active: '#ece3d8'
-  text: '#272d31'
-  muted: '#5e6264'
-  border: '#e2ddd4'
-  control: '#c9c2b7'
+  shell-active: '#ffffff'
+  ground: '#edf2f4'
+  surface: '#ffffff'
+  active: '#f8e9e3'
+  text: '#223440'
+  muted: '#53636d'
+  border: '#d8e1e6'
+  control: '#bccbd3'
   warning: '#865317'
   danger: '#9c3833'
 typography:
@@ -34,7 +34,7 @@ typography:
 rounded:
   control: '6px'
   panel: '8px'
-  card: '12px'
+  card: '16px'
 spacing:
   compact: '8px'
   normal: '16px'
@@ -58,7 +58,7 @@ components:
 
 **Creative North Star: "A place for everyday food"**
 
-A practical workspace with warm surfaces, warm neutral navigation and clearly aligned food information. The system serves repeat tasks: checking what remains, adding a purchase and preparing a shopping list.
+A practical workspace with blue-grey surfaces, blue-grey navigation and clearly aligned food information. The system serves repeat tasks: checking what remains, adding a purchase and preparing a shopping list.
 
 The source of truth is the final workspace rules in `styles.css` and the components in `src/components`. Food illustrations identify objects; they do not compete with quantities or controls.
 
@@ -70,7 +70,7 @@ The source of truth is the final workspace rules in `styles.css` and the compone
 
 ## Colors
 
-Primary ink blue marks actions and selected filters. The warm navigation surface separates navigation from work. Off-white records sit on cream ground. Warning and danger colors carry stock or destructive-action meaning.
+Rust marks primary actions and selected filters. The blue-grey navigation surface separates navigation from work. Off-white records sit on blue-grey ground. Warning and danger colors carry stock or destructive-action meaning.
 
 **The State Rule.** Use color to reinforce a text label; never make color the only status cue.
 
@@ -82,7 +82,7 @@ IBM Plex Sans is self-hosted and shared by headings, labels and quantities. Page
 
 ## Layout
 
-Navigation runs across the top at every width. The desktop workspace aligns food identity, storage, quantity and actions in compact rows. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Desktop records align identity, location, quantity and status. List stays left of Manage food.
+Navigation runs across the top at every width. The inventory uses three illustrated cards per row on desktop, two below 1100px and one on phones. Each card groups identity, amount, status, storage and actions. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Cards group identity, location, quantity and status. List stays left of Manage food.
 
 Editors maintain a header, section navigation, scrollable form body and reachable save footer. The Manage editor is a right-side panel on desktop and fills the phone viewport. Search and native select controls remain usable without hover.
 

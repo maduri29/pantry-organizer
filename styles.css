@@ -4131,3 +4131,287 @@ body > #app > header {
   min-width: 44px;
   min-height: 44px;
 }
+
+/* Food-first visual replacement: illustrated cards instead of ledger rows. */
+:root {
+  --ground: #edf2f4;
+  --surface: #ffffff;
+  --raised: #e4ebef;
+  --active: #f8e9e3;
+  --primary: #a53e28;
+  --primary-hover: #86301e;
+  --text: #223440;
+  --muted: #53636d;
+  --border: #d8e1e6;
+  --rule: #e8edf0;
+  --control: #bccbd3;
+}
+body > #app > header {
+  border-bottom: 0;
+  background: var(--ground);
+}
+.brand {
+  font-size: 27px;
+}
+.brand .mark {
+  color: #223440;
+}
+.workspace-nav {
+  background: var(--ground);
+  border-bottom: 1px solid var(--border);
+}
+.workspace-nav .nav button {
+  color: var(--muted);
+}
+.workspace-nav .nav button.active {
+  border-bottom-color: var(--text);
+  color: var(--text);
+}
+.app-workspace > main {
+  max-width: 1220px;
+  padding-top: 32px;
+}
+.hero h1 {
+  font-size: 36px;
+  letter-spacing: -0.035em;
+}
+.hero p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.hero-actions button {
+  border-radius: 9px;
+}
+.stats {
+  background: transparent;
+  border: 0;
+  gap: 8px;
+  overflow: visible;
+}
+.stats .stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 16px;
+}
+.stats .stat + .stat {
+  border-left: 1px solid var(--border);
+}
+.stats .stat.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: white;
+}
+.inventory-heading h2 {
+  font-size: 18px;
+}
+.toolbar {
+  margin-bottom: 22px;
+}
+.toolbar input,
+.toolbar select {
+  background: white;
+  border-radius: 9px;
+  border-color: var(--border);
+}
+.shelf-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+.shelf-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto 1fr auto;
+  padding: 22px;
+  gap: 14px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--surface);
+  min-width: 0;
+}
+.shelf-card:last-child {
+  border-bottom: 0;
+}
+.shelf-card .card-top {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.shelf-card .food-art {
+  width: 76px;
+  height: 76px;
+  flex-basis: 76px;
+}
+.shelf-card .food-art svg {
+  width: 72px;
+  height: 72px;
+}
+.shelf-card .card-top h2 {
+  font-size: 19px;
+  margin-bottom: 2px;
+}
+.food-name-action {
+  min-height: 44px;
+}
+.shelf-card .amount {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  align-self: center;
+  font-size: 28px;
+  line-height: 1.2;
+}
+.shelf-card .amount small {
+  font-size: 13px;
+  color: var(--muted);
+}
+.shelf-card .stock-status {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  font-size: 11px;
+  white-space: normal;
+  max-width: 140px;
+}
+.shelf-card .single-batch {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.shelf-card .batch-details {
+  grid-column: 1 / -1;
+  grid-row: 4;
+}
+.shelf-card .card-foot {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  border-top: 1px solid var(--rule);
+  padding-top: 14px;
+  margin-top: 0;
+  gap: 8px;
+}
+.shelf-card .card-foot [data-action='manage'] {
+  background: #f0f4f6;
+  color: var(--text);
+  border-color: transparent;
+  padding-inline: 12px;
+  border-radius: 8px;
+}
+.shelf-card .card-foot [data-action='shop'] {
+  color: var(--muted);
+}
+.shelf-card .card-foot [data-action='manage']:hover {
+  background: #e2ebf0;
+}
+.shopping-row {
+  border: 0;
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+.suggestion-row {
+  background: white;
+}
+.empty {
+  border: 0;
+  border-radius: 16px;
+}
+.footer {
+  color: var(--muted);
+}
+.manage-editor .manage-heading,
+.add-heading {
+  background: #edf2f4;
+}
+.editor-navigation button[aria-pressed='true'] {
+  background: #223440;
+  color: white;
+}
+.stock-footer,
+.manage-footer,
+.add-footer {
+  background: #edf2f4;
+}
+@media (max-width: 1100px) {
+  .shelf-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .app-workspace > main {
+    padding-top: 22px;
+  }
+  .hero h1 {
+    font-size: 30px;
+  }
+  .hero p {
+    font-size: 13px;
+  }
+  .stats .stat {
+    padding: 9px 5px;
+  }
+  .toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .toolbar #search {
+    grid-column: 1 / -1;
+  }
+  .toolbar #sort {
+    grid-column: auto;
+  }
+  .toolbar select {
+    font-size: 11px;
+    padding-inline: 6px;
+  }
+  .shelf-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .shelf-card {
+    padding: 20px;
+    grid-template-rows: auto auto auto 1fr auto;
+  }
+  .shelf-card .card-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+  .shelf-card .food-art {
+    width: 64px;
+    height: 64px;
+    flex-basis: 64px;
+  }
+  .shelf-card .food-art svg {
+    width: 60px;
+    height: 60px;
+  }
+  .shelf-card .card-top h2 {
+    font-size: 18px;
+  }
+  .shelf-card .amount {
+    font-size: 26px;
+  }
+  .shelf-card .stock-status {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .shelf-card .single-batch {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+  .shelf-card .batch-details {
+    grid-row: 4;
+  }
+  .shelf-card .card-foot {
+    grid-column: 1 / -1;
+    grid-row: 5;
+  }
+}

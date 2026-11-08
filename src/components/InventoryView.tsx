@@ -221,22 +221,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
       <div className="grid shelf-grid">
         {items.length > 0 ? (
-          items.map((p, index) => {
-            const heading =
-              sort === 'category' && (index === 0 || items[index - 1].category !== p.category) ? (
-                <div key={`cat-${p.category}`} className="category-heading">
-                  <div>
-                    <h2>{p.category}</h2>
-                  </div>
-                  <span className="category-count">
-                    {items.filter((item) => item.category === p.category).length}{' '}
-                    {items.filter((item) => item.category === p.category).length === 1
-                      ? 'food'
-                      : 'foods'}
-                  </span>
-                </div>
-              ) : null;
-
+          items.map((p) => {
             const batches = productBatches.get(p.id) || [];
             const isOnShopping = openShoppingIds.has(p.id);
             const totalQty = productTotals.get(p.id) ?? 0;
@@ -244,7 +229,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
             return (
               <React.Fragment key={p.id}>
-                {heading}
                 <article
                   className={`card shelf-card ${totalQty === 0 ? 'is-out' : itemIsLow ? 'is-low' : 'is-ready'}`}
                 >
