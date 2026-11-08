@@ -246,6 +246,33 @@ try {
     1
   );
   pass('Escape cannot dismiss an editor while its save is pending');
+
+  const otherTab = await context.newPage();
+  await otherTab.goto(baseUrl);
+  await page.getByRole('button', { name: 'Add food', exact: false }).click();
+  await editor.getByLabel('Food name', { exact: true }).fill('Conflicting draft');
+  await page.evaluate(() => {
+    delete window.__releasePantrySave;
+  });
+  await editor.getByRole('button', { name: 'Add food', exact: true }).click();
+  await page.waitForFunction(() => typeof window.__releasePantrySave === 'function');
+  await otherTab.evaluate((key) => {
+    const data = JSON.parse(localStorage.getItem(key));
+    data.state.products[0].name = 'Updated in other tab';
+    data.revision += 1;
+    localStorage.setItem(key, JSON.stringify(data));
+  }, storageKey);
+  await page.waitForTimeout(100);
+  await page.evaluate(() => window.__releasePantrySave());
+  await editor.getByText(/Inventory changed in another tab/).waitFor();
+  assert.equal(
+    await editor.getByLabel('Food name', { exact: true }).inputValue(),
+    'Conflicting draft'
+  );
+  await editor.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('heading', { name: 'Updated in other tab', exact: true }).waitFor();
+  await otherTab.close();
+  pass('a conflicting save preserves the draft and refreshes changes from another tab');
   await context.close();
 } finally {
   await browser.close();

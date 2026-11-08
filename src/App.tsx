@@ -98,6 +98,11 @@ export const App: React.FC = () => {
   }, []);
 
   const pendingRemoteRef = useRef<PantryRecord | null>(null);
+  const pendingLocalRef = useRef(false);
+  const saveFinishedRef = useRef<Promise<boolean> | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => () => unsubscribeRef.current?.(), []);
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
@@ -106,6 +111,11 @@ export const App: React.FC = () => {
   const activateShared = useCallback(
     async (candidate: any) => {
       const loaded = await candidate.load();
+      while (saveFinishedRef.current) {
+        if (!(await saveFinishedRef.current)) {
+          throw new Error('Finish saving your local changes before connecting.');
+        }
+      }
       // Update the refs before rendering the shared state so immediately
       // available actions (including Jev) cannot read the previous demo repo.
       repositoryRef.current = candidate;
@@ -115,16 +125,26 @@ export const App: React.FC = () => {
       setData(loaded);
       setOnline(true);
 
-      candidate.subscribe(
+      unsubscribeRef.current?.();
+      pendingRemoteRef.current = null;
+      unsubscribeRef.current = candidate.subscribe(
         (next: PantryRecord) => {
+          if (repositoryRef.current !== candidate) return;
           if (busyRef.current) {
-            pendingRemoteRef.current = next;
+            if (!pendingRemoteRef.current || next.revision > pendingRemoteRef.current.revision) {
+              pendingRemoteRef.current = next;
+            }
           } else if (dataRef.current && next.revision > dataRef.current.revision) {
+            dataRef.current = next;
             setData(next);
             showToast('Pantry updated from your household');
           }
         },
-        () => showToast('Connection interrupted. Reconnect before editing.')
+        () => {
+          if (repositoryRef.current === candidate) {
+            showToast('Connection interrupted. Reconnect before editing.');
+          }
+        }
       );
 
       setModal(null);
@@ -172,10 +192,22 @@ export const App: React.FC = () => {
   // Storage synchronization between tabs
   useEffect(() => {
     const handleStorage = async () => {
+      if (!onlineRef.current && busyRef.current) pendingLocalRef.current = true;
       if (!onlineRef.current && !busyRef.current) {
         try {
-          const loaded = await repositoryRef.current.load();
-          setData(loaded);
+          const activeRepository = repositoryRef.current;
+          const loaded = await activeRepository.load();
+          if (
+            activeRepository === repositoryRef.current &&
+            !onlineRef.current &&
+            !busyRef.current &&
+            (!dataRef.current || loaded.revision > dataRef.current.revision)
+          ) {
+            dataRef.current = loaded;
+            setData(loaded);
+          } else if (busyRef.current && activeRepository === repositoryRef.current) {
+            pendingLocalRef.current = true;
+          }
         } catch {
           // ignore
         }
@@ -195,6 +227,11 @@ export const App: React.FC = () => {
       if (busyRef.current) return;
       busyRef.current = true;
       setBusy(true);
+      let finishSave!: (success: boolean) => void;
+      saveFinishedRef.current = new Promise((resolve) => {
+        finishSave = resolve;
+      });
+      let succeeded = false;
 
       const currentData = dataRef.current;
       const currentModal = modalRef.current;
@@ -228,6 +265,7 @@ export const App: React.FC = () => {
         setData(saved);
         if (!keepEditorOpen) setModal(null);
         showToast(message);
+        succeeded = true;
         return saved;
       } catch (err: any) {
         if (!currentModal && expectedRevision === undefined) {
@@ -235,8 +273,6 @@ export const App: React.FC = () => {
         }
         throw err;
       } finally {
-        busyRef.current = false;
-        setBusy(false);
         if (
           pendingRemoteRef.current &&
           dataRef.current &&
@@ -246,6 +282,27 @@ export const App: React.FC = () => {
           setData(pendingRemoteRef.current);
         }
         pendingRemoteRef.current = null;
+        while (pendingLocalRef.current && !onlineRef.current) {
+          pendingLocalRef.current = false;
+          const activeRepository = repositoryRef.current;
+          try {
+            const loaded = await activeRepository.load();
+            if (
+              activeRepository === repositoryRef.current &&
+              !onlineRef.current &&
+              (!dataRef.current || loaded.revision > dataRef.current.revision)
+            ) {
+              dataRef.current = loaded;
+              setData(loaded);
+            }
+          } catch {
+            // Keep the last readable pantry if another tab wrote invalid data.
+          }
+        }
+        busyRef.current = false;
+        setBusy(false);
+        saveFinishedRef.current = null;
+        finishSave(succeeded);
       }
     },
     [showToast]
