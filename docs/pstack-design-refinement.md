@@ -26,3 +26,9 @@ The final design was captured in 54 views covering inventory, profile, stock, de
 `tests/design-layout.mjs` checks gutters, chevrons, phone card placement and overflow at all six widths. Running it against the original stylesheet fails at 560px with actual gutters `[16, 16, 24, 24]` instead of `[16, 16, 16, 16]`. The final stylesheet passes. The check is included in `bun run test:ui` and can also be run with `bun run test:design`.
 
 The existing browser suite, `bun run ci`, and the native domain tests remain the required release checks.
+
+## Follow-up refactor
+
+A further pass removed 19 unused CSS rules for `.stock-status`, `.amount-edit-label`, and `.editor-eyebrow`, and removed a duplicate low-stock comparison after priority was already established. A browser check now confirms that sorting by name and by low stock preserves the same order within priority groups.
+
+The before/after comparison covered 54 views across six widths. Fifty-two PNGs were byte-identical. The remaining two stock-editor captures differed by 20 pixels each in dimmed page content outside the editor. The app's full browser suite, domain suite, and six-width design checks passed.

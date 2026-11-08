@@ -85,6 +85,9 @@ try {
       ),
     priorityOrder
   );
+  const nameOrder = await page.locator('.shelf-card h2').allTextContents();
+  await page.getByLabel('Sort foods').selectOption('low');
+  assert.deepEqual(await page.locator('.shelf-card h2').allTextContents(), nameOrder);
   await page.getByLabel('Sort foods').selectOption('category');
   pass('low-stock foods lead the inventory while the selected sort orders each group');
 

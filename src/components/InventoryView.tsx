@@ -129,13 +129,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         if (sort === 'category') {
           return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
         }
-        if (sort === 'name') {
+        if (sort === 'name' || sort === 'low') {
           return a.name.localeCompare(b.name);
-        }
-        if (sort === 'low') {
-          const lowDiff =
-            Number(productIsLow.get(b.id) ?? false) - Number(productIsLow.get(a.id) ?? false);
-          return lowDiff || a.name.localeCompare(b.name);
         }
         const aExp = minExpiryDays.get(a.id) ?? Infinity;
         const bExp = minExpiryDays.get(b.id) ?? Infinity;
