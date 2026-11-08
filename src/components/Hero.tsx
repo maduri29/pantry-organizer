@@ -29,7 +29,6 @@ export const Hero: React.FC<HeroProps> = ({
               ? 'Shopping list'
               : 'Pantry activity'}
         </h1>
-        {view === 'inventory' && <p>Track your food and shopping list.</p>}
       </div>
       <div className="hero-actions">
         <button className="primary" data-action="add" aria-label="＋ Add food" onClick={onAdd}>
@@ -40,6 +39,9 @@ export const Hero: React.FC<HeroProps> = ({
         </button>
         {hasProducts && (
           <button data-action="bulk" onClick={onBulk}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 8h14l1 12H4L5 8Zm4 0V6a3 3 0 0 1 6 0v2M12 11v6m-3-3h6" />
+            </svg>
             Restock several
           </button>
         )}

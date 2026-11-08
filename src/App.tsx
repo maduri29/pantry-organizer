@@ -800,36 +800,38 @@ export const App: React.FC = () => {
           </p>
         </aside>
         <main id="main-content" tabIndex={-1}>
-          <Hero
-            view={tab}
-            hasProducts={s.products.length > 0}
-            canSuggestCategories={online}
-            suggestingCategories={suggestingCategories}
-            onSuggestCategories={handleSuggestPantryCategories}
-            onAdd={() => openAddFood()}
-            onBulk={() =>
-              setModal({
-                type: 'bulk',
-                revision: data.revision
-              })
-            }
-          />
-
-          {tab === 'inventory' && (
-            <Stats
-              totalProducts={s.products.length}
-              soonCount={soon.length}
-              lowCount={low.length}
-              currentFilter={filter}
-              onSelectFilter={(newFilter) => {
-                setFilter(newFilter);
-                setSearch('');
-                setCategory('all');
-                setLocation('all');
-                setTab('inventory');
-              }}
+          <div className="pantry-overview">
+            <Hero
+              view={tab}
+              hasProducts={s.products.length > 0}
+              canSuggestCategories={online}
+              suggestingCategories={suggestingCategories}
+              onSuggestCategories={handleSuggestPantryCategories}
+              onAdd={() => openAddFood()}
+              onBulk={() =>
+                setModal({
+                  type: 'bulk',
+                  revision: data.revision
+                })
+              }
             />
-          )}
+
+            {tab === 'inventory' && (
+              <Stats
+                totalProducts={s.products.length}
+                soonCount={soon.length}
+                lowCount={low.length}
+                currentFilter={filter}
+                onSelectFilter={(newFilter) => {
+                  setFilter(newFilter);
+                  setSearch('');
+                  setCategory('all');
+                  setLocation('all');
+                  setTab('inventory');
+                }}
+              />
+            )}
+          </div>
 
           <div id="content">
             {tab === 'inventory' && (
