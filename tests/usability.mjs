@@ -221,6 +221,31 @@ try {
   assert.equal((await record()).state.products.filter((food) => food.name === 'Oats').length, 1);
   assert.deepEqual(errors, []);
   pass('a failed save preserves the draft and pantry; retry saves exactly once');
+
+  await page.getByRole('button', { name: 'Add food', exact: false }).click();
+  await editor.getByLabel('Food name', { exact: true }).fill('Delayed save test');
+  await page.evaluate(() => {
+    const original = navigator.locks.request.bind(navigator.locks);
+    navigator.locks.request = (name, callback) =>
+      new Promise((resolve, reject) => {
+        window.__releasePantrySave = () => original(name, callback).then(resolve, reject);
+      });
+  });
+  await editor.getByRole('button', { name: 'Add food', exact: true }).click();
+  await page.waitForFunction(() => typeof window.__releasePantrySave === 'function');
+  await page.keyboard.press('Escape');
+  assert.equal(await editor.isVisible(), true);
+  assert.equal(
+    await editor.getByLabel('Food name', { exact: true }).inputValue(),
+    'Delayed save test'
+  );
+  await page.evaluate(() => window.__releasePantrySave());
+  await editor.waitFor({ state: 'hidden' });
+  assert.equal(
+    (await record()).state.products.filter((food) => food.name === 'Delayed save test').length,
+    1
+  );
+  pass('Escape cannot dismiss an editor while its save is pending');
   await context.close();
 } finally {
   await browser.close();

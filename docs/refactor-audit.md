@@ -1,0 +1,24 @@
+# Pantry code audit and refactoring plan
+
+This review examined state changes, local and shared persistence, import validation, editor flows, and test/build coverage. It prioritizes data integrity before structural cleanup.
+
+## Findings and recommendations
+
+1. **Make local saves atomic across tabs.** `src/storage.ts` uses Web Locks when available, but otherwise performs an unlocked read followed by a write. In a controlled run with `navigator.locks` unavailable, two simultaneous saves both fulfilled at revision 1 and the second state overwrote the first. Replace the local persistence mechanism with an IndexedDB transaction that checks the revision and writes the new record atomically. Ship it behind a versioned migration with backup and rollback. Do not silently emulate a cross-tab lock with localStorage.
+2. **Validate semantic invariants on every load and import.** `src/domain.ts` currently decodes the structural schema in `validateState`, but does not verify references or domain rules. A controlled call accepted a product with a negative minimum and a batch pointing to a missing product. Add a versioned decoder that checks unique IDs, references, finite nonnegative quantities, unit-specific constraints, and valid dates. Reject invalid input with a recoverable explanation; never silently drop records. Use the same validation for imports, local storage and shared records.
+3. **Preserve history units and decide how unit changes work.** `src/App.tsx` updates a product's unit in place, while `src/components/HistoryView.tsx` displays all historical quantities using the current unit. A unit change can therefore relabel historical values and existing amounts without conversion. Add unit information to new movement records, choose an explicit conversion or reset policy, and label legacy entries whose original unit cannot be established rather than inventing it.
+4. **Give each repository session a lifecycle.** `activateShared` in `src/App.tsx` does not retain the unsubscribe function returned by `FirebaseRepository.subscribe`. Make the session controller own subscription teardown and ignore callbacks from an old session. Keep only the highest pending revision. Normal sign-out reloads the page, so the risk is reactivation or unmount rather than a proven normal sign-out failure.
+5. **Split the app controller and editor by workflow.** `src/App.tsx` currently owns repository state, synchronization, authentication, import/export, suggestions, and a large modal command dispatcher. `src/components/DialogModal.tsx` mixes adding, stock, buying, details, connection, and category suggestions. Extract a repository/session controller and typed command handlers, then separate dialogs by workflow. Replace `Record<string, any>` submit payloads with discriminated command types. Migrate one caller at a time and keep the revision check and atomic save contract intact.
+6. **Test source code and repository contracts directly.** The default Node domain tests import generated `.js` files, while the native TypeScript suite covers a smaller set of source-level cases. The native suite is now part of the default `test` script. Expand source-level coverage and check that generated bundles are current. Add a shared repository contract suite for revision conflicts, invalid records, delayed saves, subscription replacement, and concurrent writers. Keep focused browser coverage for real user workflows.
+7. **Plan for shared-history growth when needed.** Shared data currently lives in one Firestore document, and `src/firebase.ts` refuses a record beyond 700,000 bytes. This is a deliberate guard, not evidence that the current pantry is near the limit. If measured usage approaches it, separate archived movements from current stock with a versioned, transactional migration and corresponding security rules; retain export and rollback.
+
+## Fixed in this pass
+
+- The native TypeScript domain suite now runs as part of `bun run test` and `bun run ci`.
+
+- A cancelled category suggestion could leave the suggestion button disabled after the user changed the name and changed it back. The abort now clears the pending state only for the active request. A browser regression reproduces the prior failure and confirms that late responses remain ignored.
+- Escape could close an editor during an in-flight pantry save. A later save completion could then close a different editor. The editor now stays open while a pantry mutation is pending. A browser test holds the save, presses Escape, checks the draft, releases the save, and verifies one successful write.
+
+## Suggested delivery order
+
+Add source/repository contract tests first. Introduce transactional local storage and semantic validation with explicit migration and recovery. Address unit history and session lifecycle next. Only then split the controller and dialogs along the now-tested command boundaries. Treat shared-history partitioning as a separately measured migration.

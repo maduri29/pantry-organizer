@@ -884,6 +884,11 @@ try {
   await authPage.getByRole('button', { name: 'Suggest category with Jev' }).click();
   while (!releaseSlowResponse) await new Promise((resolve) => setTimeout(resolve, 5));
   await signedInEditor.locator('[name="name"]').fill('Changed name');
+  await signedInEditor.locator('[name="name"]').fill('Slow food');
+  assert.equal(
+    await authPage.getByRole('button', { name: 'Suggest category with Jev' }).isEnabled(),
+    true
+  );
   releaseSlowResponse();
   await authPage.waitForTimeout(80);
   assert.equal(await signedInEditor.locator('.category-suggestion-result').count(), 0);

@@ -96,12 +96,26 @@ const CategoryField: React.FC<{
     controller.current?.abort();
     controller.current = null;
   }, [itemName]);
-  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(
+    () => () => {
+      const active = controller.current;
+      controller.current = null;
+      active?.abort();
+    },
+    []
+  );
 
   const requestSuggestion = async () => {
     if (!onSuggestCategory || !itemName.trim()) return;
     controller.current?.abort();
     const requestController = new AbortController();
+    requestController.signal.addEventListener(
+      'abort',
+      () => {
+        if (controller.current === requestController) setSuggestingName(null);
+      },
+      { once: true }
+    );
     controller.current = requestController;
     setSuggestingName(itemName);
     setSuggestionError(null);

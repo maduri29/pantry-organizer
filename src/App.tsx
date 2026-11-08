@@ -832,7 +832,9 @@ export const App: React.FC = () => {
       <DialogModal
         modal={modal}
         state={s}
-        onClose={() => setModal(null)}
+        onClose={() => {
+          if (!busyRef.current) setModal(null);
+        }}
         onSubmit={handleModalSubmit}
         onManageExisting={(product) =>
           setModal({ type: 'stock', revision: dataRef.current?.revision ?? data.revision, product })

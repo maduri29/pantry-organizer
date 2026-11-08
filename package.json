@@ -11,7 +11,7 @@
     "build": "bun build.mjs",
     "search": "tgrep --no-index",
     "ci": "bun run check && bun run test",
-    "test": "node --test tests/domain.test.mjs && bun test tests/domain.test.mjs tests/category-api.test.ts",
+    "test": "node --test tests/domain.test.mjs && bun test tests/domain.test.mjs tests/domain.bun.test.ts tests/category-api.test.ts",
     "test:ui": "node tests/ui.mjs && node tests/usability.mjs && node tests/stock-flows.mjs && node tests/sw-upgrade.mjs && node tests/design-layout.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint",
