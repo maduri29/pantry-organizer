@@ -50,11 +50,11 @@ export const CategoryReviewDialog: React.FC<CategoryReviewDialogProps> = ({
     if (!dialog) return;
     const handleCancel = (event: Event) => {
       event.preventDefault();
-      onClose();
+      if (!busy) onClose();
     };
     dialog.addEventListener('cancel', handleCancel);
     return () => dialog.removeEventListener('cancel', handleCancel);
-  }, [onClose]);
+  }, [onClose, busy]);
 
   const selectedCount = selected.size;
   const entries = review?.entries || [];

@@ -31,6 +31,62 @@ import {
 import { Toast } from './components/Toast.tsx';
 
 export const App: React.FC = () => {
+  useEffect(() => {
+    let nextId = 0;
+    const clear = (field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
+      const id = field.dataset.validationMessage;
+      if (!id) return;
+      document.getElementById(id)?.remove();
+      const descriptions = (field.getAttribute('aria-describedby') || '')
+        .split(/\s+/)
+        .filter((part) => part && part !== id);
+      if (descriptions.length) field.setAttribute('aria-describedby', descriptions.join(' '));
+      else field.removeAttribute('aria-describedby');
+      field.removeAttribute('aria-invalid');
+      delete field.dataset.validationMessage;
+    };
+    const onInvalid = (event: Event) => {
+      const field = event.target;
+      if (
+        !(
+          field instanceof HTMLInputElement ||
+          field instanceof HTMLSelectElement ||
+          field instanceof HTMLTextAreaElement
+        )
+      )
+        return;
+      clear(field);
+      const message = document.createElement('span');
+      message.id = `field-error-${++nextId}`;
+      message.className = 'field-error';
+      message.textContent = field.validationMessage;
+      field.insertAdjacentElement('afterend', message);
+      field.dataset.validationMessage = message.id;
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute(
+        'aria-describedby',
+        [field.getAttribute('aria-describedby'), message.id].filter(Boolean).join(' ')
+      );
+    };
+    const onChange = (event: Event) => {
+      const field = event.target;
+      if (
+        (field instanceof HTMLInputElement ||
+          field instanceof HTMLSelectElement ||
+          field instanceof HTMLTextAreaElement) &&
+        field.validity.valid
+      )
+        clear(field);
+    };
+    document.addEventListener('invalid', onInvalid, true);
+    document.addEventListener('input', onChange);
+    document.addEventListener('change', onChange);
+    return () => {
+      document.removeEventListener('invalid', onInvalid, true);
+      document.removeEventListener('input', onChange);
+      document.removeEventListener('change', onChange);
+    };
+  }, []);
   const [repository, setRepository] = useState<PantryRepository>(() => new LocalDemoRepository());
   const repositoryRef = useRef<PantryRepository>(repository);
   useEffect(() => {
@@ -688,17 +744,28 @@ export const App: React.FC = () => {
     return data.state.shopping.filter((i) => i.status === 'open');
   }, [data]);
 
+  useEffect(() => {
+    document.title = `${tab === 'inventory' ? 'Pantry' : tab === 'shopping' ? 'Shopping list' : 'Activity'} · Pantry`;
+  }, [tab]);
+
   if (loadError) {
     return (
-      <main>
+      <main className="app-status" role="alert">
         <h1>We couldn’t open your pantry</h1>
         <p>{loadError}</p>
+        <button type="button" onClick={() => window.location.reload()}>
+          Try again
+        </button>
       </main>
     );
   }
 
   if (!data) {
-    return null;
+    return (
+      <main className="app-status" role="status">
+        Loading pantry…
+      </main>
+    );
   }
 
   const s = data.state;

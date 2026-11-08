@@ -152,7 +152,7 @@ try {
   assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   assert.equal(await page.locator('.card .food-art').count(), 5);
   assert.equal(await page.locator('.card .food-art svg').count(), 5);
-  assert.equal(await page.locator('.workspace-nav .nav button').count(), 3);
+  assert.equal(await page.locator('.workspace-nav .nav button[data-tab]').count(), 3);
   await page.evaluate(() => document.fonts.ready);
   const bodyFont = await page.locator('body').evaluate((node) => getComputedStyle(node).fontFamily);
   const headingType = await page.locator('.hero h1').evaluate((node) => ({

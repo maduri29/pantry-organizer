@@ -77,11 +77,19 @@ export const Header: React.FC<HeaderProps> = ({
       }
     };
 
+    const handleFocus = (e: FocusEvent) => {
+      if (profileOpen && e.target instanceof Element && !e.target.closest('.profile-wrap')) {
+        onCloseProfile();
+      }
+    };
+
     document.addEventListener('keydown', handleGlobalKeyDown);
     document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('focusin', handleFocus);
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
       document.removeEventListener('click', handleGlobalClick);
+      document.removeEventListener('focusin', handleFocus);
     };
   }, [profileOpen, onToggleProfile, onCloseProfile]);
 

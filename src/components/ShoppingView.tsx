@@ -58,12 +58,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
               >
                 ×
               </button>
-              <button
-                className="primary"
-                data-action="buy"
-                data-id={i.id}
-                onClick={() => onBuyItem(i, p)}
-              >
+              <button data-action="buy" data-id={i.id} onClick={() => onBuyItem(i, p)}>
                 Restock
               </button>
             </div>

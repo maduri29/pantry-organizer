@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface NavProps {
   tab: 'inventory' | 'shopping' | 'history';
@@ -7,8 +7,17 @@ interface NavProps {
 }
 
 export const Nav: React.FC<NavProps> = ({ tab, shoppingCount, onSelectTab }) => {
+  const [expanded, setExpanded] = useState(true);
   return (
-    <nav className="nav" aria-label="Pantry views">
+    <nav className={`nav ${expanded ? '' : 'is-collapsed'}`} aria-label="Pantry views">
+      <button
+        className="mobile-nav-toggle"
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? 'Hide navigation' : 'Show navigation'}
+      </button>
       <button
         data-tab="inventory"
         className={tab === 'inventory' ? 'active' : ''}

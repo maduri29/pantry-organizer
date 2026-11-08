@@ -29,6 +29,7 @@ export const Hero: React.FC<HeroProps> = ({
               ? 'Shopping list'
               : 'Pantry activity'}
         </h1>
+        {view === 'inventory' && <p>Track your food and shopping list.</p>}
       </div>
       <div className="hero-actions">
         <button className="primary" data-action="add" aria-label="＋ Add food" onClick={onAdd}>

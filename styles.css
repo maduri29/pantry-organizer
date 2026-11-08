@@ -4916,3 +4916,79 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
     --sheet-gutter: 16px;
   }
 }
+
+.app-status {
+  max-width: 32rem;
+  margin: 12vh auto;
+  padding: 24px;
+}
+
+.mobile-nav-toggle {
+  display: none;
+}
+
+@media (max-width: 850px) {
+  .nav {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  .nav .mobile-nav-toggle {
+    display: inline-flex;
+    min-height: 44px;
+  }
+  .nav.is-collapsed button[data-tab] {
+    display: none;
+  }
+  .nav button[data-tab] {
+    min-width: 0;
+    white-space: normal;
+  }
+  .shelf-card .card-foot {
+    flex-wrap: wrap;
+  }
+  .shelf-card .card-foot button {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .app-workspace,
+  main,
+  .shelf-card,
+  .card-top,
+  .card-stock-summary {
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+  .inventory-view,
+  .shopping-view,
+  .activity-view {
+    animation: view-enter 140ms ease-out;
+  }
+  @keyframes view-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+.field-error {
+  display: block;
+  color: #9c3833;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+[aria-invalid='true'] {
+  border-color: #9c3833;
+}

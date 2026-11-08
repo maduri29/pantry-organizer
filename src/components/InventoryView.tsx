@@ -392,7 +392,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 : 'Start with a few things you already have. You can add the rest as you go.'}
             </p>
             <button
-              className="primary"
               data-action={s.products.length ? 'clear' : 'add'}
               onClick={() => {
                 if (s.products.length) {

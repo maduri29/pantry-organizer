@@ -28,7 +28,7 @@ typography:
     fontWeight: 400
   food-title:
     fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
-    fontSize: '16px'
+    fontSize: '14px'
     fontWeight: 600
     lineHeight: 1.35
 rounded:
@@ -76,13 +76,13 @@ Charcoal marks primary actions and selected filters. The blue-grey navigation su
 
 ## Typography
 
-The platform system font is shared by headings, labels and quantities. Page headings use the heading token, reducing to 22px on phones. Food titles are 14px on desktop and 13px on phones; secondary metadata is 12–13px. Quantities use 22px on desktop and 21px on phones. Data tables use tabular numerals.
+The platform system font is shared by headings, labels and quantities. Page headings use the heading token, reducing to 22px on phones. Food titles are 14px on desktop and 13px on phones; secondary metadata is 11px. Quantities use 22px on desktop and 21px on phones. Data tables use tabular numerals.
 
 **The One Voice Rule.** Keep the same readable family throughout the working interface.
 
 ## Layout
 
-Navigation runs across the top at every width. The inventory uses three illustrated cards per row on desktop, two below 1100px and one on phones. Each card groups identity, amount, status, storage and actions. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Cards group identity, location, quantity and status. List stays left of Manage food.
+Navigation runs across the top and can be collapsed on smaller screens. The inventory uses three illustrated cards per row on desktop, two below 1100px and one on phones. Each card groups identity, amount, status, storage and actions. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Cards group identity, location, quantity and status. List stays left of Manage food.
 
 Editors maintain a header, section navigation, scrollable form body and reachable save footer. The Manage editor is a right-side panel on desktop and fills the phone viewport. Search and native select controls remain usable without hover.
 
@@ -98,7 +98,7 @@ Controls use the control radius, shopping rows use the panel radius, and food ca
 
 ### Buttons
 
-Primary buttons use ink blue and white text. Secondary buttons use white surfaces and visible borders. Touch targets are at least 44px tall. Hover changes the surface or border; disabled controls use muted colors. Preserve accessible names when an icon accompanies a label.
+Primary buttons use charcoal and white text. Secondary buttons use white surfaces and visible borders. Touch targets are at least 44px tall. Hover changes the surface or border; disabled controls use muted colors. Preserve accessible names when an icon accompanies a label.
 
 ### Stock filters
 
