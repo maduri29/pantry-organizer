@@ -117,6 +117,15 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         return true;
       })
       .sort((a, b) => {
+        const priority =
+          Number(productIsLow.get(b.id) ?? false) - Number(productIsLow.get(a.id) ?? false);
+        if (priority) return priority;
+        if (productIsLow.get(a.id) && productIsLow.get(b.id)) {
+          const emptyFirst =
+            Number((productTotals.get(b.id) ?? 0) === 0) -
+            Number((productTotals.get(a.id) ?? 0) === 0);
+          if (emptyFirst) return emptyFirst;
+        }
         if (sort === 'category') {
           return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
         }
@@ -141,6 +150,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     sort,
     productBatches,
     productIsLow,
+    productTotals,
     minExpiryDays
   ]);
 
@@ -161,7 +171,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
         </div>
         <span className="inventory-note">
           {items.length} {items.length === 1 ? 'food' : 'foods'}
-          {sort === 'category' ? ' · By category' : ''}
+          {filter === 'all' ? ' · Low stock first' : ''}
         </span>
       </div>
       <div className="toolbar">
@@ -245,6 +255,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         </button>
                       </h2>
                       <span className="meta">{p.category}</span>
+                      {itemIsLow && (
+                        <span className={`food-attention ${totalQty === 0 ? 'is-empty' : ''}`}>
+                          <span className="attention-mark" aria-hidden="true" />
+                          {totalQty === 0 ? 'Out of stock' : 'Running low'}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -268,11 +284,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                     {batches.length === 1 && (
                       <span className="stock-location">{batches[0].location}</span>
-                    )}
-                    {itemIsLow && (
-                      <span className="badge stock-status warn">
-                        {totalQty === 0 ? 'Out' : 'Low'}
-                      </span>
                     )}
                   </div>
 
@@ -346,7 +357,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
                   <div className="card-foot">
                     <button
-                      className="icon-action"
+                      className="icon-action list-toggle"
+                      data-listed={isOnShopping}
                       data-action="shop"
                       data-id={p.id}
                       aria-label={
@@ -363,9 +375,10 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                       onClick={() => onAddToList(p)}
                     >
                       <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />
+                        <path d="M5 8h14l1 12H4L5 8Zm4 0V6a3 3 0 0 1 6 0v2" />
+                        {isOnShopping ? <path d="m8 14 3 3 5-5" /> : <path d="M12 11v6m-3-3h6" />}
                       </svg>
-                      <span>{isOnShopping ? 'On list' : 'List'}</span>
+                      <span>{isOnShopping ? 'Added to list' : 'Add to list'}</span>
                     </button>
                     <button
                       className="icon-action"

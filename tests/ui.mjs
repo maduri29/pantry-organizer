@@ -48,6 +48,24 @@ try {
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);
   pass('sample pantry and category groups render');
+  const priorityOrder = await page
+    .locator('.shelf-card')
+    .evaluateAll((cards) =>
+      cards.map((card) => card.classList.contains('is-low') || card.classList.contains('is-out'))
+    );
+  assert.deepEqual(priorityOrder, [true, true, false, false, false]);
+  await page.getByLabel('Sort foods').selectOption('name');
+  assert.deepEqual(
+    await page
+      .locator('.shelf-card')
+      .evaluateAll((cards) =>
+        cards.map((card) => card.classList.contains('is-low') || card.classList.contains('is-out'))
+      ),
+    priorityOrder
+  );
+  await page.getByLabel('Sort foods').selectOption('category');
+  pass('low-stock foods lead the inventory while the selected sort orders each group');
+
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     const cards = await page.locator('.shelf-card').evaluateAll((nodes) =>
@@ -455,6 +473,9 @@ try {
     .locator('.card')
     .filter({ has: page.getByRole('heading', { name: 'Rice', exact: true }) });
   await riceCard.getByRole('button', { name: 'Add Rice to shopping list' }).click();
+  await riceCard.getByRole('button', { name: 'Rice already on shopping list' }).waitFor();
+  assert.match(await riceCard.locator('[data-action=shop]').innerText(), /Added to list/);
+  assert.equal(await riceCard.locator('[data-action=shop]').isDisabled(), true);
   await page.getByRole('button', { name: /Shopping list/ }).click();
   let riceRow = page
     .locator('.shopping-row')

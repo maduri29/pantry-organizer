@@ -106,7 +106,7 @@ Compact buttons group stock states. Selection changes both `aria-pressed` and th
 
 ### Food records
 
-Show the illustration and food identity on the left. Group amount and storage on the right. Show only Low or Out warnings; omit redundant Stocked labels. Keep List on the left and Manage food on the right. Multi-batch details expand within the record.
+Show the illustration and food identity on the left. Group amount and storage on the right. Place Running low / Out of stock markers beneath the food identity; omit redundant Stocked labels. Out-of-stock and low-stock foods appear first, with the selected sort applied within each priority group. Keep Add to list on the left and Manage food on the right. Use the bag-plus action for adding, and a checked bag with Added to list for confirmation. Multi-batch details expand within the record.
 
 ### Fields
 

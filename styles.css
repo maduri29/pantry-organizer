@@ -4941,3 +4941,62 @@ select,
     padding-inline: 12px;
   }
 }
+/* Stock needs attention at the food identity; shopping feedback stays actionable. */
+.food-attention {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #865317;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.attention-mark {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b77b2d;
+  flex: 0 0 7px;
+}
+.food-attention.is-empty {
+  color: var(--negative);
+}
+.food-attention.is-empty .attention-mark {
+  background: var(--negative);
+}
+.shelf-card .card-foot .list-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  padding-inline: 0;
+  font-size: 12px;
+}
+.shelf-card .card-foot .list-toggle[data-listed='true']:disabled {
+  background: transparent;
+  color: var(--muted);
+  opacity: 1;
+  cursor: default;
+}
+.shelf-card .card-foot .list-toggle svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.shelf-card .card-foot .list-toggle[data-listed='true'] svg {
+  color: #3e6072;
+}
+@media (max-width: 850px) {
+  .shelf-card .card-top > .food-art {
+    align-self: center;
+  }
+  .shelf-card .card-foot {
+    gap: 6px;
+  }
+  .shelf-card .card-foot .list-toggle {
+    padding-inline: 0;
+  }
+}
