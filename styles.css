@@ -4923,21 +4923,10 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
   padding: 24px;
 }
 
-.mobile-nav-toggle {
-  display: none;
-}
-
 @media (max-width: 850px) {
   .nav {
     flex-wrap: wrap;
     height: auto;
-  }
-  .nav .mobile-nav-toggle {
-    display: inline-flex;
-    min-height: 44px;
-  }
-  .nav.is-collapsed button[data-tab] {
-    display: none;
   }
   .nav button[data-tab] {
     min-width: 0;
@@ -4991,4 +4980,47 @@ dialog:has(.add-shell) :is(.add-heading, .add-body, .add-footer) {
 
 [aria-invalid='true'] {
   border-color: #9c3833;
+}
+
+@media (max-width: 600px) {
+  .workspace-nav .nav {
+    position: fixed;
+    z-index: 20;
+    inset: auto 0 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    padding: 4px 8px max(4px, env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .workspace-nav .nav button[data-tab] {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 56px;
+    padding: 6px 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    font-size: 11px;
+    line-height: 1.15;
+    text-align: center;
+    border-radius: 8px;
+    border-bottom: 0;
+  }
+  .workspace-nav .nav button[data-tab].active {
+    background: var(--active);
+    color: var(--text);
+  }
+  .workspace-nav .nav svg {
+    width: 19px;
+    height: 19px;
+  }
+  .app-workspace > main {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+  #toast {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
 }

@@ -82,7 +82,7 @@ The platform system font is shared by headings, labels and quantities. Page head
 
 ## Layout
 
-Navigation runs across the top and can be collapsed on smaller screens. The inventory uses three illustrated cards per row on desktop, two below 1100px and one on phones. Each card groups identity, amount, status, storage and actions. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Cards group identity, location, quantity and status. List stays left of Manage food.
+Navigation runs across the top on larger screens and as an icon and label bar at the bottom on phones. The inventory uses three illustrated cards per row on desktop, two below 1100px and one on phones. Each card groups identity, amount, status, storage and actions. At 850px and below, food records stack their information; at 600px the workspace uses 16px side padding. Cards group identity, location, quantity and status. List stays left of Manage food.
 
 Editors maintain a header, section navigation, scrollable form body and reachable save footer. The Manage editor is a right-side panel on desktop and fills the phone viewport. Search and native select controls remain usable without hover.
 
