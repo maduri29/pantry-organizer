@@ -63,7 +63,11 @@ export const Header: React.FC<HeaderProps> = ({
         (document.activeElement as HTMLElement)?.matches?.('#profile-menu [role="menuitem"]')
       ) {
         e.preventDefault();
-        (document.activeElement as HTMLElement).focus();
+        const items = Array.from(
+          profileMenuRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? []
+        );
+        const current = items.indexOf(document.activeElement as HTMLButtonElement);
+        items[(current + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length]?.focus();
       }
     };
 
@@ -90,41 +94,6 @@ export const Header: React.FC<HeaderProps> = ({
         pantry<span className="subtitle">Our kitchen</span>
       </div>
       <div className="header-actions">
-        <button
-          className="icon-button"
-          type="button"
-          data-action="export"
-          aria-label="Export pantry data"
-          title="Export pantry data"
-          onClick={onExport}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 19h14" />
-          </svg>
-        </button>
-        {onImport && (
-          <>
-            <button
-              className="icon-button"
-              type="button"
-              data-action="import"
-              aria-label="Import pantry backup"
-              title="Import pantry backup"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 21v-12m0 0 5 5m-5-5-5 5M5 5h14" />
-              </svg>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json,application/json"
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-          </>
-        )}
         <div className="profile-wrap">
           <button
             ref={profileButtonRef}
@@ -167,8 +136,52 @@ export const Header: React.FC<HeaderProps> = ({
                     ? 'Sign in'
                     : 'Connect'}
               </button>
+              <div className="profile-menu-divider" role="separator" aria-label="Backup actions" />
+              {onImport && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  data-action="import"
+                  aria-label="Import pantry backup"
+                  onClick={() => {
+                    onCloseProfile();
+                    profileButtonRef.current?.focus();
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 21V9m0 0 5 5m-5-5-5 5M5 5h14" />
+                  </svg>
+                  Import backup
+                </button>
+              )}
+              <button
+                type="button"
+                role="menuitem"
+                data-action="export"
+                aria-label="Export pantry data"
+                onClick={() => {
+                  onCloseProfile();
+                  profileButtonRef.current?.focus();
+                  onExport();
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12m0 0 5-5m-5 5-5-5M5 19h14" />
+                </svg>
+                Export backup
+              </button>
             </div>
           </div>
+          {onImport && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              hidden
+              onChange={handleFileChange}
+            />
+          )}
         </div>
       </div>
     </header>

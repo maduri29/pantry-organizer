@@ -14,11 +14,6 @@ try {
     route.fulfill({ contentType: 'application/javascript', body: 'window.PANTRY_CONFIG = {};' })
   );
   await page.goto(baseUrl);
-  const exportButton = page.getByRole('button', { name: 'Export pantry data', exact: true });
-  assert.equal(await exportButton.count(), 1);
-  assert.equal(await exportButton.getAttribute('title'), 'Export pantry data');
-  assert.equal(await exportButton.locator('svg', {}).count(), 1);
-  pass('compact export icon has an accessible name, tooltip and SVG');
   const profileButton = page.getByRole('button', { name: 'Profile', exact: true });
   assert.equal(await page.locator('.notice').count(), 0);
   await profileButton.focus();
@@ -40,10 +35,37 @@ try {
     'Profile'
   );
   pass('profile menu reports signed-out state and supports keyboard open/close with focus return');
+  assert.equal(
+    await page
+      .locator('.header-actions > [data-action="export"], .header-actions > [data-action="import"]')
+      .count(),
+    0
+  );
+  await profileButton.click();
+  const exportButton = page.getByRole('menuitem', { name: 'Export pantry data', exact: true });
+  assert.equal(await exportButton.locator('svg').count(), 1);
+  await profileMenu.getByRole('menuitem', { name: 'Connect', exact: true }).press('ArrowDown');
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-action')),
+    'import'
+  );
+  await page.keyboard.press('ArrowDown');
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-action')),
+    'export'
+  );
   const [exported] = await Promise.all([page.waitForEvent('download'), exportButton.click()]);
   assert.match(exported.suggestedFilename(), /^pantry-\d{4}-\d{2}-\d{2}\.json$/);
   assert.equal(await exported.failure(), null);
-  pass('export icon still downloads pantry JSON');
+  await profileMenu.waitFor({ state: 'hidden' });
+  await profileButton.click();
+  const [chooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('menuitem', { name: 'Import pantry backup' }).click()
+  ]);
+  assert.equal(chooser.isMultiple(), false);
+  await profileMenu.waitFor({ state: 'hidden' });
+  pass('profile menu supports keyboard backup actions, export download and import picker');
   await page.getByRole('button', { name: 'Try sample pantry' }).click();
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);

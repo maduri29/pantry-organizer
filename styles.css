@@ -5361,3 +5361,19 @@ dialog select,
     font-size: 22px;
   }
 }
+.profile-menu-divider {
+  border-top: 1px solid var(--border);
+  margin: 6px 0;
+}
+#profile-menu [role='menuitem'] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+#profile-menu [role='menuitem'] svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
