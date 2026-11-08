@@ -875,13 +875,15 @@ export const App: React.FC = () => {
             {tab === 'history' && <HistoryView state={s} />}
           </div>
 
-          <div className="footer">
-            <span>
-              {online ? 'Shared with your household' : 'Your demo stays on this device'} ·{' '}
-              {s.batches.filter((b) => b.quantity > 0).length} active batches
-            </span>
-            <span>Update what’s left whenever you check.</span>
-          </div>
+          {tab !== 'history' && (
+            <div className="footer">
+              <span>
+                {online ? 'Shared with your household' : 'Your demo stays on this device'} ·{' '}
+                {s.batches.filter((b) => b.quantity > 0).length} active batches
+              </span>
+              <span>Update what’s left whenever you check.</span>
+            </div>
+          )}
         </main>
       </div>
 

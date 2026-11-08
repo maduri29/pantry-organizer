@@ -1,62 +1,125 @@
 import React, { useMemo } from 'react';
-import * as D from '../domain.ts';
 import type { Movement, PantryState } from '../types.ts';
-import { fmt } from '../format.ts';
+import { fmt, formatUnit } from '../format.ts';
+import * as D from '../domain.ts';
 
 interface HistoryViewProps {
   state: PantryState;
 }
 
-const actionLabels: Record<string, string> = {
+const actionLabels: Record<Movement['type'], string> = {
   restock: 'Added',
   consume: 'Used',
   discard: 'Discarded',
-  correct: 'Corrected by'
+  correct: 'Adjusted'
 };
 
-export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
-  const productMap = useMemo(() => new Map(s.products.map((p) => [p.id, p])), [s.products]);
-  const movements = useMemo(() => s.movements.slice().reverse().slice(0, 100), [s.movements]);
+const dayKey = (date: Date): string => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+const dayLabel = (date: Date, today: Date): string => {
+  const day = dayKey(date);
+  if (day === dayKey(today)) return 'Today';
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (day === dayKey(yesterday)) return 'Yesterday';
+
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    ...(date.getFullYear() !== today.getFullYear() ? { year: 'numeric' as const } : {})
+  }).format(date);
+};
+
+const amountLabel = (movement: Movement, unit: string | undefined): string => {
+  if (unit === 'level') {
+    return movement.type === 'correct' ? 'Level changed' : D.level(movement.quantity);
+  }
+
+  const sign =
+    movement.type === 'restock'
+      ? '+'
+      : movement.type === 'correct'
+        ? movement.quantity < 0
+          ? '−'
+          : movement.quantity > 0
+            ? '+'
+            : ''
+        : '−';
+  const quantity = Math.abs(movement.quantity);
+  const formattedUnit = unit ? ` ${formatUnit(quantity, unit)}` : '';
+  return `${sign}${fmt(quantity)}${formattedUnit}`;
+};
+
+const timeLabel = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Unknown time';
+  return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(date);
+};
+
+export const HistoryView: React.FC<HistoryViewProps> = ({ state }) => {
+  const productMap = useMemo(
+    () => new Map(state.products.map((product) => [product.id, product])),
+    [state.products]
+  );
+  const groups = useMemo(() => {
+    const today = new Date();
+    const byDay = new Map<string, { label: string; movements: Movement[] }>();
+
+    for (const movement of state.movements.slice(-100).reverse()) {
+      const date = new Date(movement.at);
+      const key = Number.isNaN(date.getTime()) ? 'unknown' : dayKey(date);
+      const label = Number.isNaN(date.getTime()) ? 'Unknown date' : dayLabel(date, today);
+      const group = byDay.get(key) || { label, movements: [] };
+      group.movements.push(movement);
+      byDay.set(key, group);
+    }
+
+    return [...byDay.values()];
+  }, [state.movements]);
 
   return (
     <div className="activity-view">
-      {movements.length > 0 ? (
-        <table className="history">
-          <thead>
-            <tr>
-              <th>Food</th>
-              <th>Action</th>
-              <th>Amount</th>
-              <th>When</th>
-            </tr>
-          </thead>
-          <tbody>
-            {movements.map((m: Movement) => {
-              const p = productMap.get(m.productId);
-              const amountStr =
-                p?.unit === 'level'
-                  ? m.type === 'correct'
-                    ? 'Level updated'
-                    : D.level(m.quantity)
-                  : `${fmt(m.quantity)} ${p?.unit || ''}`;
+      {groups.length > 0 ? (
+        <div className="activity-groups">
+          {groups.map((group) => (
+            <section className="activity-day" aria-label={group.label} key={group.label}>
+              <h2>{group.label}</h2>
+              <ol>
+                {group.movements.map((movement) => {
+                  const product = productMap.get(movement.productId);
+                  const time = new Date(movement.at);
+                  const validTime = !Number.isNaN(time.getTime());
 
-              return (
-                <tr key={m.id}>
-                  <td data-label="Food">{p?.name || 'Unknown'}</td>
-                  <td data-label="Action">{actionLabels[m.type] || m.type}</td>
-                  <td data-label="Amount">{amountStr}</td>
-                  <td data-label="When">
-                    <time dateTime={m.at}>{new Date(m.at).toLocaleString()}</time>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  return (
+                    <li className="activity-event" data-kind={movement.type} key={movement.id}>
+                      <span className="activity-marker" aria-hidden="true" />
+                      <div className="activity-description">
+                        <span className="activity-food">{product?.name || 'Unknown food'}</span>
+                        <span className="activity-action">{actionLabels[movement.type]}</span>
+                      </div>
+                      <div className="activity-meta">
+                        <span className="activity-amount">
+                          {amountLabel(movement, product?.unit)}
+                        </span>
+                        <time
+                          className="activity-time"
+                          dateTime={validTime ? time.toISOString() : undefined}
+                        >
+                          {timeLabel(movement.at)}
+                        </time>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          ))}
+        </div>
       ) : (
-        <div className="empty">
-          <h2>Your pantry’s story starts here</h2>
-          <p>Add a food to record your first activity.</p>
+        <div className="empty activity-empty">
+          <h2>No activity yet</h2>
         </div>
       )}
     </div>
