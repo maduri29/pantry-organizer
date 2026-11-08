@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import * as D from '../domain.ts';
 import type { PantryState } from '../types.ts';
 import { FoodIllustration } from './FoodIllustration.tsx';
-import { formatAmount } from './InventoryView.tsx';
-import { LevelPicker, QuantityInput } from './StockEditor.tsx';
+import { formatAmount } from '../format.ts';
+import { LevelPicker, QuantityInput } from './StockControls.tsx';
 
 export const RestockTrip: React.FC<{
   state: PantryState;

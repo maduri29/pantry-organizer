@@ -1,0 +1,1 @@
+export const CATEGORY_SUGGESTION_BATCH_SIZE = 10;

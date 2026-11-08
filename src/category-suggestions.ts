@@ -3,7 +3,6 @@ import type { CategorySuggestion, CategorySuggestionInput } from './types.ts';
 export async function requestCategorySuggestions(
   token: string,
   items: CategorySuggestionInput[],
-  categories: string[],
   signal?: AbortSignal
 ): Promise<CategorySuggestion[]> {
   const response = await fetch('/api/category-suggestions', {

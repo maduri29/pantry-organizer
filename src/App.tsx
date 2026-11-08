@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Effect } from 'effect';
 import * as D from './domain.ts';
 import { requestCategorySuggestions } from './category-suggestions.ts';
+import { CATEGORY_SUGGESTION_BATCH_SIZE } from './category-contract.ts';
+import { availableCategories } from './category-options.ts';
 import { LocalDemoRepository } from './storage.ts';
 import type {
   FoodInput,
@@ -311,7 +313,6 @@ export const App: React.FC = () => {
   const requestSuggestions = useCallback(
     async (
       items: CategorySuggestionInput[],
-      categories: string[],
       signal?: AbortSignal
     ): Promise<CategorySuggestion[]> => {
       if (!onlineRef.current) {
@@ -320,14 +321,14 @@ export const App: React.FC = () => {
       const getIdToken = repositoryRef.current.getIdToken;
       if (!getIdToken) throw new Error('Sign in to get Jev category suggestions.');
       const token = await getIdToken.call(repositoryRef.current);
-      return requestCategorySuggestions(token, items, categories, signal);
+      return requestCategorySuggestions(token, items, signal);
     },
     []
   );
 
   const suggestNewItemCategory = useCallback(
-    async (name: string, categories: string[], signal: AbortSignal) => {
-      const [suggestion] = await requestSuggestions([{ id: 'new-item', name }], categories, signal);
+    async (name: string, signal: AbortSignal) => {
+      const [suggestion] = await requestSuggestions([{ id: 'new-item', name }], signal);
       if (!suggestion) throw new Error('No category suggestion was returned.');
       return suggestion;
     },
@@ -341,19 +342,16 @@ export const App: React.FC = () => {
       showToast('Connect your shared pantry to get Jev category suggestions.');
       return;
     }
-    const categories = [
-      ...new Set([...D.categories, ...snapshot.state.products.map((p) => p.category)])
-    ].sort();
+    const categories = availableCategories(snapshot.state.products);
 
     setSuggestingCategories(true);
     try {
       const proposals: CategoryReviewData['entries'] = [];
       const products = snapshot.state.products;
-      for (let index = 0; index < products.length; index += 10) {
-        const batch = products.slice(index, index + 10);
+      for (let index = 0; index < products.length; index += CATEGORY_SUGGESTION_BATCH_SIZE) {
+        const batch = products.slice(index, index + CATEGORY_SUGGESTION_BATCH_SIZE);
         const results = await requestSuggestions(
-          batch.map((product) => ({ id: product.id, name: product.name })),
-          categories
+          batch.map((product) => ({ id: product.id, name: product.name }))
         );
         if (dataRef.current?.revision !== snapshot.revision) {
           throw new Error(
@@ -487,7 +485,7 @@ export const App: React.FC = () => {
   const handleModalSubmit = useCallback(
     async (values: Record<string, any>) => {
       if (!modal) return;
-      const { type, product: p, batch: b } = modal;
+      const { type, product: p } = modal;
 
       if (type === 'add') {
         const keepAdding = values['add-action'] === 'another';
@@ -589,27 +587,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      if (type === 'use' && b) {
-        await mutate((s) => {
-          D.move(s, b.id, values.type || 'correct', Number(values.quantity));
-        }, 'Stock updated');
-        return;
-      }
-
-      if (type === 'minimum' && p) {
-        await mutate((s) => {
-          const n = Number(values.quantity);
-          if (!Number.isFinite(n) || n < 0) throw new Error('Enter zero or more.');
-          const prod = s.products.find((prod) => prod.id === p.id);
-          if (prod) {
-            prod.minimum = n;
-            prod.category = values.category.trim();
-          }
-        }, 'Minimum saved');
-        return;
-      }
-
-      if ((type === 'stock' || type === 'restock' || type === 'buy' || type === 'manage') && p) {
+      if ((type === 'stock' || type === 'buy' || type === 'manage') && p) {
         const action = String(values['stock-action']);
         await mutate(
           (s) => {
@@ -658,13 +636,6 @@ export const App: React.FC = () => {
           },
           action === 'update' ? 'Stock updated' : 'Restocked and saved'
         );
-        return;
-      }
-
-      if (type === 'delete' && p) {
-        await mutate((s) => {
-          D.deleteFood(s, p.id);
-        }, `${p.name} deleted`);
         return;
       }
 

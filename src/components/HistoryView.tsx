@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { Movement, PantryState } from '../types.ts';
-import { fmt } from './InventoryView.tsx';
+import { fmt } from '../format.ts';
 
 interface HistoryViewProps {
   state: PantryState;

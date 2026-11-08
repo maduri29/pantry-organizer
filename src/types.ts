@@ -1,14 +1,14 @@
-import { Context, Schema } from 'effect';
+import { Schema } from 'effect';
 import { categories } from './category-taxonomy.ts';
 
 export const units = ['level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs'] as const;
 export const locations = ['Pantry', 'Fridge', 'Freezer'] as const;
 export { categories };
 
-export const UnitSchema = Schema.Literal('level', 'items', 'g', 'kg', 'lb', 'ml', 'L', 'packs');
+export const UnitSchema = Schema.Literal(...units);
 export type Unit = (typeof units)[number];
 
-export const LocationSchema = Schema.Literal('Pantry', 'Fridge', 'Freezer');
+export const LocationSchema = Schema.Literal(...locations);
 export type Location = (typeof locations)[number];
 
 export const CategorySchema = Schema.String;
@@ -165,8 +165,6 @@ export interface PantryRepository {
   ): () => void;
   signOut?(): Promise<void>;
 }
-
-export const PantryRepositoryTag = Context.GenericTag<PantryRepository>('PantryRepository');
 
 declare global {
   interface Window {

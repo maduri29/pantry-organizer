@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { PantryState, Product, ShoppingItem } from '../types.ts';
-import { fmt, formatAmount } from './InventoryView.tsx';
+import { formatAmount } from '../format.ts';
 import { FoodIllustration } from './FoodIllustration.tsx';
 
 interface ShoppingViewProps {
@@ -48,7 +48,7 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
                 <span className="meta">
                   {p.unit === 'level'
                     ? 'Restock when you shop'
-                    : `Planned: ${fmt(i.quantity ?? 1)} ${(i.quantity ?? 1) === 1 && (p.unit === 'items' || p.unit === 'packs') ? p.unit.slice(0, -1) : p.unit}`}
+                    : `Planned: ${formatAmount(i.quantity ?? 1, p)}`}
                 </span>
               </div>
               <button

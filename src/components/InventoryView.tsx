@@ -1,7 +1,9 @@
+import { availableCategories } from '../category-options.ts';
 import React, { useMemo } from 'react';
 import * as D from '../domain.ts';
 import type { Batch, PantryState, Product } from '../types.ts';
 import { FoodIllustration } from './FoodIllustration.tsx';
+import { fmt, formatAmount, formatUnit } from '../format.ts';
 
 interface InventoryViewProps {
   state: PantryState;
@@ -23,13 +25,6 @@ interface InventoryViewProps {
   onAddToList: (product: Product) => void;
 }
 
-export const fmt = (n: number): string => Number(n.toFixed(3)).toLocaleString();
-
-export const formatAmount = (n: number, p: Product): string =>
-  p.unit === 'level'
-    ? D.level(n)
-    : `${fmt(n)} ${n === 1 && (p.unit === 'items' || p.unit === 'packs') ? p.unit.slice(0, -1) : p.unit}`;
-
 export const InventoryView: React.FC<InventoryViewProps> = ({
   state: s,
   online,
@@ -50,7 +45,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onAddToList
 }) => {
   const allCategories = useMemo(() => {
-    return [...new Set([...D.categories, ...s.products.map((p) => p.category)])].sort();
+    return availableCategories(s.products);
   }, [s.products]);
 
   const { productBatches, productTotals, productIsLow, minExpiryDays, openShoppingIds } =
@@ -266,12 +261,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                           D.level(totalQty)
                         ) : (
                           <>
-                            {fmt(totalQty)}{' '}
-                            <small>
-                              {totalQty === 1 && (p.unit === 'items' || p.unit === 'packs')
-                                ? p.unit.slice(0, -1)
-                                : p.unit}
-                            </small>
+                            {fmt(totalQty)} <small>{formatUnit(totalQty, p.unit)}</small>
                           </>
                         )}
                       </span>

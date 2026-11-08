@@ -1,3 +1,4 @@
+import { availableCategories } from '../category-options.ts';
 import { FoodIllustration } from './FoodIllustration.tsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -12,17 +13,13 @@ import type {
 } from '../types.ts';
 import { RestockTrip } from './RestockTrip.tsx';
 import { StockEditor } from './StockEditor.tsx';
-import { formatAmount } from './InventoryView.tsx';
+import { formatAmount } from '../format.ts';
 
 export type ModalType =
   | 'stock'
   | 'add'
-  | 'use'
-  | 'minimum'
   | 'manage'
-  | 'restock'
   | 'buy'
-  | 'delete'
   | 'bulk'
   | 'connect_missing'
   | 'connect_auth';
@@ -46,11 +43,7 @@ interface DialogModalProps {
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
   onManageExisting?: (product: Product) => void;
-  onSuggestCategory?: (
-    name: string,
-    categories: string[],
-    signal: AbortSignal
-  ) => Promise<CategorySuggestion>;
+  onSuggestCategory?: (name: string, signal: AbortSignal) => Promise<CategorySuggestion>;
 }
 
 interface ModalFormContentProps {
@@ -59,22 +52,14 @@ interface ModalFormContentProps {
   onClose: () => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
   onManageExisting?: (product: Product) => void;
-  onSuggestCategory?: (
-    name: string,
-    categories: string[],
-    signal: AbortSignal
-  ) => Promise<CategorySuggestion>;
+  onSuggestCategory?: (name: string, signal: AbortSignal) => Promise<CategorySuggestion>;
 }
 
 const CategoryField: React.FC<{
   categories: string[];
   initialCategory: string;
   itemName?: string;
-  onSuggestCategory?: (
-    name: string,
-    categories: string[],
-    signal: AbortSignal
-  ) => Promise<CategorySuggestion>;
+  onSuggestCategory?: (name: string, signal: AbortSignal) => Promise<CategorySuggestion>;
 }> = ({ categories, initialCategory, itemName = '', onSuggestCategory }) => {
   const initialIndex = categories.indexOf(initialCategory);
   const [selection, setSelection] = useState(
@@ -121,7 +106,7 @@ const CategoryField: React.FC<{
     setSuggestionError(null);
     try {
       const requestedName = itemName.trim();
-      const result = await onSuggestCategory(requestedName, categories, requestController.signal);
+      const result = await onSuggestCategory(requestedName, requestController.signal);
       if (!requestController.signal.aborted && nameRef.current === requestedName) {
         setSuggestion({ name: requestedName, result });
       }
@@ -243,7 +228,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   );
 
   const allCategories = useMemo(() => {
-    return [...new Set([...D.categories, ...s.products.map((p) => p.category)])].sort();
+    return availableCategories(s.products);
   }, [s.products]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -470,7 +455,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     );
   }
 
-  if ((type === 'stock' || type === 'restock' || type === 'buy') && p) {
+  if ((type === 'stock' || type === 'buy') && p) {
     return (
       <StockEditor
         state={s}
@@ -848,122 +833,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           </form>
         </div>
       </div>
-    );
-  }
-
-  if (type === 'use' && p && b) {
-    return (
-      <>
-        <h2>Update {p.name}</h2>
-        <p>
-          {formatAmount(b.quantity, p)} in {b.location}. Set the amount you see now. No daily usage
-          logging needed.
-        </p>
-        <form onSubmit={handleSubmit}>
-          <input type="hidden" name="type" value="correct" />
-          {p.unit === 'level' ? (
-            <label>
-              What’s left?
-              <select name="quantity" defaultValue={String(b.quantity)}>
-                <option value="1">Full</option>
-                <option value="0.5">Half</option>
-                <option value="0.25">Low</option>
-                <option value="0">Out</option>
-              </select>
-            </label>
-          ) : (
-            <label>
-              {p.unit}
-              <input
-                name="quantity"
-                type="number"
-                min="0"
-                step="any"
-                required
-                defaultValue={String(b.quantity)}
-              />
-            </label>
-          )}
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Save update
-            </button>
-          </div>
-        </form>
-      </>
-    );
-  }
-
-  if (type === 'minimum' && p) {
-    return (
-      <>
-        <h2>Food settings</h2>
-        <p>Suggest shopping when {p.name} reaches this amount.</p>
-        <form onSubmit={handleSubmit}>
-          <CategoryField categories={allCategories} initialCategory={p.category} />
-          {p.unit === 'level' ? (
-            <>
-              <input type="hidden" name="quantity" value="0.25" />
-              <p>Low and Out appear in Running low.</p>
-            </>
-          ) : (
-            <label>
-              {p.unit}
-              <input
-                name="quantity"
-                type="number"
-                min="0"
-                step="any"
-                required
-                defaultValue={String(p.minimum)}
-              />
-            </label>
-          )}
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Save settings
-            </button>
-          </div>
-        </form>
-      </>
-    );
-  }
-
-  if (type === 'delete' && p) {
-    return (
-      <>
-        <h2>Delete {p.name}?</h2>
-        <p>
-          This removes its stock batches, activity history, and shopping-list entries from this
-          shared pantry. This cannot be undone.
-        </p>
-        <form onSubmit={handleSubmit}>
-          <p>Other foods and their shopping-list items are not affected.</p>
-          <div className="error" role="alert">
-            {error}
-          </div>
-          <div className="actions">
-            <button type="button" id="cancel" onClick={handleCancelClick} disabled={busy}>
-              Cancel
-            </button>
-            <button className="primary" type="submit" disabled={busy}>
-              Delete food
-            </button>
-          </div>
-        </form>
-      </>
     );
   }
 

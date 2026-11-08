@@ -1,4 +1,5 @@
 import { categoryTaxonomy } from '../src/category-taxonomy.ts';
+import { CATEGORY_SUGGESTION_BATCH_SIZE } from '../src/category-contract.ts';
 
 type SuggestionInput = { id: string; name: string };
 type RequestLike = {
@@ -24,7 +25,6 @@ type FetchLike = (input: string | URL | Request, init?: RequestInit) => Promise<
 
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 const MAX_BODY_BYTES = 16 * 1024;
-const MAX_ITEMS = 10;
 const MAX_PER_MINUTE = 24;
 const rateWindows = new Map<string, { start: number; count: number }>();
 
@@ -82,7 +82,11 @@ function validateInput(value: unknown): { items: SuggestionInput[] } {
     throw Object.assign(new Error(), { status: 400 });
   }
   const input = value as { items?: unknown };
-  if (!Array.isArray(input.items) || input.items.length < 1 || input.items.length > MAX_ITEMS) {
+  if (
+    !Array.isArray(input.items) ||
+    input.items.length < 1 ||
+    input.items.length > CATEGORY_SUGGESTION_BATCH_SIZE
+  ) {
     throw Object.assign(new Error(), { status: 400 });
   }
   const ids = new Set<string>();

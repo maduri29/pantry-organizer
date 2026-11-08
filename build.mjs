@@ -69,7 +69,15 @@ const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const plexBytes = await readFile('assets/ibm-plex-sans-variable-latin.woff2');
 const plexHash = sha256(plexBytes).slice(0, 12);
 const fingerprint = createHash('sha256');
-for (const name of ['index.html', 'styles.css', 'src/app.js', 'src/firebase.js']) {
+for (const name of [
+  'index.html',
+  'styles.css',
+  'src/app.js',
+  'src/firebase.js',
+  'favicon.svg',
+  'manifest.webmanifest',
+  'sw.js'
+]) {
   fingerprint.update(name);
   fingerprint.update(await readFile(name));
 }

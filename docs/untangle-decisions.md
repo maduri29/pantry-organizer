@@ -1,0 +1,16 @@
+# Untangling decisions
+
+This log records coupling found during the codebase audit and the intended boundary for each change. Existing comments and tests are outside the optional cleanup selected for this pass.
+
+- **Own quantity presentation in a shared module.** Inventory currently exports formatters consumed by shopping, history, and both editors. Inventory, shopping and stock controls also repeat the singular-unit rule. Move the presentation rules into one neutral module so these screens change independently.
+- **Derive validation from the supported values.** Unit and location options and schema literals are independently maintained in `types.ts`; derive each schema from its runtime list.
+- **Share the category suggestion request limit across client and server.** The UI chunks requests in tens while the API independently rejects batches larger than ten. Define one neutral contract. Remove unused category arguments from the request path while retaining categories for the review UI.
+- **Cover every current precached asset in the offline release.** `build.mjs` omitted the favicon and manifest from its fingerprint, so their changes could remain cached. They now contribute to the release ID. The worker and build still maintain separate asset lists; a shared manifest needs an upgrade test that also exercises the production build.
+- **Extract shared stock controls.** The grocery trip imported generic inputs from the entire stock editor; both now use a dedicated controls module.
+- **Share available category options.** Inventory, the food editor and suggestion review each combined defaults and custom categories independently; one selector now owns that rule.
+- **Remove obsolete modal paths together.** Several legacy modal types have rendering and submit branches but no entry point; verify every caller before removing them so forms and commands remain aligned.
+- **Keep separate runtime adapters until their contract can be verified.** `server.mjs` duplicates Bun and Node request routing. Their platform-specific response and path behavior need targeted equivalence tests before consolidating; the documented Node fallback remains supported.
+- **Keep persisted-data migrations separate.** Local saves without Web Locks are not atomic across tabs; historical movement units are not recorded; imported records have incomplete semantic validation. Correcting these requires recoverable migrations, not an implicit schema change in a refactor.
+- **Keep intentional external-boundary special cases.** API authorization, rate limits, timeouts, storage conflict checks, offline fallback, dialog focus restoration and service-worker upgrade behavior represent real requirements. Replacing them with general machinery would obscure those requirements.
+- **Follow up on stock form decoding.** The manage and stock forms share field-name conventions and duplicate some parsing in `App.tsx`. A typed stock command is the right boundary, but movement semantics and draft preservation need dedicated behavioral coverage before changing it.
+- **Follow up on generated JavaScript.** Domain and storage tests include tracked generated files, so source and tests can drift. A freshness check needs a deterministic build independent of installed Bun version before enforcing it in CI.
