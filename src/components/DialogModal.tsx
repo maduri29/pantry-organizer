@@ -281,7 +281,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
         <div className="add-heading">
           <div>
             <h2 id="add-food-title">Add food</h2>
-            <p>A name is enough to start. Adjust the rest when you need to.</p>
           </div>
           <button
             type="button"
@@ -636,7 +635,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                     {trackingUnit === 'level' ? (
                       <>
                         <input type="hidden" name="minimum" value="0.25" />
-                        <p className="manage-note">Rough levels use Full, Half, Low, and Out.</p>
                       </>
                     ) : (
                       <label>
@@ -661,9 +659,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
                     <path d="M4 6 L8 10 L12 6" />
                   </svg>
                 </summary>
-                <p className="manage-note">
-                  Change a package’s location, date or remaining amount.
-                </p>
                 <section className="manage-section" id="manage-stock">
                   {batches.length === 0 && <p className="manage-note">No stock batches yet.</p>}
                   {batches.map((batch, index) => {

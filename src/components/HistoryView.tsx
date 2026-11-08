@@ -20,8 +20,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
 
   return (
     <div className="activity-view">
-      <p className="section-caption">Your latest 100 additions and stock updates.</p>
-
       {movements.length > 0 ? (
         <table className="history">
           <thead>

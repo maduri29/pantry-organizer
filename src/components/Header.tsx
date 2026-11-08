@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
         <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
           <path d="M5 14h22M5 27h22M8 14V5h6v9m5 0V8h5v6M8 27v-8h7v8m5 0v-7h4v7M7 5h8m4 3h6" />
         </svg>
-        pantry<span className="subtitle">Our kitchen</span>
+        pantry
       </div>
       <div className="header-actions">
         <div className="profile-wrap">

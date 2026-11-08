@@ -34,7 +34,6 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
           {items.length} {items.length === 1 ? 'food' : 'foods'}
         </span>
       </div>
-      <p className="section-caption">Restock each food when you’re home to update your pantry.</p>
 
       {items.length > 0 ? (
         items.map((i) => {

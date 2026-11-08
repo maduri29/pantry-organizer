@@ -29,13 +29,6 @@ export const Hero: React.FC<HeroProps> = ({
               ? 'Shopping list'
               : 'Pantry activity'}
         </h1>
-        <p>
-          {view === 'inventory'
-            ? 'What’s here, what’s low, and what to use next.'
-            : view === 'shopping'
-              ? 'Pick up what’s missing. Update stock when you’re home.'
-              : 'Your recent additions and stock check-ins.'}
-        </p>
       </div>
       <div className="hero-actions">
         <button className="primary" data-action="add" aria-label="＋ Add food" onClick={onAdd}>

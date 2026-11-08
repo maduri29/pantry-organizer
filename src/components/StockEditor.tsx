@@ -171,7 +171,6 @@ export const StockEditor: React.FC<{
             hidden={action !== 'update'}
             disabled={action !== 'update' || busy}
           >
-            <p className="stock-instruction">Set what’s on the shelf now.</p>
             {batches.length === 0 && (
               <p>No stock recorded yet. Choose “I bought more” to add some.</p>
             )}

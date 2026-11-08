@@ -49,7 +49,6 @@ export const RestockTrip: React.FC<{
       <header className="stock-heading">
         <div>
           <h2>Put away your groceries</h2>
-          <p>Select what you bought. Check the amounts. Save once.</p>
         </div>
         <button
           type="button"
