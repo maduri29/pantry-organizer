@@ -114,7 +114,7 @@ Use native inputs and selects, visible labels, clear focus and recoverable error
 
 ### Navigation and editors
 
-Navigation uses `aria-current`; editor sections use `aria-pressed`. The same section controls remain available across stock, restock and details. Destructive actions have a named confirmation.
+Navigation uses `aria-current`; editor links name the next task. Open on the remaining amount. Use one contextual link to switch to a purchase; keep Edit details as a secondary header link. Do not restore a tab bar. Destructive actions have a named confirmation.
 
 ## Do's and Don'ts
 

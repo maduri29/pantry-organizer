@@ -4415,3 +4415,123 @@ body > #app > header {
     grid-row: 5;
   }
 }
+/* Food card alignment: identity, stock, storage, actions. */
+.shelf-card {
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 12px;
+  padding: 20px;
+}
+.shelf-card .card-top {
+  gap: 10px;
+}
+.shelf-card .card-top h2 {
+  margin: 0;
+}
+.shelf-card .card-top .food-name-action {
+  padding: 0;
+  line-height: 1.3;
+}
+.shelf-card .single-batch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+}
+.shelf-card .stock-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.shelf-card .stock-location svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+}
+.shelf-card .expiry-status {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 12px;
+}
+.shelf-card .card-foot {
+  align-self: end;
+  margin: 0;
+  padding-top: 12px;
+}
+.shelf-card .amount {
+  margin: 0;
+  line-height: 1.2;
+}
+.shelf-card .stock-status {
+  justify-self: end;
+  text-align: right;
+}
+/* One task at a time; food details remain secondary to daily stock changes. */
+.edit-details-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.edit-details-link:hover {
+  background: transparent;
+  color: var(--primary-hover);
+}
+.editor-task-switch {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.editor-task-switch h3 {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.editor-task-switch button {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  padding: 6px 0;
+  font-size: 13px;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.manage-editor .manage-heading {
+  padding-bottom: 12px;
+}
+.manage-editor .stock-body .stock-instruction {
+  display: none;
+}
+@media (max-width: 600px) {
+  .shelf-card .card-top {
+    gap: 12px;
+  }
+  .shelf-card .single-batch {
+    gap: 6px;
+  }
+  .editor-task-switch {
+    padding: 10px 16px;
+  }
+  .editor-task-switch h3 {
+    font-size: 15px;
+  }
+}

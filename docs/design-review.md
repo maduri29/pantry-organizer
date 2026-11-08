@@ -30,3 +30,7 @@ Taste v2.5's browser gate ran and reported `GATE: FAIL 30`. Its current checker 
 ## Pantry workflow research
 
 KitchenPal’s [kitchen FAQ](https://kitchenpalapp.com/en/faqs/kitchen.html) describes optional dates, previous-location defaults and adding multiple items; [Pantry Check’s guide](https://pantrycheck.com/user-guide/) describes manual lookup and quantity adjustment. These informed keeping the add form light and making low-stock suggestions easier to act on. Suggestions are still explicitly chosen by the user; “Add all to list” performs one update and avoids duplicates.
+
+## Card and editor simplification
+
+Location and date now share a consistent left-aligned storage block beneath stock amounts. The Manage food tab bar is removed: the default flow edits remaining stock, a contextual link switches to adding a purchase, and a secondary header link opens food details. Drafts remain mounted when changing tasks; deletion still requires confirmation.

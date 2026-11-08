@@ -505,6 +505,16 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             <p className="edit-food-caption">
               {editMode === 'details' ? p.name : `${formatAmount(D.total(s, p), p)} on hand`}
             </p>
+            <button
+              className="edit-details-link"
+              type="button"
+              aria-label="Details"
+              hidden={editMode === 'details'}
+              disabled={busy || stockBusy}
+              onClick={() => setEditMode('details')}
+            >
+              Edit details
+            </button>
           </div>
           <button
             type="button"
@@ -516,36 +526,37 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             ×
           </button>
         </header>
-        <div className="editor-navigation" role="group" aria-label="Manage food sections">
+        <div className="editor-task-switch">
+          <h3>
+            {editMode === 'details'
+              ? 'Food details'
+              : stockAction === 'update'
+                ? 'Update what’s left'
+                : 'Add your purchase'}
+          </h3>
           <button
             type="button"
-            aria-pressed={editMode === 'stock' && stockAction === 'update'}
+            aria-label="What’s left"
+            hidden={editMode === 'stock' && stockAction === 'update'}
             disabled={busy || stockBusy}
             onClick={() => {
               setStockAction('update');
               setEditMode('stock');
             }}
           >
-            What’s left
+            Back to remaining stock
           </button>
           <button
             type="button"
-            aria-pressed={editMode === 'stock' && stockAction === 'restock'}
+            aria-label="I bought more"
+            hidden={editMode === 'stock' && stockAction === 'restock'}
             disabled={busy || stockBusy}
             onClick={() => {
               setStockAction('restock');
               setEditMode('stock');
             }}
           >
-            I bought more
-          </button>
-          <button
-            type="button"
-            aria-pressed={editMode === 'details'}
-            disabled={busy || stockBusy}
-            onClick={() => setEditMode('details')}
-          >
-            Details
+            Bought more?
           </button>
         </div>
         <div className="editor-pane" hidden={editMode !== 'stock'}>
