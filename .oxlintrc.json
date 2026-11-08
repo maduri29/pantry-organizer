@@ -13,7 +13,8 @@
     "src/app.js",
     "src/domain.js",
     "src/storage.js",
-    "src/firebase.js"
+    "src/firebase.js",
+    ".agents/skills/**"
   ],
   "env": {
     "browser": true,
