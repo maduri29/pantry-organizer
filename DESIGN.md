@@ -106,7 +106,7 @@ Compact buttons group stock states. Selection changes both `aria-pressed` and th
 
 ### Food records
 
-Show the food illustration, name, amount, storage and stock status together. Keep List on the left and Manage food on the right. Multi-batch details expand within the record.
+Show the illustration and food identity on the left. Group amount and storage on the right. Show only Low or Out warnings; omit redundant Stocked labels. Keep List on the left and Manage food on the right. Multi-batch details expand within the record.
 
 ### Fields
 

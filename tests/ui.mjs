@@ -48,6 +48,32 @@ try {
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);
   pass('sample pantry and category groups render');
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    const cards = await page.locator('.shelf-card').evaluateAll((nodes) =>
+      nodes.map((card) => {
+        const bounds = card.getBoundingClientRect();
+        const amount = card.querySelector('.amount').getBoundingClientRect();
+        const location = card.querySelector('.stock-location')?.getBoundingClientRect();
+        return {
+          overflow: card.scrollWidth > card.clientWidth,
+          aligned: !location || Math.abs(amount.right - location.right) < 2,
+          actionsFit: [...card.querySelectorAll('.card-foot button')].every((button) => {
+            const rect = button.getBoundingClientRect();
+            return (
+              rect.left >= bounds.left &&
+              rect.right <= bounds.right &&
+              button.scrollWidth <= button.clientWidth
+            );
+          })
+        };
+      })
+    );
+    assert.ok(cards.every((card) => !card.overflow && card.aligned && card.actionsFit));
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  pass('phone cards align quantity and location on the right and keep actions inside their bounds');
+
   const bulkContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await bulkContext.route('**/config.js', (route) =>
     route.fulfill({ contentType: 'application/javascript', body: 'window.PANTRY_CONFIG = {};' })
@@ -109,7 +135,10 @@ try {
   assert.equal(await initialAvocados.locator('[data-action=manage]').count(), 1);
   assert.equal(await initialAvocados.locator('.batch, .batch-details').count(), 0);
   assert.equal(await initialAvocados.getByRole('button', { name: 'Manage Avocados' }).count(), 1);
-  assert.match(await initialAvocados.locator('.stock-line').innerText(), /Pantry/);
+  assert.match(
+    await initialAvocados.locator('.card-stock-summary .stock-location').innerText(),
+    /Pantry/
+  );
   assert.doesNotMatch(await initialAvocados.innerText(), /Checked/);
   const blueberriesCard = page
     .locator('.shelf-card')

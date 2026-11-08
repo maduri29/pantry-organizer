@@ -248,37 +248,41 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="amount">
-                    <span>
-                      {p.unit === 'level' ? (
-                        D.level(totalQty)
-                      ) : (
-                        <>
-                          {fmt(totalQty)}{' '}
-                          <small>
-                            {totalQty === 1 && (p.unit === 'items' || p.unit === 'packs')
-                              ? p.unit.slice(0, -1)
-                              : p.unit}
-                          </small>
-                        </>
-                      )}
-                    </span>
+                  <div className="card-stock-summary">
+                    <div className="amount">
+                      <span>
+                        {p.unit === 'level' ? (
+                          D.level(totalQty)
+                        ) : (
+                          <>
+                            {fmt(totalQty)}{' '}
+                            <small>
+                              {totalQty === 1 && (p.unit === 'items' || p.unit === 'packs')
+                                ? p.unit.slice(0, -1)
+                                : p.unit}
+                            </small>
+                          </>
+                        )}
+                      </span>
+                    </div>
+
+                    {batches.length === 1 && (
+                      <span className="stock-location">{batches[0].location}</span>
+                    )}
+                    {itemIsLow && (
+                      <span className="badge stock-status warn">
+                        {totalQty === 0 ? 'Out' : 'Low'}
+                      </span>
+                    )}
                   </div>
 
-                  <span className={`badge stock-status ${itemIsLow ? 'warn' : ''}`}>
-                    {totalQty === 0 ? 'Out' : itemIsLow ? 'Low' : 'Stocked'}
-                    {totalQty > 0 && itemIsLow && p.unit !== 'level'
-                      ? ` · min ${formatAmount(p.minimum, p)}`
-                      : ''}
-                  </span>
-
                   {batches.length === 1 &&
+                    batches[0].expiry &&
                     (() => {
                       const batch = batches[0];
                       const days = D.expiryDays(batch.expiry);
                       return (
                         <div className="stock-line single-batch">
-                          <span className="stock-location">{batch.location}</span>
                           {batch.expiry && (
                             <span
                               className={`badge expiry-status ${days < 0 ? 'expired' : days <= 3 ? 'warn' : ''}`}
