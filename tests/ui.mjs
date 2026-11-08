@@ -129,9 +129,13 @@ try {
       .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) }),
     cardActions = avocadoCard.locator('.card-foot button');
   assert.equal(await cardActions.count(), 2);
+  const actionPositions = await cardActions.evaluateAll((es) =>
+    es.map((e) => e.getBoundingClientRect().x)
+  );
+  assert.ok(actionPositions[0] < actionPositions[1], 'List sits to the left of Manage food');
   assert.deepEqual(
     await cardActions.evaluateAll((es) => es.map((e) => e.getAttribute('aria-label'))),
-    ['Manage Avocados', 'Add Avocados to shopping list']
+    ['Add Avocados to shopping list', 'Manage Avocados']
   );
   assert.equal(
     await cardActions.evaluateAll((es) =>
@@ -169,7 +173,7 @@ try {
       (button) => button.getBoundingClientRect().height
     )
   }));
-  assert.ok(manageMobile.width <= 382 && manageMobile.scrollWidth <= manageMobile.clientWidth);
+  assert.ok(manageMobile.width === 390 && manageMobile.scrollWidth <= manageMobile.clientWidth);
   assert.equal(manageMobile.footerTargets.length, 2);
   assert.ok(manageMobile.footerTargets.every((height) => height >= 44));
   for (const [width, height] of [

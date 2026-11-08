@@ -166,10 +166,11 @@ export const StockEditor: React.FC<{
   };
 
   return (
-    <div className="stock-shell" ref={shellRef}>
+    <div className={`stock-shell ${onDetails ? 'food-workspace' : ''}`} ref={shellRef}>
       <header className="stock-heading">
         <FoodIllustration product={product} />
         <div>
+          {onDetails && <span className="editor-eyebrow">Manage food</span>}
           <h2>{product.name}</h2>
           <p>{formatAmount(current, product)} on hand</p>
         </div>
@@ -190,6 +191,7 @@ export const StockEditor: React.FC<{
       >
         <button
           type="button"
+          aria-label="What’s left"
           aria-pressed={action === 'update'}
           disabled={busy}
           onClick={() => {
@@ -200,10 +202,11 @@ export const StockEditor: React.FC<{
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="m5 12 4 4L19 6M4 21h16" />
           </svg>
-          What’s left
+          <span>What’s left{onDetails && <small>Check your stock</small>}</span>
         </button>
         <button
           type="button"
+          aria-label="I bought more"
           aria-pressed={action === 'restock'}
           disabled={busy}
           onClick={() => {
@@ -214,11 +217,16 @@ export const StockEditor: React.FC<{
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 8h14l2 12H3L5 8Zm3 0V6a4 4 0 0 1 8 0v2M12 11v6m-3-3h6" />
           </svg>
-          I bought more
+          <span>I bought more{onDetails && <small>Add a purchase</small>}</span>
         </button>
         {onDetails && (
-          <button type="button" disabled={busy} onClick={onDetails}>
-            Details
+          <button type="button" aria-label="Details" disabled={busy} onClick={onDetails}>
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M4 5h16M4 12h16M4 19h16M8 3v4m8 3v4m-7 3v4" />
+            </svg>
+            <span>
+              Details<small>Name & settings</small>
+            </span>
           </button>
         )}
       </div>

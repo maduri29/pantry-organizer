@@ -515,6 +515,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           <header className="manage-heading">
             <FoodIllustration product={p} />
             <div>
+              <span className="editor-eyebrow">Manage food / Details</span>
               <h2>Edit food</h2>
               <p className="edit-food-caption">{p.name}</p>
             </div>

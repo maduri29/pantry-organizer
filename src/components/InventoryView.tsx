@@ -422,19 +422,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                   <div className="card-foot">
                     <button
                       className="icon-action"
-                      data-action="manage"
-                      data-id={p.id}
-                      aria-label={`Manage ${p.name}`}
-                      title={`Manage ${p.name}`}
-                      onClick={() => onManage(p, 'stock')}
-                    >
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
-                      </svg>
-                      <span>Manage food</span>
-                    </button>
-                    <button
-                      className="icon-action"
                       data-action="shop"
                       data-id={p.id}
                       aria-label={
@@ -454,6 +441,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                         <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />
                       </svg>
                       <span>{isOnShopping ? 'On list' : 'List'}</span>
+                    </button>
+                    <button
+                      className="icon-action"
+                      data-action="manage"
+                      data-id={p.id}
+                      aria-label={`Manage ${p.name}`}
+                      title={`Manage ${p.name}`}
+                      onClick={() => onManage(p, 'stock')}
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z" />
+                      </svg>
+                      <span>Manage food</span>
                     </button>
                   </div>
                 </article>
