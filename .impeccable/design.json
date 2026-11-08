@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T16:46:01.658475+00:00",
+  "title": "Design System: Pantry",
+  "extensions": {
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "160ms ease-out",
+        "purpose": "Background and border feedback; respect reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow-desktop",
+        "value": "1100px"
+      },
+      {
+        "name": "top-navigation",
+        "value": "850px"
+      },
+      {
+        "name": "phone",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Labeled task action.",
+      "html": "<button class=\"ds-primary\">Save changes</button>",
+      "css": ".ds-primary{font:500 14px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:var(--primary,#284c69);color:white;border:1px solid var(--control,#c7c5bf)}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--text,#252b31);outline-offset:3px}"
+    },
+    {
+      "name": "Secondary button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Labeled task action.",
+      "html": "<button class=\"ds-secondary\">Save changes</button>",
+      "css": ".ds-secondary{font:500 14px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:white;color:var(--text,#252b31);border:1px solid var(--control,#c7c5bf)}.ds-secondary:hover{filter:brightness(.95)}.ds-secondary:focus-visible{outline:2px solid var(--text,#252b31);outline-offset:3px}"
+    },
+    {
+      "name": "Search field",
+      "kind": "input",
+      "description": "Native labeled search control.",
+      "html": "<label class=\"ds-field\">Search food<input placeholder=\"Search your pantry\u2026\" /></label>",
+      "css": ".ds-field{display:grid;gap:8px;font:14px \"IBM Plex Sans\",Arial,sans-serif}.ds-field input{min-height:46px;padding:10px 12px;border:1px solid var(--control,#c7c5bf);border-radius:6px;background:white;color:var(--text,#252b31);font:inherit}.ds-field input:focus-visible{outline:2px solid var(--text,#252b31);outline-offset:3px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Current view on an ink-blue rail.",
+      "html": "<nav class=\"ds-nav\"><button aria-current=\"page\">My inventory</button><button>Shopping list</button></nav>",
+      "css": ".ds-nav{display:grid;gap:8px;padding:16px;background:var(--shell,#243d50)}.ds-nav button{font:14px \"IBM Plex Sans\",Arial,sans-serif;min-height:48px;padding:12px;text-align:left;color:#e2e8ec;background:transparent;border:0;border-radius:6px}.ds-nav button[aria-current=page]{background:#3c5365;color:white}.ds-nav button:hover{background:#344e61}.ds-nav button:focus-visible{outline:2px solid white;outline-offset:3px}"
+    },
+    {
+      "name": "Stock filter",
+      "kind": "chip",
+      "description": "Compact selected inventory filter.",
+      "html": "<button class=\"ds-filter\" aria-pressed=\"true\">Foods at home <strong>5</strong></button>",
+      "css": ".ds-filter{font:13px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border:1px solid var(--primary,#284c69);border-radius:6px;background:var(--primary,#284c69);color:white}.ds-filter strong{margin-left:8px}.ds-filter:hover{background:var(--primary-hover,#18374e)}.ds-filter:focus-visible{outline:2px solid var(--text,#252b31);outline-offset:3px}"
+    },
+    {
+      "name": "Food record",
+      "kind": "card",
+      "description": "Food identity and stock on a white work surface.",
+      "html": "<article class=\"ds-food\"><h2>Avocados</h2><p>2 items \u00b7 Pantry</p><div><button>List</button><button>Manage food</button></div></article>",
+      "css": ".ds-food{font:14px \"IBM Plex Sans\",Arial,sans-serif;padding:16px 20px;border:1px solid var(--border,#dedbd4);border-radius:12px;background:white;color:var(--text,#252b31)}.ds-food h2{font-size:16px;margin:0 0 8px}.ds-food div{display:flex;justify-content:space-between;gap:12px}.ds-food button{font:inherit;min-height:44px;padding:9px 14px;border:1px solid var(--control,#c7c5bf);border-radius:6px;background:var(--ground,#f5f2ec)}.ds-food button:hover{background:var(--active,#e5eaf0)}.ds-food button:focus-visible{outline:2px solid var(--text,#252b31);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A place for everyday food",
+    "overview": "A practical workspace with warm surfaces, ink-blue navigation and clearly aligned food information.",
+    "keyCharacteristics": [
+      "Persistent navigation and compact stock filters.",
+      "Warm neutral work surfaces and restrained state colors.",
+      "Consistent labeled actions across records and editors."
+    ]
+  }
+}

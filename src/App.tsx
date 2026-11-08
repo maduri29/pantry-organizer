@@ -681,6 +681,9 @@ export const App: React.FC = () => {
 
   return (
     <>
+      <a className="skip-link" href="#main-content">
+        Skip to pantry
+      </a>
       <Header
         online={online}
         authCheck={authCheck}
@@ -692,122 +695,131 @@ export const App: React.FC = () => {
         onConnect={handleConnect}
       />
 
-      <main>
-        <Hero
-          view={tab}
-          hasProducts={s.products.length > 0}
-          canSuggestCategories={online}
-          suggestingCategories={suggestingCategories}
-          onSuggestCategories={handleSuggestPantryCategories}
-          onAdd={() => openAddFood()}
-          onBulk={() =>
-            setModal({
-              type: 'bulk',
-              revision: data.revision
-            })
-          }
-        />
+      <div className="app-workspace">
+        <aside className="workspace-nav">
+          <Nav
+            tab={tab}
+            shoppingCount={openShopping.length}
+            onSelectTab={(newTab) => setTab(newTab)}
+          />
+          <p className="workspace-note">
+            A place for everything
+            <br />
+            you have at home.
+          </p>
+        </aside>
+        <main id="main-content" tabIndex={-1}>
+          <Hero
+            view={tab}
+            hasProducts={s.products.length > 0}
+            canSuggestCategories={online}
+            suggestingCategories={suggestingCategories}
+            onSuggestCategories={handleSuggestPantryCategories}
+            onAdd={() => openAddFood()}
+            onBulk={() =>
+              setModal({
+                type: 'bulk',
+                revision: data.revision
+              })
+            }
+          />
 
-        <Stats
-          totalProducts={s.products.length}
-          soonCount={soon.length}
-          lowCount={low.length}
-          currentFilter={filter}
-          onSelectFilter={(newFilter) => {
-            setFilter(newFilter);
-            setSearch('');
-            setCategory('all');
-            setLocation('all');
-            setTab('inventory');
-          }}
-        />
-
-        <Nav
-          tab={tab}
-          shoppingCount={openShopping.length}
-          onSelectTab={(newTab) => setTab(newTab)}
-        />
-
-        <div id="content">
           {tab === 'inventory' && (
-            <InventoryView
-              state={s}
-              online={online}
-              search={search}
-              location={location}
-              category={category}
-              sort={sort}
-              filter={filter}
-              onSearchChange={setSearch}
-              onLocationChange={setLocation}
-              onCategoryChange={setCategory}
-              onSortChange={setSort}
-              onClearFilter={() => setFilter('all')}
-              onShowNeeds={() => setFilter('low')}
-              onAddFood={openAddFood}
-              onTrySample={async () => {
-                await mutate((st) => {
-                  Object.assign(st, D.demo());
-                }, 'Sample pantry ready');
-              }}
-              onUpdate={(product, batch) =>
-                setModal({ type: 'stock', revision: data.revision, product, batch })
-              }
-              onManage={(product, section, batch) =>
-                setModal({
-                  type: 'manage',
-                  revision: data.revision,
-                  product,
-                  section,
-                  batch
-                })
-              }
-              onAddToList={async (product) => {
-                await mutate((st) => {
-                  const prod = st.products.find((p) => p.id === product.id);
-                  if (prod) D.suggest(st, prod);
-                }, 'Added to your list');
+            <Stats
+              totalProducts={s.products.length}
+              soonCount={soon.length}
+              lowCount={low.length}
+              currentFilter={filter}
+              onSelectFilter={(newFilter) => {
+                setFilter(newFilter);
+                setSearch('');
+                setCategory('all');
+                setLocation('all');
+                setTab('inventory');
               }}
             />
           )}
 
-          {tab === 'shopping' && (
-            <ShoppingView
-              state={s}
-              onRemoveItem={async (itemId) => {
-                await mutate((st) => {
-                  const it = st.shopping.find((item) => item.id === itemId);
-                  if (it) it.status = 'removed';
-                }, 'Removed from list');
-              }}
-              onBuyItem={(item, product) =>
-                setModal({
-                  type: 'buy',
-                  revision: data.revision,
-                  product,
-                  shoppingItem: item
-                })
-              }
-              onAddSuggestion={async (product) => {
-                await mutate((st) => {
-                  const prod = st.products.find((p) => p.id === product.id);
-                  if (prod) D.suggest(st, prod);
-                }, 'Added to your list');
-              }}
-            />
-          )}
+          <div id="content">
+            {tab === 'inventory' && (
+              <InventoryView
+                state={s}
+                online={online}
+                search={search}
+                location={location}
+                category={category}
+                sort={sort}
+                filter={filter}
+                onSearchChange={setSearch}
+                onLocationChange={setLocation}
+                onCategoryChange={setCategory}
+                onSortChange={setSort}
+                onClearFilter={() => setFilter('all')}
+                onAddFood={openAddFood}
+                onTrySample={async () => {
+                  await mutate((st) => {
+                    Object.assign(st, D.demo());
+                  }, 'Sample pantry ready');
+                }}
+                onUpdate={(product, batch) =>
+                  setModal({ type: 'stock', revision: data.revision, product, batch })
+                }
+                onManage={(product, section, batch) =>
+                  setModal({
+                    type: 'manage',
+                    revision: data.revision,
+                    product,
+                    section,
+                    batch
+                  })
+                }
+                onAddToList={async (product) => {
+                  await mutate((st) => {
+                    const prod = st.products.find((p) => p.id === product.id);
+                    if (prod) D.suggest(st, prod);
+                  }, 'Added to your list');
+                }}
+              />
+            )}
 
-          {tab === 'history' && <HistoryView state={s} />}
-        </div>
+            {tab === 'shopping' && (
+              <ShoppingView
+                state={s}
+                onRemoveItem={async (itemId) => {
+                  await mutate((st) => {
+                    const it = st.shopping.find((item) => item.id === itemId);
+                    if (it) it.status = 'removed';
+                  }, 'Removed from list');
+                }}
+                onBuyItem={(item, product) =>
+                  setModal({
+                    type: 'buy',
+                    revision: data.revision,
+                    product,
+                    shoppingItem: item
+                  })
+                }
+                onAddSuggestion={async (product) => {
+                  await mutate((st) => {
+                    const prod = st.products.find((p) => p.id === product.id);
+                    if (prod) D.suggest(st, prod);
+                  }, 'Added to your list');
+                }}
+              />
+            )}
 
-        <div className="footer">
-          <span>
-            {online ? 'Shared with your household' : 'Your demo stays on this device'} ·{' '}
-            {s.batches.filter((b) => b.quantity > 0).length} active batches
-          </span>
-          <span>Update what’s left whenever you check.</span>
-        </div>
-      </main>
+            {tab === 'history' && <HistoryView state={s} />}
+          </div>
+
+          <div className="footer">
+            <span>
+              {online ? 'Shared with your household' : 'Your demo stays on this device'} ·{' '}
+              {s.batches.filter((b) => b.quantity > 0).length} active batches
+            </span>
+            <span>Update what’s left whenever you check.</span>
+          </div>
+        </main>
+      </div>
 
       <DialogModal
         modal={modal}

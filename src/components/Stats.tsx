@@ -16,7 +16,7 @@ export const Stats: React.FC<StatsProps> = ({
   onSelectFilter
 }) => {
   return (
-    <section className="stats">
+    <section className="stats" aria-label="Filter inventory by stock">
       <button
         className={`stat ${currentFilter === 'all' ? 'active' : ''}`}
         data-filter="all"

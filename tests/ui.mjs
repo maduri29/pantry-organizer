@@ -48,12 +48,10 @@ try {
   await page.getByRole('heading', { name: 'Avocados', exact: true }).waitFor();
   assert.equal(await page.locator('.card').count(), 5);
   pass('sample pantry and category groups render');
-  const glanceCounts = await page.locator('.glance-counts').innerText();
-  assert.match(glanceCounts, /0\s+out/);
-  assert.match(glanceCounts, /2\s+running low/);
+  assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   assert.equal(await page.locator('.card .food-art').count(), 5);
   assert.equal(await page.locator('.card .food-art svg').count(), 5);
-  assert.equal(await page.locator('.hero-art svg').count(), 1);
+  assert.equal(await page.locator('.workspace-nav .nav button').count(), 3);
   await page.evaluate(() => document.fonts.ready);
   const bodyFont = await page.locator('body').evaluate((node) => getComputedStyle(node).fontFamily);
   const headingType = await page.locator('.hero h1').evaluate((node) => ({
@@ -72,7 +70,7 @@ try {
   assert.equal(headingType.family, bodyFont);
   assert.ok(headingType.size <= 32);
   pass(
-    'glance counts and food illustrations render; IBM Plex Sans loads and is shared by headings and interface text'
+    'stock counts and food illustrations render; IBM Plex Sans loads and is shared by headings and interface text'
   );
   const initialAvocados = page
     .locator('.shelf-card')
@@ -92,14 +90,14 @@ try {
   await page.getByLabel('Storage location').selectOption('Fridge');
   await page.getByLabel('Food category').selectOption('Fruit');
   await page.getByLabel('Search food').fill('blue');
-  await page.getByRole('button', { name: 'See all 2 items' }).click();
+  await page.getByRole('button', { name: /Running low/ }).click();
   assert.equal(await page.getByLabel('Storage location').inputValue(), 'all');
   assert.equal(await page.getByLabel('Food category').inputValue(), 'all');
   assert.equal(await page.getByLabel('Search food').inputValue(), '');
   assert.equal(await page.locator('.stat[data-filter="low"]').getAttribute('class'), 'stat active');
   assert.equal(await page.locator('.shelf-card').count(), 2);
   await page.locator('.toolbar button[data-filter="all"]').click();
-  pass('shopping glance reveals every low/out item after resetting location, category and search');
+  pass('stock filter reveals every low/out item after resetting location, category and search');
   const filters = await page.evaluate(() =>
     Object.fromEntries(
       ['#search', '#location', '#category', '#sort'].map((sel) => {
@@ -228,9 +226,7 @@ try {
   await page.getByRole('button', { name: 'Save stock', exact: true }).click();
   await page.locator('#editor').waitFor({ state: 'hidden' });
   assert.match(await card.innerText(), /\bOut\b/);
-  const outSummary = (await page.locator('.glance-counts').innerText()).replace(/\s+/g, ' ');
-  assert.match(outSummary, /1 out/);
-  assert.match(outSummary, /1 running low/);
+  assert.match(await page.locator('.stat[data-filter=low]').innerText(), /2/);
   pass('check-in sets remaining quantity; out-of-stock food stays visible');
   await page.reload();
   card = page

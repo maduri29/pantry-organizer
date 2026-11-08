@@ -81,6 +81,9 @@ export const StockEditor: React.FC<{
   batch?: Batch;
   shoppingItem?: ShoppingItem;
   initialAction: 'update' | 'restock';
+  selectedAction?: 'update' | 'restock';
+  embedded?: boolean;
+  onBusyChange?: (busy: boolean) => void;
   onSubmit: (values: Record<string, any>) => Promise<void>;
   onClose: () => void;
   onDetails?: () => void;
@@ -91,6 +94,9 @@ export const StockEditor: React.FC<{
   batch,
   shoppingItem,
   initialAction,
+  selectedAction,
+  embedded = false,
+  onBusyChange,
   onSubmit,
   onClose,
   onDetails,
@@ -100,7 +106,8 @@ export const StockEditor: React.FC<{
   const activeBatches = allBatches.filter((item) => item.quantity > 0 || item.id === batch?.id);
   const batches = activeBatches.length ? activeBatches : allBatches.slice(-1);
   const latest = batch ?? allBatches.at(-1);
-  const [action, setAction] = useState(initialAction);
+  const [localAction, setAction] = useState(initialAction);
+  const action = selectedAction ?? localAction;
   const batchId = batch?.id;
   const shellRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -130,6 +137,9 @@ export const StockEditor: React.FC<{
   const [location, setLocation] = useState<Location>(latest?.location ?? 'Pantry');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
   const current = D.total(state, product);
   const nextAmounts = allBatches.map((item) =>
     amounts[item.id] === undefined ? item.quantity : Number(amounts[item.id])
@@ -167,10 +177,9 @@ export const StockEditor: React.FC<{
 
   return (
     <div className={`stock-shell ${onDetails ? 'food-workspace' : ''}`} ref={shellRef}>
-      <header className="stock-heading">
+      <header className="stock-heading" hidden={embedded}>
         <FoodIllustration product={product} />
         <div>
-          {onDetails && <span className="editor-eyebrow">Manage food</span>}
           <h2>{product.name}</h2>
           <p>{formatAmount(current, product)} on hand</p>
         </div>
@@ -186,6 +195,7 @@ export const StockEditor: React.FC<{
       </header>
       <div
         className={`stock-intents ${onDetails ? 'unified-intents' : ''}`}
+        hidden={embedded}
         role="group"
         aria-label="Stock action"
       >

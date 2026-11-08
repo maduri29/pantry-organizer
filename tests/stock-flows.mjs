@@ -111,7 +111,7 @@ try {
   assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
   await editor.getByRole('button', { name: 'Details', exact: true }).click();
   await editor.getByLabel('Food name', { exact: true }).fill('Draft chickpeas');
-  await editor.getByRole('button', { name: 'Stock & restock' }).click();
+  await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
   await editor.getByRole('button', { name: 'Delete Chickpeas', exact: true }).click();
   assert.equal(
@@ -125,7 +125,7 @@ try {
     await editor.getByLabel('Food name', { exact: true }).inputValue(),
     'Draft chickpeas'
   );
-  await editor.getByRole('button', { name: 'Stock & restock' }).click();
+  await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.match(await editor.locator('.stock-preview').innerText(), /4 \+ 1.5 = 5.5 items/);
   assert.match(await editor.locator('.stock-list-note').innerText(), /checks this off/);
   await editor.getByRole('button', { name: 'Add to pantry', exact: true }).click();

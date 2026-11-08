@@ -25,10 +25,14 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
   }, [s, openItemProductIds]);
 
   return (
-    <>
-      <p className="section-caption">
-        Your list, your call. Suggestions are added only when you choose them.
-      </p>
+    <div className="shopping-view">
+      <div className="view-section-heading">
+        <h2>To pick up</h2>
+        <span>
+          {items.length} {items.length === 1 ? 'food' : 'foods'}
+        </span>
+      </div>
+      <p className="section-caption">Restock each food when you’re home to update your pantry.</p>
 
       {items.length > 0 ? (
         items.map((i) => {
@@ -66,15 +70,23 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
         })
       ) : (
         <div className="empty">
-          <h2>A little list goes a long way</h2>
+          <h2>Your shopping list is clear</h2>
           <p>Add foods from your inventory or accept a suggestion below.</p>
         </div>
       )}
 
-      {suggestions.length > 0 && <h3>Worth checking before you shop</h3>}
+      {suggestions.length > 0 && (
+        <div className="view-section-heading suggestions-heading">
+          <h2>Worth checking before you shop</h2>
+          <span>
+            {suggestions.length} {suggestions.length === 1 ? 'suggestion' : 'suggestions'}
+          </span>
+        </div>
+      )}
 
       {suggestions.map((p) => (
-        <div key={p.id} className="shopping-row">
+        <div key={p.id} className="shopping-row suggestion-row">
+          <FoodIllustration product={p} />
           <div className="info">
             <h2>{p.name}</h2>
             <span className="meta">{formatAmount(D.total(s, p), p)} left</span>
@@ -84,6 +96,6 @@ export const ShoppingView: React.FC<ShoppingViewProps> = ({
           </button>
         </div>
       ))}
-    </>
+    </div>
   );
 };

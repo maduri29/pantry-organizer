@@ -16,7 +16,6 @@ interface InventoryViewProps {
   onCategoryChange: (category: string) => void;
   onSortChange: (sort: string) => void;
   onClearFilter: () => void;
-  onShowNeeds: () => void;
   onAddFood: (initialName?: string) => void;
   onTrySample: () => void;
   onUpdate: (product: Product, batch?: Batch) => void;
@@ -42,7 +41,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onCategoryChange,
   onSortChange,
   onClearFilter,
-  onShowNeeds,
   onAddFood,
   onTrySample,
   onUpdate,
@@ -100,23 +98,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
       };
     }, [s]);
 
-  const needsAttention = useMemo(
-    () =>
-      s.products
-        .filter((product) => productIsLow.get(product.id) ?? false)
-        .sort((a, b) => {
-          const outDifference =
-            Number((productTotals.get(b.id) ?? 0) === 0) -
-            Number((productTotals.get(a.id) ?? 0) === 0);
-          return outDifference || a.name.localeCompare(b.name);
-        }),
-    [s.products, productIsLow, productTotals]
-  );
-  const outCount = needsAttention.filter(
-    (product) => (productTotals.get(product.id) ?? 0) === 0
-  ).length;
-  const runningLowCount = needsAttention.length - outCount;
-
   const items = useMemo(() => {
     const term = search.trim().toLocaleLowerCase();
     return s.products
@@ -172,65 +153,6 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
   return (
     <div className="inventory-view">
-      {s.products.length > 0 && (
-        <section className="shopping-glance" aria-labelledby="shopping-glance-title">
-          <div className="glance-heading">
-            <h2 id="shopping-glance-title">Before you shop</h2>
-            <p>From your latest stock checks</p>
-          </div>
-          <div className="glance-counts" aria-live="polite">
-            <span>
-              <i className="glance-dot out" />
-              <strong>{outCount}</strong> out
-            </span>
-            <span>
-              <i className="glance-dot low" />
-              <strong>{runningLowCount}</strong> running low
-            </span>
-          </div>
-          {needsAttention.length ? (
-            <div className="glance-items">
-              {needsAttention.slice(0, 4).map((product) => {
-                const isOut = (productTotals.get(product.id) ?? 0) === 0;
-                return (
-                  <div className="glance-item" key={product.id}>
-                    <div className="glance-item-copy">
-                      <strong>{product.name}</strong>
-                      <span className={`glance-status ${isOut ? 'is-out' : 'is-low'}`}>
-                        {isOut ? 'Out' : 'Running low'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="glance-clear">Everything looks stocked for now.</p>
-          )}
-          <div className="glance-footer">
-            {needsAttention.length > 4 && (
-              <span>{needsAttention.length - 4} more need attention</span>
-            )}
-            <button
-              type="button"
-              className="glance-link"
-              onClick={() => {
-                onSearchChange('');
-                onCategoryChange('all');
-                onLocationChange('all');
-                if (needsAttention.length) onShowNeeds();
-                else onClearFilter();
-              }}
-            >
-              {needsAttention.length ? `See all ${needsAttention.length} items` : 'See your pantry'}
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 12h15m-6-6 6 6-6 6" />
-              </svg>
-            </button>
-          </div>
-        </section>
-      )}
-
       <div className="inventory-heading">
         <div>
           <h2>On your shelves</h2>

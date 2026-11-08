@@ -211,6 +211,8 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
   const [trackingUnit, setTrackingUnit] = useState<string>(modal.product?.unit ?? 'level');
   const [foodName, setFoodName] = useState(modal.initialName ?? modal.product?.name ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [stockAction, setStockAction] = useState<'update' | 'restock'>('update');
+  const [stockBusy, setStockBusy] = useState(false);
   const keepItemRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (confirmDelete) keepItemRef.current?.focus();
@@ -495,13 +497,66 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
     };
 
     return (
-      <>
-        <div hidden={editMode !== 'stock'}>
+      <div className="manage-editor">
+        <header className="manage-heading">
+          <FoodIllustration product={p} />
+          <div>
+            <h2>{editMode === 'details' ? 'Edit food' : p.name}</h2>
+            <p className="edit-food-caption">
+              {editMode === 'details' ? p.name : `${formatAmount(D.total(s, p), p)} on hand`}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="manage-close"
+            aria-label="Close manage item"
+            onClick={onClose}
+            disabled={busy || stockBusy}
+          >
+            ×
+          </button>
+        </header>
+        <div className="editor-navigation" role="group" aria-label="Manage food sections">
+          <button
+            type="button"
+            aria-pressed={editMode === 'stock' && stockAction === 'update'}
+            disabled={busy || stockBusy}
+            onClick={() => {
+              setStockAction('update');
+              setEditMode('stock');
+            }}
+          >
+            What’s left
+          </button>
+          <button
+            type="button"
+            aria-pressed={editMode === 'stock' && stockAction === 'restock'}
+            disabled={busy || stockBusy}
+            onClick={() => {
+              setStockAction('restock');
+              setEditMode('stock');
+            }}
+          >
+            I bought more
+          </button>
+          <button
+            type="button"
+            aria-pressed={editMode === 'details'}
+            disabled={busy || stockBusy}
+            onClick={() => setEditMode('details')}
+          >
+            Details
+          </button>
+        </div>
+        <div className="editor-pane" hidden={editMode !== 'stock'}>
           <StockEditor
             state={s}
             product={p}
             batch={b}
             initialAction="update"
+            selectedAction={stockAction}
+            embedded
+            onBusyChange={setStockBusy}
             onSubmit={onSubmit}
             onClose={onClose}
             onDetails={() => setEditMode('details')}
@@ -512,26 +567,6 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           />
         </div>
         <div className="manage-shell" hidden={editMode !== 'details'}>
-          <header className="manage-heading">
-            <FoodIllustration product={p} />
-            <div>
-              <span className="editor-eyebrow">Manage food / Details</span>
-              <h2>Edit food</h2>
-              <p className="edit-food-caption">{p.name}</p>
-            </div>
-            <button
-              type="button"
-              className="manage-close"
-              aria-label="Close manage item"
-              onClick={onClose}
-              disabled={busy}
-            >
-              ×
-            </button>
-          </header>
-          <button className="food-back" type="button" onClick={() => setEditMode('stock')}>
-            ← Stock &amp; restock
-          </button>
           <form
             className="manage-form"
             onSubmit={handleSubmit}
@@ -787,7 +822,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
             </footer>
           </form>
         </div>
-      </>
+      </div>
     );
   }
 

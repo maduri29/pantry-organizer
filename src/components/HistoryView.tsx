@@ -19,10 +19,8 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
   const movements = useMemo(() => s.movements.slice().reverse().slice(0, 100), [s.movements]);
 
   return (
-    <>
-      <p className="section-caption">
-        A quiet record of additions and stock check-ins. No need to log every use.
-      </p>
+    <div className="activity-view">
+      <p className="section-caption">Your latest 100 additions and stock updates.</p>
 
       {movements.length > 0 ? (
         <table className="history">
@@ -46,10 +44,12 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
 
               return (
                 <tr key={m.id}>
-                  <td>{p?.name || 'Unknown'}</td>
-                  <td>{actionLabels[m.type] || m.type}</td>
-                  <td>{amountStr}</td>
-                  <td>{new Date(m.at).toLocaleString()}</td>
+                  <td data-label="Food">{p?.name || 'Unknown'}</td>
+                  <td data-label="Action">{actionLabels[m.type] || m.type}</td>
+                  <td data-label="Amount">{amountStr}</td>
+                  <td data-label="When">
+                    <time dateTime={m.at}>{new Date(m.at).toLocaleString()}</time>
+                  </td>
                 </tr>
               );
             })}
@@ -61,6 +61,6 @@ export const HistoryView: React.FC<HistoryViewProps> = ({ state: s }) => {
           <p>Add a food to record your first activity.</p>
         </div>
       )}
-    </>
+    </div>
   );
 };
