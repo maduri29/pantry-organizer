@@ -5000,3 +5000,248 @@ select,
     padding-inline: 0;
   }
 }
+
+/* Compact system typography and quiet editor disclosures. */
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  --ground: #f6f6f4;
+  --surface: #ffffff;
+  --raised: #eeeeec;
+  --active: #e9e9e6;
+  --text: #292b2e;
+  --muted: #626467;
+  --primary: #2f3033;
+  --primary-hover: #151619;
+  --border: #dededb;
+  --rule: #ececea;
+  --control: #c9cac7;
+}
+body,
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+.hero h1 {
+  font-size: 27px;
+  letter-spacing: -0.025em;
+}
+.hero p {
+  font-size: 13px;
+}
+.brand {
+  font-size: 23px;
+}
+.inventory-heading h2,
+.view-section-heading h2 {
+  font-size: 16px;
+}
+.shelf-card .card-top h2 {
+  font-size: 15px;
+}
+.shelf-card .card-stock-summary .amount {
+  font-size: 22px;
+}
+.shelf-card .card-foot button {
+  font-size: 12px;
+}
+.manage-heading h2,
+.stock-heading h2,
+.add-heading h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+dialog:has(.food-workspace) .manage-heading {
+  padding: 18px 20px 10px;
+}
+.manage-editor .manage-heading,
+.add-heading {
+  background: var(--surface);
+}
+.edit-food-caption {
+  font-size: 12px;
+}
+.editor-task-switch {
+  padding: 4px 20px;
+  gap: 8px;
+}
+.editor-task-switch h3 {
+  font-size: 14px;
+}
+.editor-task-switch button,
+.edit-details-link {
+  font-size: 12px;
+  text-decoration: none;
+}
+.editor-task-switch button:hover,
+.edit-details-link:hover {
+  text-decoration: underline;
+}
+.manage-body,
+.add-body {
+  font-size: 13px;
+}
+.manage-body label,
+.add-body label {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.manage-body input,
+.manage-body select,
+.add-body input,
+.add-body select {
+  font-size: 14px;
+  font-weight: 400;
+  min-height: 44px;
+  padding-block: 9px;
+}
+.manage-body .edit-tracking {
+  gap: 12px;
+}
+.batch-settings {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 4px;
+}
+.batch-settings > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  list-style: none;
+}
+.batch-settings > summary::-webkit-details-marker {
+  display: none;
+}
+.package-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.package-chevron {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  stroke-width: 1.5;
+  transition: transform 150ms ease;
+}
+.batch-settings[open] .package-chevron {
+  transform: rotate(180deg);
+}
+.batch-settings > .manage-note {
+  margin: 0 0 16px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.manage-batch {
+  margin: 0;
+  padding: 0 0 16px;
+  border: 0;
+  border-radius: 0;
+  gap: 10px;
+}
+.manage-batch + .manage-batch {
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+.manage-batch legend {
+  padding: 0;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.manage-batch input {
+  font-weight: 400;
+}
+.manage-batch-meta {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.manage-batch-meta > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  min-height: 44px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  list-style: none;
+}
+.manage-batch-meta > summary::-webkit-details-marker {
+  display: none;
+}
+.manage-batch-meta > summary::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23626467' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 10 4 4 4-4'/%3E%3C/svg%3E")
+    center/16px no-repeat;
+}
+.manage-batch-meta[open] > summary::after {
+  transform: rotate(180deg);
+}
+.manage-footer,
+.stock-footer,
+.add-footer {
+  background: var(--surface);
+}
+.manage-footer button,
+.stock-footer button,
+.add-footer button {
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: 24px;
+  }
+  .shelf-card .card-top h2 {
+    font-size: 14px;
+  }
+  .shelf-card .card-stock-summary .amount {
+    font-size: 21px;
+  }
+  .manage-heading h2,
+  .add-heading h2 {
+    font-size: 18px;
+  }
+  dialog:has(.food-workspace) .manage-heading {
+    padding: 16px 16px 10px;
+  }
+  .editor-task-switch {
+    padding: 2px 16px;
+  }
+  .manage-body input,
+  .manage-body select,
+  .add-body input,
+  .add-body select {
+    font-size: 16px;
+  }
+  .manage-body .edit-tracking {
+    gap: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .package-chevron {
+    transition: none;
+  }
+}
+.batch-settings > summary .package-chevron {
+  width: 18px;
+  height: 18px;
+  flex-basis: 18px;
+  stroke-width: 1.75;
+  fill: none;
+  color: var(--muted);
+}

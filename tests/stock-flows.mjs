@@ -105,11 +105,17 @@ try {
   await editor.locator('[name="expiry"]').fill('2032-03-03');
   await editor.getByRole('button', { name: 'What’s left', exact: true }).click();
   await editor.locator(`[name="quantity-${exactBatches[0].id}"]:visible`).fill('');
+  if (!(await editor.getByRole('button', { name: 'I bought more', exact: true }).isVisible())) {
+    await editor.getByRole('button', { name: 'What’s left', exact: true }).click();
+  }
   await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.equal(await editor.locator('[name="expiry"]').inputValue(), '2032-03-03');
   assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
   await editor.getByRole('button', { name: 'Details', exact: true }).click();
   await editor.getByLabel('Food name', { exact: true }).fill('Draft chickpeas');
+  if (!(await editor.getByRole('button', { name: 'I bought more', exact: true }).isVisible())) {
+    await editor.getByRole('button', { name: 'What’s left', exact: true }).click();
+  }
   await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.equal(await editor.locator('[name="quantity"]').inputValue(), '1.5');
   await editor.getByRole('button', { name: 'Delete Chickpeas', exact: true }).click();
@@ -124,6 +130,9 @@ try {
     await editor.getByLabel('Food name', { exact: true }).inputValue(),
     'Draft chickpeas'
   );
+  if (!(await editor.getByRole('button', { name: 'I bought more', exact: true }).isVisible())) {
+    await editor.getByRole('button', { name: 'What’s left', exact: true }).click();
+  }
   await editor.getByRole('button', { name: 'I bought more', exact: true }).click();
   assert.match(await editor.locator('.stock-list-note').innerText(), /checks this off/);
   await editor.getByRole('button', { name: 'Add to pantry', exact: true }).click();

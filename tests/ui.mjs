@@ -133,20 +133,10 @@ try {
     family: getComputedStyle(node).fontFamily,
     size: parseFloat(getComputedStyle(node).fontSize)
   }));
-  assert.match(bodyFont, /IBM Plex Sans/);
-  assert.equal(
-    await page.evaluate(() =>
-      [...document.fonts].some(
-        (face) => face.family.replaceAll('"', '') === 'IBM Plex Sans' && face.status === 'loaded'
-      )
-    ),
-    true
-  );
+  assert.match(bodyFont, /system-ui/);
   assert.equal(headingType.family, bodyFont);
   assert.ok(headingType.size <= 32);
-  pass(
-    'stock counts and food illustrations render; IBM Plex Sans loads and is shared by headings and interface text'
-  );
+  pass('stock counts and food illustrations render with compact system typography');
   const initialAvocados = page
     .locator('.shelf-card')
     .filter({ has: page.getByRole('heading', { name: 'Avocados', exact: true }) });

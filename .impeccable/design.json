@@ -32,7 +32,7 @@
       "refersTo": "button-primary",
       "description": "Labeled task action.",
       "html": "<button class=\"ds-primary\">Save changes</button>",
-      "css": ".ds-primary{font:500 14px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:var(--primary,#a53e28);color:white;border:1px solid var(--control,#bccbd3)}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--text,#223440);outline-offset:3px}"
+      "css": ".ds-primary{font:500 14px \"system-ui\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:var(--primary,#2f3033);color:white;border:1px solid var(--control,#c9cac7)}.ds-primary:hover{filter:brightness(.95)}.ds-primary:focus-visible{outline:2px solid var(--text,#292b2e);outline-offset:3px}"
     },
     {
       "name": "Secondary button",
@@ -40,35 +40,35 @@
       "refersTo": "button-secondary",
       "description": "Labeled task action.",
       "html": "<button class=\"ds-secondary\">Save changes</button>",
-      "css": ".ds-secondary{font:500 14px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:white;color:var(--text,#223440);border:1px solid var(--control,#bccbd3)}.ds-secondary:hover{filter:brightness(.95)}.ds-secondary:focus-visible{outline:2px solid var(--text,#223440);outline-offset:3px}"
+      "css": ".ds-secondary{font:500 14px \"system-ui\",Arial,sans-serif;min-height:44px;padding:9px 14px;border-radius:6px;cursor:pointer;background:white;color:var(--text,#292b2e);border:1px solid var(--control,#c9cac7)}.ds-secondary:hover{filter:brightness(.95)}.ds-secondary:focus-visible{outline:2px solid var(--text,#292b2e);outline-offset:3px}"
     },
     {
       "name": "Search field",
       "kind": "input",
       "description": "Native labeled search control.",
       "html": "<label class=\"ds-field\">Search food<input placeholder=\"Search your pantry\u2026\" /></label>",
-      "css": ".ds-field{display:grid;gap:8px;font:14px \"IBM Plex Sans\",Arial,sans-serif}.ds-field input{min-height:46px;padding:10px 12px;border:1px solid var(--control,#bccbd3);border-radius:6px;background:white;color:var(--text,#223440);font:inherit}.ds-field input:focus-visible{outline:2px solid var(--text,#223440);outline-offset:3px}"
+      "css": ".ds-field{display:grid;gap:8px;font:14px \"system-ui\",Arial,sans-serif}.ds-field input{min-height:46px;padding:10px 12px;border:1px solid var(--control,#c9cac7);border-radius:6px;background:white;color:var(--text,#292b2e);font:inherit}.ds-field input:focus-visible{outline:2px solid var(--text,#292b2e);outline-offset:3px}"
     },
     {
       "name": "Navigation",
       "kind": "nav",
       "description": "Horizontal navigation with a clear current view.",
       "html": "<nav class=\"ds-nav\"><button aria-current=\"page\">My inventory</button><button>Shopping list</button></nav>",
-      "css": ".ds-nav{display:flex;gap:24px;padding:0 16px;background:var(--surface,#ffffff);border-bottom:1px solid var(--border,#d8e1e6)}.ds-nav button{font:14px \"IBM Plex Sans\",Arial,sans-serif;min-height:54px;padding:12px 2px;color:#4c5559;background:transparent;border:0;border-bottom:2px solid transparent}.ds-nav button[aria-current=page]{border-bottom-color:var(--primary,#a53e28);color:var(--primary,#a53e28)}.ds-nav button:hover{color:var(--primary,#a53e28)}.ds-nav button:focus-visible{outline:2px solid #223440;outline-offset:3px}"
+      "css": ".ds-nav{display:flex;gap:24px;padding:0 16px;background:var(--surface,#ffffff);border-bottom:1px solid var(--border,#dededb)}.ds-nav button{font:14px \"system-ui\",Arial,sans-serif;min-height:54px;padding:12px 2px;color:#4c5559;background:transparent;border:0;border-bottom:2px solid transparent}.ds-nav button[aria-current=page]{border-bottom-color:var(--primary,#2f3033);color:var(--primary,#2f3033)}.ds-nav button:hover{color:var(--primary,#2f3033)}.ds-nav button:focus-visible{outline:2px solid #292b2e;outline-offset:3px}"
     },
     {
       "name": "Stock filter",
       "kind": "chip",
       "description": "Compact selected inventory filter.",
       "html": "<button class=\"ds-filter\" aria-pressed=\"true\">Foods at home <strong>5</strong></button>",
-      "css": ".ds-filter{font:13px \"IBM Plex Sans\",Arial,sans-serif;min-height:44px;padding:9px 14px;border:1px solid var(--primary,#a53e28);border-radius:6px;background:var(--primary,#a53e28);color:white}.ds-filter strong{margin-left:8px}.ds-filter:hover{background:var(--primary-hover,#86301e)}.ds-filter:focus-visible{outline:2px solid var(--text,#223440);outline-offset:3px}"
+      "css": ".ds-filter{font:13px \"system-ui\",Arial,sans-serif;min-height:44px;padding:9px 14px;border:1px solid var(--primary,#2f3033);border-radius:6px;background:var(--primary,#2f3033);color:white}.ds-filter strong{margin-left:8px}.ds-filter:hover{background:var(--primary-hover,#151619)}.ds-filter:focus-visible{outline:2px solid var(--text,#292b2e);outline-offset:3px}"
     },
     {
       "name": "Food record",
       "kind": "card",
       "description": "Food identity and stock on a white work surface.",
       "html": "<article class=\"ds-food\"><h2>Avocados</h2><p>2 items \u00b7 Pantry</p><div><button>List</button><button>Manage food</button></div></article>",
-      "css": ".ds-food{font:14px \"IBM Plex Sans\",Arial,sans-serif;padding:16px 20px;border:1px solid var(--border,#d8e1e6);border-radius:12px;background:white;color:var(--text,#223440)}.ds-food h2{font-size:16px;margin:0 0 8px}.ds-food div{display:flex;justify-content:space-between;gap:12px}.ds-food button{font:inherit;min-height:44px;padding:9px 14px;border:1px solid var(--control,#bccbd3);border-radius:6px;background:var(--ground,#edf2f4)}.ds-food button:hover{background:var(--active,#f8e9e3)}.ds-food button:focus-visible{outline:2px solid var(--text,#223440);outline-offset:3px}"
+      "css": ".ds-food{font:14px \"system-ui\",Arial,sans-serif;padding:16px 20px;border:1px solid var(--border,#dededb);border-radius:12px;background:white;color:var(--text,#292b2e)}.ds-food h2{font-size:16px;margin:0 0 8px}.ds-food div{display:flex;justify-content:space-between;gap:12px}.ds-food button{font:inherit;min-height:44px;padding:9px 14px;border:1px solid var(--control,#c9cac7);border-radius:6px;background:var(--ground,#f6f6f4)}.ds-food button:hover{background:var(--active,#e9e9e6)}.ds-food button:focus-visible{outline:2px solid var(--text,#292b2e);outline-offset:3px}"
     }
   ],
   "narrative": {

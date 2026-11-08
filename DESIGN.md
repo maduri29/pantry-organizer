@@ -2,32 +2,32 @@
 name: Pantry
 description: Everyday food inventory and shopping workspace
 colors:
-  primary: '#a53e28'
-  primary-hover: '#86301e'
+  primary: '#2f3033'
+  primary-hover: '#151619'
   shell: '#eee9e0'
   shell-active: '#ffffff'
-  ground: '#edf2f4'
+  ground: '#f6f6f4'
   surface: '#ffffff'
-  active: '#f8e9e3'
-  text: '#223440'
-  muted: '#53636d'
-  border: '#d8e1e6'
-  control: '#bccbd3'
+  active: '#e9e9e6'
+  text: '#292b2e'
+  muted: '#626467'
+  border: '#dededb'
+  control: '#c9cac7'
   warning: '#865317'
   danger: '#9c3833'
 typography:
   heading:
-    fontFamily: 'IBM Plex Sans, Arial, sans-serif'
-    fontSize: '30px'
+    fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
+    fontSize: '27px'
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: '-0.025em'
   body:
-    fontFamily: 'IBM Plex Sans, Arial, sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
     fontSize: '14px'
     fontWeight: 400
   food-title:
-    fontFamily: 'IBM Plex Sans, Arial, sans-serif'
+    fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
     fontSize: '16px'
     fontWeight: 600
     lineHeight: 1.35
@@ -70,13 +70,13 @@ The source of truth is the final workspace rules in `styles.css` and the compone
 
 ## Colors
 
-Rust marks primary actions and selected filters. The blue-grey navigation surface separates navigation from work. Off-white records sit on blue-grey ground. Warning and danger colors carry stock or destructive-action meaning.
+Charcoal marks primary actions and selected filters. The blue-grey navigation surface separates navigation from work. Off-white records sit on blue-grey ground. Warning and danger colors carry stock or destructive-action meaning.
 
 **The State Rule.** Use color to reinforce a text label; never make color the only status cue.
 
 ## Typography
 
-IBM Plex Sans is self-hosted and shared by headings, labels and quantities. Page headings use the heading token, reducing to 26px on phones. Food titles are 16px; secondary metadata is 12–13px. Quantities use 24px on desktop and 22px on phones. Data tables use tabular numerals.
+The platform system font is shared by headings, labels and quantities. Page headings use the heading token, reducing to 24px on phones. Food titles are 15px on desktop and 14px on phones; secondary metadata is 12–13px. Quantities use 22px on desktop and 21px on phones. Data tables use tabular numerals.
 
 **The One Voice Rule.** Keep the same readable family throughout the working interface.
 

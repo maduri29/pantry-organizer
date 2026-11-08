@@ -527,7 +527,7 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
           </button>
         </header>
         <div className="editor-task-switch">
-          <h3>
+          <h3 hidden={editMode === 'details'}>
             {editMode === 'details'
               ? 'Food details'
               : stockAction === 'update'
@@ -544,12 +544,12 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
               setEditMode('stock');
             }}
           >
-            Back to remaining stock
+            Back to stock
           </button>
           <button
             type="button"
             aria-label="I bought more"
-            hidden={editMode === 'stock' && stockAction === 'restock'}
+            hidden={editMode === 'details' || stockAction === 'restock'}
             disabled={busy || stockBusy}
             onClick={() => {
               setStockAction('restock');
@@ -657,9 +657,9 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
               <details className="manage-panel batch-settings" id="manage-panel-stock">
                 <summary>
                   Packages <span className="package-count">{batches.length}</span>
-                  <span aria-hidden="true" className="package-chevron">
-                    ⌄
-                  </span>
+                  <svg aria-hidden="true" className="package-chevron" viewBox="0 0 24 24">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
                 </summary>
                 <p className="manage-note">
                   Change a package’s location, date or remaining amount.
