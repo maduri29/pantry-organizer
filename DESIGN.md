@@ -18,13 +18,13 @@ colors:
 typography:
   heading:
     fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
-    fontSize: '27px'
+    fontSize: '24px'
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: '-0.025em'
   body:
     fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
-    fontSize: '14px'
+    fontSize: '13px'
     fontWeight: 400
   food-title:
     fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif'
@@ -76,7 +76,7 @@ Charcoal marks primary actions and selected filters. The blue-grey navigation su
 
 ## Typography
 
-The platform system font is shared by headings, labels and quantities. Page headings use the heading token, reducing to 24px on phones. Food titles are 15px on desktop and 14px on phones; secondary metadata is 12–13px. Quantities use 22px on desktop and 21px on phones. Data tables use tabular numerals.
+The platform system font is shared by headings, labels and quantities. Page headings use the heading token, reducing to 22px on phones. Food titles are 14px on desktop and 13px on phones; secondary metadata is 12–13px. Quantities use 22px on desktop and 21px on phones. Data tables use tabular numerals.
 
 **The One Voice Rule.** Keep the same readable family throughout the working interface.
 

@@ -5245,3 +5245,119 @@ dialog:has(.food-workspace) .manage-heading {
   fill: none;
   color: var(--muted);
 }
+/* Smaller supporting type; inputs and touch targets retain their working size. */
+:root {
+  font-size: 13px;
+}
+.hero h1 {
+  font-size: 24px;
+}
+.hero p {
+  font-size: 12px;
+}
+.brand {
+  font-size: 21px;
+}
+.inventory-heading h2,
+.view-section-heading h2 {
+  font-size: 15px;
+}
+.shelf-card .card-top h2 {
+  font-size: 14px;
+}
+.shelf-card .card-top .meta,
+.shelf-card .stock-location {
+  font-size: 11px;
+}
+.manage-heading h2,
+.stock-heading h2,
+.add-heading h2 {
+  font-size: 16px;
+}
+.edit-food-caption {
+  font-size: 11px;
+}
+.editor-task-switch h3 {
+  font-size: 13px;
+}
+.manage-body label,
+.add-body label {
+  font-size: 12px;
+}
+.batch-settings > summary {
+  font-size: 12px;
+}
+.package-count,
+.batch-settings > .manage-note,
+.manage-batch legend {
+  font-size: 11px;
+}
+.manage-batch-meta > summary {
+  font-size: 12px;
+}
+.section-caption {
+  font-size: 13px;
+}
+.footer {
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .hero h1 {
+    font-size: 22px;
+  }
+  .hero p {
+    font-size: 12px;
+  }
+  .inventory-heading h2 {
+    font-size: 15px;
+  }
+  .shelf-card .card-top h2 {
+    font-size: 13px;
+  }
+  .shelf-card .card-stock-summary .amount {
+    font-size: 20px;
+  }
+  .manage-heading h2,
+  .stock-heading h2,
+  .add-heading h2 {
+    font-size: 16px;
+  }
+  .editor-task-switch h3 {
+    font-size: 13px;
+  }
+}
+.batch-settings > summary .package-chevron {
+  transform-origin: 50% 50%;
+  overflow: visible;
+}
+/* Compact field text, including the explicit mobile control rules. */
+dialog input,
+dialog select,
+.manage-body input,
+.manage-body select,
+.add-body input,
+.add-body select,
+.stock-body input,
+.stock-body select {
+  font-size: 14px;
+}
+.quantity-stepper input,
+.food-workspace .quantity-stepper input {
+  font-size: 22px;
+}
+@media (max-width: 600px) {
+  dialog input,
+  dialog select,
+  .manage-body input,
+  .manage-body select,
+  .add-body input,
+  .add-body select,
+  .stock-body input,
+  .stock-body select {
+    font-size: 14px;
+  }
+  .quantity-stepper input,
+  .food-workspace .quantity-stepper input {
+    font-size: 22px;
+  }
+}

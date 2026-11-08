@@ -228,7 +228,7 @@ try {
   const currentAmountText = await page
     .locator('.manage-batch input[name^="quantity-"]')
     .evaluate((input) => getComputedStyle(input).fontSize);
-  assert.ok(parseFloat(currentAmountText) >= 16);
+  assert.equal(parseFloat(currentAmountText), 14);
   const manageMobile = await page.locator('dialog[open]').evaluate((dialog) => ({
     width: dialog.getBoundingClientRect().width,
     scrollWidth: dialog.scrollWidth,

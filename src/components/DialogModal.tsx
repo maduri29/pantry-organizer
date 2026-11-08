@@ -657,8 +657,8 @@ const ModalFormContent: React.FC<ModalFormContentProps> = ({
               <details className="manage-panel batch-settings" id="manage-panel-stock">
                 <summary>
                   Packages <span className="package-count">{batches.length}</span>
-                  <svg aria-hidden="true" className="package-chevron" viewBox="0 0 24 24">
-                    <path d="m6 9 6 6 6-6" />
+                  <svg aria-hidden="true" className="package-chevron" viewBox="0 0 16 16">
+                    <path d="M4 6 L8 10 L12 6" />
                   </svg>
                 </summary>
                 <p className="manage-note">
