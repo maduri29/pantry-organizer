@@ -393,7 +393,7 @@ try {
   const before = await page.evaluate(
     () => JSON.parse(localStorage.getItem('pantry-organizer.demo.v1')).state
   );
-  await page.getByRole('button', { name: 'Restock several', exact: true }).click();
+  await page.getByRole('button', { name: 'Add groceries', exact: true }).click();
   const rice = page
     .locator('.bulk-item')
     .filter({ has: page.getByRole('checkbox', { name: /Rice.*on hand/ }) });

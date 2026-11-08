@@ -189,7 +189,7 @@ try {
   assert.match(await card('Empty oats').locator('.amount').innerText(), /2 packs/);
   pass('out-of-stock foods can be restocked directly with quantity controls');
 
-  await page.getByRole('button', { name: 'Restock several', exact: true }).click();
+  await page.getByRole('button', { name: 'Add groceries', exact: true }).click();
   const confirm = editor.getByRole('button', { name: 'Confirm restock', exact: true });
   assert.equal(await confirm.isDisabled(), true);
   assert.equal(await editor.locator('.trip-fields:visible').count(), 0);

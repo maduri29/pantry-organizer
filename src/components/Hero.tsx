@@ -5,20 +5,9 @@ interface HeroProps {
   hasProducts: boolean;
   onAdd: () => void;
   onBulk: () => void;
-  canSuggestCategories?: boolean;
-  suggestingCategories?: boolean;
-  onSuggestCategories?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({
-  view,
-  hasProducts,
-  onAdd,
-  onBulk,
-  canSuggestCategories = false,
-  suggestingCategories = false,
-  onSuggestCategories
-}) => {
+export const Hero: React.FC<HeroProps> = ({ view, hasProducts, onAdd, onBulk }) => {
   return (
     <section className="hero">
       <div className="hero-copy">
@@ -34,18 +23,9 @@ export const Hero: React.FC<HeroProps> = ({
         {hasProducts && (
           <button data-action="bulk" onClick={onBulk}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 8h14l1 12H4L5 8Zm4 0V6a3 3 0 0 1 6 0v2M12 11v6m-3-3h6" />
+              <path d="M4 10h16l-1.4 9H5.4L4 10Zm3 0 3-5m7 5-3-5M9 13v3m6-3v3" />
             </svg>
-            Restock several
-          </button>
-        )}
-        {hasProducts && canSuggestCategories && (
-          <button
-            data-action="suggest-categories"
-            onClick={onSuggestCategories}
-            disabled={suggestingCategories}
-          >
-            {suggestingCategories ? 'Suggesting…' : 'Suggest categories'}
+            Add groceries
           </button>
         )}
         <button

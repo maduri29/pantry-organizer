@@ -16,6 +16,8 @@ interface InventoryViewProps {
   onLocationChange: (location: string) => void;
   onCategoryChange: (category: string) => void;
   onSortChange: (sort: string) => void;
+  suggestingCategories: boolean;
+  onSuggestCategories: () => void;
   onAddFood: (initialName?: string) => void;
   onTrySample: () => void;
   onUpdate: (product: Product, batch?: Batch) => void;
@@ -34,6 +36,8 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   onLocationChange,
   onCategoryChange,
   onSortChange,
+  suggestingCategories,
+  onSuggestCategories,
   onAddFood,
   onTrySample,
   onUpdate,
@@ -209,6 +213,19 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </button>
         )}
       </div>
+
+      {online && s.products.length > 0 && (
+        <div className="category-tools">
+          <button
+            type="button"
+            data-action="suggest-categories"
+            onClick={onSuggestCategories}
+            disabled={suggestingCategories}
+          >
+            {suggestingCategories ? 'Suggesting…' : 'Suggest categories'}
+          </button>
+        </div>
+      )}
 
       <div className="grid shelf-grid">
         {items.length > 0 ? (

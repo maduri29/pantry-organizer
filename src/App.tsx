@@ -786,9 +786,6 @@ export const App: React.FC = () => {
             <Hero
               view={tab}
               hasProducts={s.products.length > 0}
-              canSuggestCategories={online}
-              suggestingCategories={suggestingCategories}
-              onSuggestCategories={handleSuggestPantryCategories}
               onAdd={() => openAddFood()}
               onBulk={() =>
                 setModal({
@@ -812,6 +809,8 @@ export const App: React.FC = () => {
                 onLocationChange={setLocation}
                 onCategoryChange={setCategory}
                 onSortChange={setSort}
+                suggestingCategories={suggestingCategories}
+                onSuggestCategories={handleSuggestPantryCategories}
                 onAddFood={openAddFood}
                 onTrySample={async () => {
                   await mutate((st) => {
